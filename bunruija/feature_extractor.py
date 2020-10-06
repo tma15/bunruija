@@ -5,9 +5,21 @@ from bunruija.data import Dictionary
 
 
 class SequenceVectorizer:
-    def __init__(self, tokenizer):
+    def __init__(self, tokenizer, max_features=None):
         self.tokenizer = tokenizer
         self.dictionary = Dictionary()
+        self.max_features = max_features
+
+    def set_params(self, **kwargs):
+        for k, v in kwargs.items():
+            if hasattr(self, k):
+                setattr(self, k, v)
+
+    def fit(self, raw_documents):
+        for row_id, document in enumerate(raw_documents):
+            elements = self.tokenizer(document)
+            for element in elements:
+                self.dictionary.add(element)
 
     def fit_transform(self, raw_documents):
         data = []
@@ -15,10 +27,10 @@ class SequenceVectorizer:
         col = []
         max_col = 0
 
+        self.fit(raw_documents)
+
         for row_id, document in enumerate(raw_documents):
             elements = self.tokenizer(document)
-            for element in elements:
-                self.dictionary.add(element)
             max_col = max(max_col, len(elements))
 
             for i, element in enumerate(elements):
