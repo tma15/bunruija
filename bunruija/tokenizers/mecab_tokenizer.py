@@ -26,5 +26,5 @@ class MeCabTokenizer(BaseTokenizer):
                     ret.append(surface if features[6] == '*' else features[6])
                 else:
                     ret.append(surface)
-        print(ret)
+#         print(ret)
         return ret
