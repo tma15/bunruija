@@ -10,7 +10,10 @@ setup(
     ],
     entry_points={
         'console_scripts': [
+            'bunruija-evaluate = bunruija_cli.evaluate:main',
+            'bunruija-predict = bunruija_cli.predict:main',
             'bunruija-preprocess = bunruija_cli.preprocess:main',
+            'bunruija-train = bunruija_cli.train:main',
         ],
     },
 )

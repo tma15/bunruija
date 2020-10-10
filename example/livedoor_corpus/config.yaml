@@ -1,0 +1,19 @@
+preprocess:
+  data:
+    train: train.csv
+    dev: dev.csv
+    test: test.csv
+
+  tokenizer:
+    type: mecab
+    lemmatize: false
+    exclude_pos:
+      - 助詞
+      - 助動詞
+
+bin_dir: models
+
+classifier:
+  type: svm
+  args:
+    verbose: true

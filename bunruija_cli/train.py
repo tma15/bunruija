@@ -2,7 +2,7 @@ import logging
 import sys
 
 from bunruija import options
-from bunruija.binarizer import Binarizer
+from bunruija import Trainer
 
 
 logging.basicConfig(
@@ -11,12 +11,12 @@ logging.basicConfig(
     level=logging.INFO,
     stream=sys.stdout,
 )
-logger = logging.getLogger('bunruija_cli.preprocess')
+logger = logging.getLogger('bunruija_cli.train')
 
 
 def main():
-    parser = options.get_default_preprocessing_parser()
+    parser = options.get_default_train_parser()
     args = parser.parse_args()
 
-    binarizer = Binarizer(args.yaml)
-    binarizer.binarize()
+    trainer = Trainer(args.yaml)
+    trainer.train()

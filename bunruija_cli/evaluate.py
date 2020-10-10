@@ -2,7 +2,7 @@ import logging
 import sys
 
 from bunruija import options
-from bunruija.binarizer import Binarizer
+from bunruija import Evaluator
 
 
 logging.basicConfig(
@@ -11,12 +11,12 @@ logging.basicConfig(
     level=logging.INFO,
     stream=sys.stdout,
 )
-logger = logging.getLogger('bunruija_cli.preprocess')
+logger = logging.getLogger('bunruija_cli.evaluate')
 
 
 def main():
-    parser = options.get_default_preprocessing_parser()
+    parser = options.get_default_evaluation_parser()
     args = parser.parse_args()
 
-    binarizer = Binarizer(args.yaml)
-    binarizer.binarize()
+    evaluator = Evaluator(args.yaml)
+    evaluator.evaluate()
