@@ -31,8 +31,11 @@ def collate_fn(padding_value):
 
 
 class LSTMClassifier(torch.nn.Module):
-    def __init__(self, vectorizer, label_encoder, **kwargs):
+    def __init__(self, **kwargs):
         super().__init__()
+
+        vectorizer = kwargs['vectorizer']
+        label_encoder = kwargs['label_encoder']
 
         if not isinstance(vectorizer, SequenceVectorizer):
             raise ValueError(vectorizer)
