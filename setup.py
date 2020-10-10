@@ -7,6 +7,7 @@ setup(
     install_requires=[
         'mecab-python3',
         'pyyaml',
+        'scikit-learn',
     ],
     entry_points={
         'console_scripts': [
