@@ -7,5 +7,5 @@ def main():
     args = parser.parse_args()
 
     predictor = Predictor(args.yaml)
-    label = predictor.predict('スマホを買った')
+    label = predictor('スマホを買った')
     print(label)

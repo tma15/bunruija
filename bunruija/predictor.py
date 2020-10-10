@@ -20,20 +20,16 @@ class Predictor:
             tokenizer = getattr(bunruija.tokenizers, tokenizer_name)()
             self.vectorizer.tokenizer = tokenizer
 
-    def predict(self, text):
+    def __call__(self, text):
         if isinstance(text, str):
             x = self.vectorizer.transform([text])
-        elif isinstance(text, list):
-            x = self.vectorizer.transform(text)
         else:
-            raise ValueError(text)
+            x = text
 
         y = self.model.predict(x)
-        label = self.label_encoder.inverse_transform(y)
 
         if isinstance(text, str):
+            label = self.label_encoder.inverse_transform(y)
             return label[0]
-        elif isinstance(text, list):
-            return label
         else:
-            raise ValueError(text)
+            return y

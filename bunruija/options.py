@@ -23,4 +23,6 @@ def get_default_prediction_parser():
 
 def get_default_evaluation_parser():
     parser = get_parser()
+    parser.add_argument('--verbose', action='store_true', help='Verbose mode')
+    parser.add_argument('--no-evaluate-time', action='store_true', help='Disable evaluation of prediction time')
     return parser

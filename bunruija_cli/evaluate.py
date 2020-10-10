@@ -18,5 +18,5 @@ def main():
     parser = options.get_default_evaluation_parser()
     args = parser.parse_args()
 
-    evaluator = Evaluator(args.yaml)
+    evaluator = Evaluator(args)
     evaluator.evaluate()
