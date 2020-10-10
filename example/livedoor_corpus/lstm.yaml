@@ -1,0 +1,22 @@
+preprocess:
+  data:
+    train: train.csv
+    dev: dev.csv
+    test: test.csv
+
+  tokenizer:
+    type: mecab
+    lemmatize: false
+
+  vectorizer:
+    type: sequence
+
+bin_dir: models
+
+classifier:
+  type: lstm
+  args:
+    batch_size: 10
+    max_epochs: 3
+    dim_emb: 64
+    dim_hid: 128

@@ -13,15 +13,15 @@ python create_data /path/to/text
 ```
 
 Then, `train.csv`, `dev.csv` and `test.csv` will be created at the current directory.
-This script creates data for text classification where text is the title of a text and the category is the one of an text.
+This script creates data for text classification where text is the title of a text and the category is the one of a text.
 
 ## Usage of bunruija
 Bunruija can be used as follows:
 
 ```
-bunruija-preprocess -y config.yaml 
-bunruija-train -y config.yaml 
-bunruija-evaluate -y config.yaml 
+bunruija-preprocess -y svm.yaml 
+bunruija-train -y svm.yaml 
+bunruija-evaluate -y svm.yaml 
 ```
 
 As you see, all you have to do is to prepare datasets and a yaml file that contains all settings for text classification.

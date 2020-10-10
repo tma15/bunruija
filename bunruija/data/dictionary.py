@@ -1,12 +1,17 @@
 
 class Dictionary:
     def __init__(self, pad='<pad>', eos='</s>', bos='<s>'):
-        self.pad = pad
-        self.eos = eos
-        self.bos = bos
         self.elements = []
         self.count = []
         self.index_to_element = {}
+
+        self.pad = pad
+        self.eos = eos
+        self.bos = bos
+
+        self.add(self.pad)
+        self.add(self.eos)
+        self.add(self.bos)
 
     def __contains__(self, element):
         return element in self.index_to_element

@@ -5,10 +5,11 @@ from bunruija.data import Dictionary
 
 
 class SequenceVectorizer:
-    def __init__(self, tokenizer, max_features=None):
+    def __init__(self, tokenizer, max_features=None, keep_raw_word=True):
         self.tokenizer = tokenizer
         self.dictionary = Dictionary()
         self.max_features = max_features
+        self.keep_raw_word = keep_raw_word
 
     def set_params(self, **kwargs):
         for k, v in kwargs.items():
@@ -21,13 +22,12 @@ class SequenceVectorizer:
             for element in elements:
                 self.dictionary.add(element)
 
-    def fit_transform(self, raw_documents):
+    def transform(self, raw_documents):
         data = []
+        raw_words = []
         row = []
         col = []
         max_col = 0
-
-        self.fit(raw_documents)
 
         for row_id, document in enumerate(raw_documents):
             elements = self.tokenizer(document)
@@ -35,6 +35,8 @@ class SequenceVectorizer:
 
             for i, element in enumerate(elements):
                 if element in self.dictionary:
+                    if self.keep_raw_word:
+                        raw_words.append(element)
                     index = self.dictionary.get_index(element)
                     data.append(index)
                     row.append(row_id)
@@ -45,12 +47,15 @@ class SequenceVectorizer:
         col = np.array(col)
 
         s = csr_matrix((data, (row, col)), shape=(len(raw_documents), max_col))
+        if self.keep_raw_word:
+            return s, raw_words
+        else:
+            return s
 
-        for i in range(len(s.indptr) - 1):
-            start = s.indptr[i]
-            end = s.indptr[i + 1]
-            print(start, end, s.data[start: end])
-        return s
+    def fit_transform(self, raw_documents):
+        self.fit(raw_documents)
+        x = self.transform(raw_documents)
+        return x
 
     def __call__(self, text):
         ret = self.tokenizer(text)

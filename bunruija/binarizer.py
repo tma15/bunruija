@@ -4,11 +4,9 @@ from pathlib import Path
 import pickle
 import yaml
 
-from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import LabelEncoder
 
-from bunruija.tokenizers import build_tokenizer
-from bunruija.feature_extractor import SequenceVectorizer
+from bunruija.feature_extraction import build_vectorizer
 
 
 class Binarizer:
@@ -40,9 +38,7 @@ class Binarizer:
         y_dev = label_encoder.transform(labels_dev)
         y_test = label_encoder.transform(labels_test)
 
-        v = TfidfVectorizer(
-            tokenizer=build_tokenizer(self.config)
-        )
+        v = build_vectorizer(self.config)
 
         x_train = v.fit_transform(texts_train)
         x_dev = v.transform(texts_dev)
@@ -70,15 +66,3 @@ class Binarizer:
                 'label_test': y_test,
                 'data_test': x_test
             }, f)
-
-#         v = SequenceVectorizer(
-#             tokenizer=MeCabTokenizer(
-#                 lemmatize=False,
-#             ),
-#         )
-#         x = v.fit_transform(texts)
-#         print(x)
-
-#         with open('vectorizer.bj', 'wb') as f:
-#             v.set_params(tokenizer=None)
-#             pickle.dump(v, f)

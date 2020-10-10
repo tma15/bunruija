@@ -1,9 +1,9 @@
 import logging
 import pickle
-import yaml
 from pathlib import Path
 
 import sklearn
+import yaml
 
 import bunruija
 
