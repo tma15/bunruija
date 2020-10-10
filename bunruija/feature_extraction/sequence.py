@@ -5,7 +5,13 @@ from bunruija.data import Dictionary
 
 
 class SequenceVectorizer:
-    def __init__(self, tokenizer, max_features=None, keep_raw_word=True):
+    def __init__(
+            self,
+            tokenizer,
+            max_features=None,
+            keep_raw_word=True,
+            **kwargs):
+
         self.tokenizer = tokenizer
         self.dictionary = Dictionary()
         self.max_features = max_features
@@ -21,6 +27,17 @@ class SequenceVectorizer:
             elements = self.tokenizer(document)
             for element in elements:
                 self.dictionary.add(element)
+
+        if self.max_features is not None:
+            filtered_dict = Dictionary()
+            for k, v in sorted(
+                zip(self.dictionary.elements, self.dictionary.count),
+                key=lambda x: x[1], reverse=True
+            )[:self.max_features]:
+
+                filtered_dict.add(k, v)
+
+            self.dictionary = filtered_dict
 
     def transform(self, raw_documents):
         data = []

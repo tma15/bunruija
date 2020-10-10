@@ -4,6 +4,12 @@ preprocess:
     dev: dev.csv
     test: test.csv
 
+  vectorizer:
+    type: tfidf
+    args:
+      max_features: 10000
+      min_df: 3
+
   tokenizer:
     type: mecab
     lemmatize: false

@@ -10,6 +10,8 @@ preprocess:
 
   vectorizer:
     type: sequence
+    args:
+      max_features: 10000
 
 bin_dir: lstm-model
 

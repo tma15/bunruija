@@ -16,15 +16,15 @@ class Dictionary:
     def __contains__(self, element):
         return element in self.index_to_element
 
-    def add(self, element):
+    def add(self, element, n=1):
         if element not in self:
             self.elements.append(element)
             index = len(self.index_to_element)
             self.index_to_element[element] = index
-            self.count.append(1)
+            self.count.append(n)
         else:
             index = self.get_index(element)
-            self.count[index] += 1
+            self.count[index] += n
         return index
 
     def get_element(self, index):
