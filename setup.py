@@ -6,6 +6,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         'mecab-python3',
+        'pymagnitude',
         'pyyaml',
         'torch',
         'scikit-learn',

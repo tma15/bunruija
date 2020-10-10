@@ -22,3 +22,4 @@ classifier:
     max_epochs: 3
     dim_emb: 64
     dim_hid: 128
+    embedding_path: jawiki.all_vectors.300d.txt

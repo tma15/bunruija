@@ -5,6 +5,7 @@ import torch
 import torch.nn.functional as F
 
 from bunruija.feature_extraction.sequence import SequenceVectorizer
+from bunruija.modules import StaticEmbedding
 
 
 logger = logging.getLogger(__name__)
@@ -36,6 +37,7 @@ class LSTMClassifier(torch.nn.Module):
 
         vectorizer = kwargs['vectorizer']
         label_encoder = kwargs['label_encoder']
+        self.embedding_path = kwargs.get('embedding_path', None)
 
         if not isinstance(vectorizer, SequenceVectorizer):
             raise ValueError(vectorizer)
@@ -50,6 +52,11 @@ class LSTMClassifier(torch.nn.Module):
         self.num_layers = kwargs.get('num_layers', 1)
         self.bidirectional = kwargs.get('bidirectional', True)
 
+        if self.embedding_path:
+            self.static_embed = StaticEmbedding(self.embedding_path)
+        else:
+            self.static_embed = None
+
         self.embed = torch.nn.Embedding(
             len(self.dictionary),
             self.dim_emb,
@@ -57,9 +64,8 @@ class LSTMClassifier(torch.nn.Module):
         )
 
         self.lstm = torch.nn.LSTM(
-#             input_size=embedding_size  self.key_vector.vector_size if embedding_path
-#                 else embedding_size,
-            self.dim_emb,
+            input_size=(self.dim_emb + self.static_embed.dim_emb
+                if self.static_embed else self.dim_emb),
             hidden_size=self.dim_hid,
             num_layers=self.num_layers,
             bidirectional=self.bidirectional,
@@ -70,6 +76,18 @@ class LSTMClassifier(torch.nn.Module):
             len(list(label_encoder.classes_)),
             bias=True)
         logger.info(self)
+
+    def reset_module(self, **kwargs):
+        embedding_path = kwargs.get('embedding_path', None)
+        if embedding_path:
+            self.static_embed = StaticEmbedding(embedding_path)
+        else:
+            self.static_embed = None
+
+    def classifier_args(self):
+        return {
+            'embedding_path': self.embedding_path
+        }
 
     def convert_data(self, X, y=None):
         if isinstance(X, tuple):
@@ -128,7 +146,9 @@ class LSTMClassifier(torch.nn.Module):
         lengths = (x != self.pad).sum(dim=1)
 
         x = self.embed(x)
-#         print(x.size())
+        if self.static_embed is not None:
+            x_static = self.static_embed(batch)
+            x = torch.cat([x, x_static], dim=2)
 
         packed = torch.nn.utils.rnn.pack_padded_sequence(
             x,
@@ -141,9 +161,7 @@ class LSTMClassifier(torch.nn.Module):
 
         # (bsz, seq_len, 2 * hidden_size)
         x, _ = torch.nn.utils.rnn.pad_packed_sequence(rnn_out, batch_first=True)
-#         print(x.size())
         x = self.out(x[:, 0])
-#         print(x.size())
         return x
 
     def predict(self, X):

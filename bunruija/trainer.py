@@ -3,6 +3,7 @@ import pickle
 from pathlib import Path
 
 import sklearn
+import torch
 import yaml
 
 import bunruija
@@ -34,7 +35,11 @@ class Trainer:
             model_data = pickle.load(f)
 
         with open(Path(self.config.get('bin_dir', '.')) / 'model.bunruija', 'wb') as f:
+            self.model.static_embed = None
             model_data['classifier'] = self.model
+
+            if hasattr(self.model, 'classifier_args'):
+                model_data['classifier_args'] = self.model.classifier_args()
             pickle.dump(model_data, f)
 
         fscore = sklearn.metrics.f1_score(y_dev, y_pred, average='micro')

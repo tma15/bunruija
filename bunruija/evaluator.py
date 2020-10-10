@@ -42,16 +42,16 @@ class Evaluator:
             y_test = self.data['label_test']
             y_pred = self.predictor(X_test)
 
+        labels = list(self.predictor.label_encoder.classes_)
         if self.verbose:
             conf_mat = sklearn.metrics.confusion_matrix(y_test, y_pred)
-            labels = list(self.predictor.label_encoder.classes_)
             for i in range(len(labels)):
                 print('True', 'Pred', 'Num samples', sep='\t')
                 for j in range(len(labels)):
                     print(labels[i], labels[j], conf_mat[i, j], sep='\t')
                 print()
 
-        fscore = sklearn.metrics.f1_score(y_test, y_pred, average='micro')
-        print(f'F-score: {fscore}')
+        report = sklearn.metrics.classification_report(y_test, y_pred, target_names=labels)
+        print(report)
         if self.evaluate_time:
             print(f'Average prediction time: {duration} sec.')
