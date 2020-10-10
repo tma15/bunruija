@@ -11,7 +11,7 @@ preprocess:
   vectorizer:
     type: sequence
 
-bin_dir: models
+bin_dir: lstm-model
 
 classifier:
   type: lstm

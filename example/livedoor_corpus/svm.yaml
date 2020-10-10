@@ -11,7 +11,7 @@ preprocess:
       - 助詞
       - 助動詞
 
-bin_dir: models
+bin_dir: svm-model
 
 classifier:
   type: svm
