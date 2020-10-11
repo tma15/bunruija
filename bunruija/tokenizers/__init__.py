@@ -4,14 +4,14 @@ from .mecab_tokenizer import MeCabTokenizer
 from bunruija.filters import PosFilter
 
 
-def build_tokenizer(config):
-    lemmatize = config.get('preprocess', {}).get('tokenizer', {}).get('lemmatize', False)
-    exclude_pos = config.get('preprocess', {}).get('tokenizer', {}).get('exclude_pos', [])
+BUNRUIJA_TOKENIZER_REGISTRY = {
+    'mecab': MeCabTokenizer,
+}
 
-    tokenizer = MeCabTokenizer(
-        lemmatize=lemmatize,
-        filters=[
-            PosFilter(exclude_pos=exclude_pos)
-        ]
-    )
+
+def build_tokenizer(config):
+    tokenizer_type = config.get('preprocess', {}).get('tokenizer', {}).get('type', 'mecab')
+    tokenizer_args = config.get('preprocess', {}).get('tokenizer', {}).get('args', {})
+
+    tokenizer = BUNRUIJA_TOKENIZER_REGISTRY[tokenizer_type](**tokenizer_args)
     return tokenizer

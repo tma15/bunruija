@@ -6,7 +6,8 @@ preprocess:
 
   tokenizer:
     type: mecab
-    lemmatize: false
+    args:
+      lemmatize: false
 
   vectorizer:
     type: sequence

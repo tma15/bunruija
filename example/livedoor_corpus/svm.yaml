@@ -12,10 +12,11 @@ preprocess:
 
   tokenizer:
     type: mecab
-    lemmatize: false
-    exclude_pos:
-      - 助詞
-      - 助動詞
+    args:
+      lemmatize: true
+      exclude_pos:
+        - 助詞
+        - 助動詞
 
 bin_dir: svm-model
 
