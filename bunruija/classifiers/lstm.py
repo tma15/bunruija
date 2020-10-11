@@ -1,4 +1,5 @@
 import logging
+import time
 
 import numpy as np
 import torch
@@ -35,9 +36,11 @@ class LSTMClassifier(torch.nn.Module):
     def __init__(self, **kwargs):
         super().__init__()
 
+        self.kwargs = kwargs
+
         vectorizer = kwargs['vectorizer']
         label_encoder = kwargs['label_encoder']
-        self.embedding_path = kwargs.get('embedding_path', None)
+        self.embedding_path = kwargs.get('static_embedding_path', None)
 
         if not isinstance(vectorizer, SequenceVectorizer):
             raise ValueError(vectorizer)
@@ -77,8 +80,10 @@ class LSTMClassifier(torch.nn.Module):
             bias=True)
         logger.info(self)
 
+        self.optimizer_type = kwargs.get('optimizer', 'adam')
+
     def reset_module(self, **kwargs):
-        embedding_path = kwargs.get('embedding_path', None)
+        embedding_path = kwargs.get('static_embedding_path', None)
         if embedding_path:
             self.static_embed = StaticEmbedding(embedding_path)
         else:
@@ -115,9 +120,28 @@ class LSTMClassifier(torch.nn.Module):
             data.append(data_i)
         return data
 
+    def build_optimizer(self):
+        lr = float(self.kwargs.get('lr', 0.001))
+        weight_decay = self.kwargs.get('weight_decay', 0.)
+
+        if self.optimizer_type == 'adam':
+            optimizer = torch.optim.Adam(self.parameters(), lr=lr, weight_decay=weight_decay)
+        elif self.optimizer_type == 'adamw':
+            optimizer = torch.optim.AdamW(self.parameters(), lr=lr, weight_decay=weight_decay)
+        return optimizer
+
+    def zero_grad(self):
+        for p in self.parameters():
+            p.grad = None
+
     def fit(self, X, y):
+        self.train()
+
         data = self.convert_data(X, y)
-        optimizer = torch.optim.Adam(self.parameters())
+
+        optimizer = self.build_optimizer()
+        logger.info(f'{optimizer}')
+        start_at = time.perf_counter()
 
         for epoch in range(self.max_epochs):
             loss_epoch = 0.
@@ -128,7 +152,7 @@ class LSTMClassifier(torch.nn.Module):
                 shuffle=True,
                 collate_fn=collate_fn(self.pad)
             ):
-                optimizer.zero_grad()
+                self.zero_grad()
 
                 logits = self(batch)
                 loss = F.nll_loss(
@@ -139,7 +163,8 @@ class LSTMClassifier(torch.nn.Module):
                 loss.backward()
                 optimizer.step()
 
-            print(epoch, loss_epoch)
+            elapsed = time.perf_counter() - start_at
+            logger.info(f'epoch:{epoch} loss:{loss_epoch:.2f} elapsed:{elapsed:.2f}')
 
     def __call__(self, batch):
         x = batch['inputs']
@@ -165,6 +190,8 @@ class LSTMClassifier(torch.nn.Module):
         return x
 
     def predict(self, X):
+        self.eval()
+
         data = self.convert_data(X)
 
         y = []

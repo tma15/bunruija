@@ -31,6 +31,9 @@ class StaticEmbedding(torch.nn.Module):
                     subword_end=6,
                     approx=False, approx_trees=None)
 
+    def __repr__(self):
+        return f'{self.__class__.__name__}({self.magnitude.length}, {self.dim_emb})'
+
     def __call__(self, batch):
         words = batch['words']
 

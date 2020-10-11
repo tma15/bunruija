@@ -20,7 +20,10 @@ classifier:
   type: lstm
   args:
     batch_size: 10
-    max_epochs: 3
+    max_epochs: 10
     dim_emb: 64
-    dim_hid: 128
-    embedding_path: jawiki.all_vectors.300d.txt
+    dim_hid: 256
+    static_embedding_path: jawiki.all_vectors.300d.txt
+    optimizer: adamw
+    lr: 0.001
+    weight_decay: 0.01
