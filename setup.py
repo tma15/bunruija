@@ -5,11 +5,12 @@ setup(
     version='0.0.0',
     packages=find_packages(),
     install_requires=[
-        'mecab-python3',
+        'mecab-python3==0.996.5',
         'pymagnitude',
         'pyyaml',
         'torch',
         'scikit-learn',
+        'unidic-lite',
     ],
     entry_points={
         'console_scripts': [
