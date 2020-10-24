@@ -32,6 +32,13 @@ def collate_fn(padding_value):
     return _collate_fn
 
 
+def move_to_cuda(batch):
+    for k, v in batch.items():
+        if isinstance(v, torch.Tensor):
+            batch[k] = v.cuda()
+    return batch
+
+
 class LSTMClassifier(torch.nn.Module):
     def __init__(self, **kwargs):
         super().__init__()
@@ -41,6 +48,7 @@ class LSTMClassifier(torch.nn.Module):
         vectorizer = kwargs['vectorizer']
         label_encoder = kwargs['label_encoder']
         self.embedding_path = kwargs.get('static_embedding_path', None)
+        self.device = kwargs.get('device', 'cpu')
 
         if not isinstance(vectorizer, SequenceVectorizer):
             raise ValueError(vectorizer)
@@ -135,6 +143,8 @@ class LSTMClassifier(torch.nn.Module):
             p.grad = None
 
     def fit(self, X, y):
+        self.to(self.device)
+
         self.train()
 
         data = self.convert_data(X, y)
@@ -153,6 +163,9 @@ class LSTMClassifier(torch.nn.Module):
                 collate_fn=collate_fn(self.pad)
             ):
                 self.zero_grad()
+
+                if self.device.startswith('cuda'):
+                   batch = move_to_cuda(batch)
 
                 logits = self(batch)
                 loss = F.nll_loss(
@@ -201,6 +214,9 @@ class LSTMClassifier(torch.nn.Module):
             shuffle=False,
             collate_fn=collate_fn(self.pad)
         ):
+            if self.device.startswith('cuda'):
+               batch = move_to_cuda(batch)
+        
             maxi = torch.argmax(self(batch), dim=1)
             y.extend(maxi.tolist())
         return np.array(y)
