@@ -1,9 +1,12 @@
 from setuptools import setup, find_packages
+from Cython.Build import cythonize
+
 
 setup(
     name='bunruija',
     version='0.0.0',
     packages=find_packages(),
+    ext_modules=cythonize('bunruija/modules/*.pyx'),
     install_requires=[
         'mecab-python3==0.996.5',
         'pymagnitude',
