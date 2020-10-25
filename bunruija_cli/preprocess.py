@@ -14,9 +14,13 @@ logging.basicConfig(
 logger = logging.getLogger('bunruija_cli.preprocess')
 
 
-def main():
+def main(args):
     parser = options.get_default_preprocessing_parser()
-    args = parser.parse_args()
+    args = parser.parse_args(args)
 
     binarizer = Binarizer(args.yaml)
     binarizer.binarize()
+
+
+def cli_main():
+    main(sys.argv)

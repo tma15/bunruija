@@ -14,9 +14,13 @@ logging.basicConfig(
 logger = logging.getLogger('bunruija_cli.train')
 
 
-def main():
+def main(args):
     parser = options.get_default_train_parser()
-    args = parser.parse_args()
+    args = parser.parse_args(args)
 
     trainer = Trainer(args.yaml)
     trainer.train()
+
+
+def cli_main():
+    main(sys.argv)

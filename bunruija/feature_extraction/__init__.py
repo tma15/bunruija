@@ -25,3 +25,24 @@ def build_vectorizer(config, tokenizer=None):
         tokenizer=build_tokenizer(config),
         **vectorizer_args)
     return vectorizer
+
+
+def get_default_vectorizer_setting_by_model(model):
+    if model in ['lstm']:
+        setting = {
+            'type': 'sequence',
+            'args': {
+                'max_features': 10000,
+                'min_df': 1,
+            }
+        }
+    else:
+        setting = {
+            'type': 'tfidf',
+            'args': {
+                'max_features': 10000,
+                'min_df': 1,
+            }
+        }
+    return setting
+
