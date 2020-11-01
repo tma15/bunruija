@@ -1,6 +1,12 @@
 # distutils: language = c++
 # distutils: sources = bunruija/modules/bunruija_vector.cc
+from functools import lru_cache
+
+from libcpp cimport bool
 from libcpp.string cimport string
+from libcpp.vector cimport vector
+
+import numpy as np
 
 
 cdef extern from "bunruija_vector.h" namespace "bunruija":
@@ -12,7 +18,12 @@ cdef extern from "bunruija_vector.h" namespace "bunruija":
 
     cdef cppclass CppPretrainedVectorProcessor "bunruija::PretrainedVectorProcessor":
         CppPretrainedVectorProcessor() except +
-        CppStatus convert(char *)
+        CppStatus convert(char *, char *)
+        CppStatus load(string)
+        CppStatus query(string, vector[float] *)
+        CppStatus contains(string, bool *)
+        int dim()
+        int length()
 
 
 cdef class Status:
@@ -33,7 +44,38 @@ cdef class PretrainedVectorProcessor:
     def __cinit__(self):
         self.thisptr = new CppPretrainedVectorProcessor()
 
-    def convert(self, input_file):
-        status_ = self.thisptr.convert(input_file.encode('utf-8'))
+    def convert(self, db_file, input_file):
+        status_ = self.thisptr.convert(db_file.encode('utf-8'), input_file.encode('utf-8'))
         status = Status(status_.status_code, status_.status_message)
         return status
+
+    def load(self, input_file):
+        cdef string input_file_ = string(bytes(input_file.encode('utf-8')))
+        status_ = self.thisptr.load(input_file_)
+        status = Status(status_.status_code, status_.status_message)
+        return status
+
+    @lru_cache(maxsize=1000)
+    def query(self, word):
+        cdef string word_ = string(bytes(word.encode('utf-8')))
+        cdef vector[float] vec_;
+        status_ = self.thisptr.query(word_, &vec_)
+        status = Status(status_.status_code, status_.status_message)
+
+        vec = np.asarray(vec_)
+        return vec, status
+
+    def __contains__(self, word):
+        cdef string word_ = string(bytes(word.encode('utf-8')))
+        cdef bool out_;
+        status_ = self.thisptr.contains(word_, &out_)
+        status = Status(status_.status_code, status_.status_message)
+        return out_
+
+    @property
+    def emb_dim(self):
+        return self.thisptr.dim()
+
+    @property
+    def length(self):
+        return self.thisptr.length()

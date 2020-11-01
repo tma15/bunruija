@@ -38,15 +38,14 @@ void one_char_length(const char *begin, const char *end, size_t *mblen) {
 }
 
 
-Status PretrainedVectorProcessor::convert(const char *input_file) {
-  std::cout << "test: " << input_file << std::endl;
+Status PretrainedVectorProcessor::convert(const char *db_file, const char *input_file) {
   std::ifstream ifs(input_file);
   std::string line;
   int k = 0;
   int ret;
   while (std::getline(ifs, line)) {
     if (k == 0) {
-      initialize_db(&line);
+      initialize_db(db_file, &line);
 
       std::stringstream query_ss;
       query_ss  << "INSERT INTO `bunruija`(key";
@@ -63,8 +62,10 @@ Status PretrainedVectorProcessor::convert(const char *input_file) {
       ret = sqlite3_prepare_v2(db_, query.c_str(), -1, &stmt_, nullptr);
       RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
 
-      ret = sqlite3_exec(db_, "BEGIN;", nullptr, nullptr, nullptr);
-      RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
+      RETURN_STATUS_IF_NOT_EQ(
+        sqlite3_exec(db_, "BEGIN;", nullptr, nullptr, nullptr),
+        SQLITE_OK,
+        sqlite3_errmsg(db_))
     }
 
     Status status = process_line(&line);
@@ -74,20 +75,77 @@ Status PretrainedVectorProcessor::convert(const char *input_file) {
     }
 
     k++;
-    if (k % 100000 == 0) {
+    if (k % 10000 == 0) {
       std::cerr << "Dumped " << k << " words" << std::endl;;
       ret = sqlite3_exec(db_, "COMMIT;", nullptr, nullptr, nullptr);
       RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
-      break;
+
+      RETURN_STATUS_IF_NOT_EQ(
+        sqlite3_exec(db_, "BEGIN;", nullptr, nullptr, nullptr),
+        SQLITE_OK,
+        sqlite3_errmsg(db_))
     }
   }
+  ret = sqlite3_exec(db_, "COMMIT;", nullptr, nullptr, nullptr);
+  RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
+
+  ret = sqlite3_exec(
+      db_,
+      "CREATE INDEX `bunruija_key_idx` ON `bunruija` (key);",
+      nullptr,
+      nullptr,
+      nullptr);
+  RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
+
+  // Insert meta information
+  std::string insert_query = "INSERT INTO `bunruija_format`(key, value) VALUES (?, ?);";
+  ret = sqlite3_prepare_v2(db_, insert_query.c_str(), -1, &stmt_, nullptr);
+  RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
+
+  ret = sqlite3_bind_text(stmt_, 1, "dim", strlen("dim"), SQLITE_TRANSIENT);
+  RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
+  ret = sqlite3_bind_int64(stmt_, 2, dim_);
+  RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
+
+  while (sqlite3_step(stmt_) == SQLITE_BUSY) {}
+  ret = sqlite3_reset(stmt_);
+  RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
+  ret = sqlite3_clear_bindings(stmt_);
+  RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
+
+  ret = sqlite3_bind_text(stmt_, 1, "precision", strlen("precision"), SQLITE_TRANSIENT);
+  RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
+  ret = sqlite3_bind_int64(stmt_, 2, precision_);
+  RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
+
+  while (sqlite3_step(stmt_) == SQLITE_BUSY) {}
+  ret = sqlite3_reset(stmt_);
+  RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
+  ret = sqlite3_clear_bindings(stmt_);
+  RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
+
+  ret = sqlite3_bind_text(stmt_, 1, "length", strlen("length"), SQLITE_TRANSIENT);
+  RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
+  ret = sqlite3_bind_int64(stmt_, 2, length_);
+  RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
+
+  while (sqlite3_step(stmt_) == SQLITE_BUSY) {}
+  ret = sqlite3_reset(stmt_);
+  RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
+  ret = sqlite3_clear_bindings(stmt_);
+  RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
+
+
+  ret = sqlite3_exec(db_, "COMMIT;", nullptr, nullptr, nullptr);
+  RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
 
   RETURN_STATUS_IF_NOT_EQ(sqlite3_finalize(stmt_), SQLITE_OK, sqlite3_errmsg(db_))
+  RETURN_STATUS_IF_NOT_EQ(sqlite3_close(db_), SQLITE_OK, sqlite3_errmsg(db_))
   return Status(0, "");
 }
 
 
-Status PretrainedVectorProcessor::initialize_db(std::string *line) {
+Status PretrainedVectorProcessor::initialize_db(const char *db_file, std::string *line) {
   const char *begin = line->data();
   const char *end = line->data() + line->size();
 
@@ -143,7 +201,7 @@ Status PretrainedVectorProcessor::initialize_db(std::string *line) {
   int ret;
 
   ret = sqlite3_open_v2(
-    "test.db",
+    db_file,
     &db_, SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE,
     nullptr);
 
@@ -181,32 +239,6 @@ Status PretrainedVectorProcessor::initialize_db(std::string *line) {
       nullptr);
   RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
 
-  // Insert meta information
-  std::string insert_query = "INSERT INTO `bunruija_format`(key, value) VALUES (?, ?);";
-  ret = sqlite3_prepare_v2(db_, insert_query.c_str(), -1, &stmt_, nullptr);
-  RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
-
-  ret = sqlite3_bind_text(stmt_, 1, "dim", strlen("dim"), SQLITE_TRANSIENT);
-  RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
-  ret = sqlite3_bind_int64(stmt_, 2, dim_);
-  RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
-
-  while (sqlite3_step(stmt_) == SQLITE_BUSY) {}
-  ret = sqlite3_reset(stmt_);
-  RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
-  ret = sqlite3_clear_bindings(stmt_);
-  RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
-
-  ret = sqlite3_bind_text(stmt_, 1, "precision", strlen("precision"), SQLITE_TRANSIENT);
-  RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
-  ret = sqlite3_bind_int64(stmt_, 2, precision_);
-  RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
-
-  while (sqlite3_step(stmt_) == SQLITE_BUSY) {}
-  ret = sqlite3_reset(stmt_);
-  RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
-  ret = sqlite3_clear_bindings(stmt_);
-  RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
 
   return Status(0, "");
 }
@@ -284,16 +316,118 @@ Status PretrainedVectorProcessor::process_line(std::string *line) {
   ret = sqlite3_clear_bindings(stmt_);
   RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
 
+  ++length_;
+
   return Status(0, "");
 }
 
 
 Status PretrainedVectorProcessor::query(const std::string &query, std::vector<float> *vector) {
+  int ret;
+
+  std::stringstream ss;
+  ss << "SELECT * FROM bunruija WHERE key='" << query << "'";
+  std::string q = ss.str();
+
+  ret = sqlite3_prepare_v2(
+      db_,
+      q.c_str(),
+      -1,
+      &stmt_,
+      nullptr);
+  RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
+
+  while(sqlite3_step(stmt_) == SQLITE_ROW) {
+
+    for (int d = 0; d < dim_; ++d) {
+      int v = sqlite3_column_int64(stmt_, d + 1);
+      float value = float(v) / float(pow(10, precision_));
+//      std::cout << query << " " << d << " " << value << std::endl;
+      vector->push_back(value);
+    }
+//    std::cout << query << " " << "size:" << vector->size() << std::endl;
+    break;
+  }
+  RETURN_STATUS_IF_NOT_EQ(sqlite3_reset(stmt_), SQLITE_OK, sqlite3_errmsg(db_))
+  RETURN_STATUS_IF_NOT_EQ(sqlite3_clear_bindings(stmt_), SQLITE_OK, sqlite3_errmsg(db_))
+
   return Status(0, "");
 }
 
 
+Status PretrainedVectorProcessor::contains(const std::string &query, bool *out) {
+  int ret;
+
+  std::stringstream ss;
+  ss << "SELECT * FROM bunruija WHERE key='" << query << "'";
+  std::string q = ss.str();
+
+  ret = sqlite3_prepare_v2(
+      db_,
+      q.c_str(),
+      -1,
+      &stmt_,
+      nullptr);
+  RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
+
+  *out = false;
+  while(sqlite3_step(stmt_) == SQLITE_ROW) {
+    *out = true;
+  }
+  RETURN_STATUS_IF_NOT_EQ(sqlite3_reset(stmt_), SQLITE_OK, sqlite3_errmsg(db_))
+  RETURN_STATUS_IF_NOT_EQ(sqlite3_clear_bindings(stmt_), SQLITE_OK, sqlite3_errmsg(db_))
+
+  return Status(0, "");
+}
+
+
+
 Status PretrainedVectorProcessor::load(const std::string &input_file) {
+  int ret = sqlite3_open_v2(
+    input_file.c_str(),
+    &db_, SQLITE_OPEN_READONLY,
+    nullptr);
+  RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
+
+  ret = sqlite3_prepare_v2(
+      db_,
+      "SELECT value FROM bunruija_format WHERE key='dim'",
+      -1,
+      &stmt_,
+      nullptr);
+  RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
+  while(sqlite3_step(stmt_) == SQLITE_ROW) {
+    dim_ = sqlite3_column_int64(stmt_, 0);
+  }
+  RETURN_STATUS_IF_NOT_EQ(sqlite3_reset(stmt_), SQLITE_OK, sqlite3_errmsg(db_))
+  RETURN_STATUS_IF_NOT_EQ(sqlite3_clear_bindings(stmt_), SQLITE_OK, sqlite3_errmsg(db_))
+
+  ret = sqlite3_prepare_v2(
+      db_,
+      "SELECT value FROM bunruija_format WHERE key='length'",
+      -1,
+      &stmt_,
+      nullptr);
+  RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
+  while(sqlite3_step(stmt_) == SQLITE_ROW) {
+    length_ = sqlite3_column_int64(stmt_, 0);
+  }
+  RETURN_STATUS_IF_NOT_EQ(sqlite3_reset(stmt_), SQLITE_OK, sqlite3_errmsg(db_))
+  RETURN_STATUS_IF_NOT_EQ(sqlite3_clear_bindings(stmt_), SQLITE_OK, sqlite3_errmsg(db_))
+
+  ret = sqlite3_prepare_v2(
+      db_,
+      "SELECT value FROM bunruija_format WHERE key='precision'",
+      -1,
+      &stmt_,
+      nullptr);
+  RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
+  while(sqlite3_step(stmt_) == SQLITE_ROW) {
+    precision_ = sqlite3_column_int64(stmt_, 0);
+  }
+  RETURN_STATUS_IF_NOT_EQ(sqlite3_reset(stmt_), SQLITE_OK, sqlite3_errmsg(db_))
+  RETURN_STATUS_IF_NOT_EQ(sqlite3_clear_bindings(stmt_), SQLITE_OK, sqlite3_errmsg(db_))
+
   return Status(0, "");
 }
 
