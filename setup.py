@@ -9,7 +9,6 @@ setup(
     ext_modules=cythonize('bunruija/modules/*.pyx'),
     install_requires=[
         'mecab-python3==0.996.5',
-        'pymagnitude',
         'pyyaml',
         'torch',
         'scikit-learn',
