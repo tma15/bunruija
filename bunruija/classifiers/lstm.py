@@ -92,6 +92,7 @@ class LSTMClassifier(BaseClassifier):
         x = self.embed(x)
         if self.static_embed is not None:
             x_static = self.static_embed(batch)
+            x_static = x_static.to(x.device)
             x = torch.cat([x, x_static], dim=2)
 
         packed = torch.nn.utils.rnn.pack_padded_sequence(
