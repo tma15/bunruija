@@ -87,6 +87,7 @@ class BaseClassifier(torch.nn.Module):
                 loss_epoch += loss.item()
                 loss.backward()
                 optimizer.step()
+                del loss
 
             elapsed = time.perf_counter() - start_at
             logger.info(f'epoch:{epoch} loss:{loss_epoch:.2f} elapsed:{elapsed:.2f}')
