@@ -8,7 +8,7 @@ setup(
     packages=find_packages(),
     ext_modules=cythonize([
         Extension(
-            'bunruija.module.vector_processor',
+            'bunruija.modules.vector_processor',
             sources=['bunruija/modules/vector_processor.pyx'],
             libraries=['sqlite3']
         )
