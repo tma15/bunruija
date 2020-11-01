@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import Extension, setup, find_packages
 from Cython.Build import cythonize
 
 
@@ -6,7 +6,13 @@ setup(
     name='bunruija',
     version='0.0.0',
     packages=find_packages(),
-    ext_modules=cythonize('bunruija/modules/*.pyx'),
+    ext_modules=cythonize([
+        Extension(
+            'bunruija.module.vector_processor',
+            sources=['bunruija/modules/vector_processor.pyx'],
+            libraries=['sqlite3']
+        )
+    ]),
     install_requires=[
         'mecab-python3==0.996.5',
         'pyyaml',
