@@ -1,5 +1,6 @@
-*.swp
 *.pyc
+*.so
+*.swp
 *egg-info
 build
 dist

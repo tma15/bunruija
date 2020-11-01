@@ -14,4 +14,4 @@ def main(args):
 
 
 def cli_main():
-    main(sys.argv)
+    main(sys.argv[1:])
