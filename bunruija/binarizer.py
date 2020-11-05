@@ -30,19 +30,22 @@ class Binarizer:
 
     def binarize(self):
         labels_train, texts_train = self.load_data(self.config['preprocess']['data']['train'])
-        labels_dev, texts_dev = self.load_data(self.config['preprocess']['data']['dev'])
-        labels_test, texts_test = self.load_data(self.config['preprocess']['data']['test'])
 
         label_encoder = LabelEncoder()
         y_train = label_encoder.fit_transform(labels_train)
-        y_dev = label_encoder.transform(labels_dev)
-        y_test = label_encoder.transform(labels_test)
 
         v = build_vectorizer(self.config)
-
         x_train = v.fit_transform(texts_train)
-        x_dev = v.transform(texts_dev)
-        x_test = v.transform(texts_test)
+
+        if 'dev' in self.config['preprocess']['data']:
+            labels_dev, texts_dev = self.load_data(self.config['preprocess']['data']['dev'])
+            y_dev = label_encoder.transform(labels_dev)
+            x_dev = v.transform(texts_dev)
+
+        if 'test' in self.config['preprocess']['data']:
+            labels_test, texts_test = self.load_data(self.config['preprocess']['data']['test'])
+            y_test = label_encoder.transform(labels_test)
+            x_test = v.transform(texts_test)
 
         with open(Path(self.config.get('bin_dir', '.')) / 'model.bunruija', 'wb') as f:
             if v.tokenizer is None:
@@ -58,11 +61,17 @@ class Binarizer:
                 }, f)
 
         with open(Path(self.config.get('bin_dir', '.')) / 'data.bunruija', 'wb') as f:
-            pickle.dump({
+            data = {
                 'label_train': y_train,
                 'data_train': x_train,
-                'label_dev': y_dev,
-                'data_dev': x_dev,
-                'label_test': y_test,
-                'data_test': x_test
-            }, f)
+            }
+            
+            if 'dev' in self.config['preprocess']['data']:
+                data['label_dev'] = y_dev
+                data['data_dev'] = x_dev
+
+            if 'test' in self.config['preprocess']['data']:
+                data['label_test'] = y_test
+                data['data_test'] = x_test
+
+            pickle.dump(data, f)
