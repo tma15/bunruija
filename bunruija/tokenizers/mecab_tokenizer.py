@@ -23,7 +23,10 @@ class MeCabTokenizer(BaseTokenizer):
         result = self._mecab.parse(text).rstrip()
         ret = []
         for line in result.splitlines()[:-1]:
-            surface, feature = line.split('\t')
+            elems = line.rstrip().split()
+            if len(elems) != 2:
+                continue
+            surface, feature = elems
             features = feature.split(',')
 
             if any([f(surface, features) for f in self.filters]):
