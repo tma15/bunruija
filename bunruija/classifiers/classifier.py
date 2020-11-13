@@ -2,6 +2,10 @@ import logging
 import time
 
 import numpy as np
+from sklearn.base import (
+    BaseEstimator,
+    ClassifierMixin
+)
 import torch
 import torch.nn.functional as F
 
@@ -11,9 +15,9 @@ from bunruija.feature_extraction.sequence import SequenceVectorizer
 logger = logging.getLogger(__name__)
 
 
-class BaseClassifier:
+class BaseClassifier(BaseEstimator, ClassifierMixin):
     def __init__(self):
-        self._estimator_type = "classifier"
+        super().__init__()
 
     def fit(self, X, y):
         raise NotImplementedError

@@ -64,6 +64,10 @@ def build_model(config):
 
         model_args['final_estimator'] = final_estimator
 
+    if model_type in ['lgb', 'lstm']:
+        model_args['vectorizer'] = additional_args['vectorizer']
+        model_args['label_encoder'] = additional_args['label_encoder']
+
     logger.info(f'model type: {model_type}')
     logger.info(f'model args: {model_args}')
     model = BUNRUIJA_CLASSIFIER_REGISTRY[model_type](**model_args)

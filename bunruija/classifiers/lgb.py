@@ -1,3 +1,4 @@
+import copy
 import logging
 
 import lightgbm as lgb
@@ -13,18 +14,17 @@ class LightGBMClassifier(BaseClassifier):
     def __init__(self, **kwargs):
         super().__init__()
 
-        label_encoder = kwargs['label_encoder']
-        num_class = len(label_encoder.classes_)
+        self.label_encoder = kwargs['label_encoder']
+        num_class = len(self.label_encoder.classes_)
 
         if 'objective' in kwargs:
             objective = kwargs['objective']
-        elif len(label_encoder.classes_) == 2:
+        elif len(self.label_encoder.classes_) == 2:
             objective = 'binary'
         else:
             objective = 'multiclass'
 
         self.param = {
-            'label_encoder': label_encoder,
             'learning_rate': kwargs.get('learning_rate', 0.1),
             'num_leaves': kwargs.get('num_leaves', 31),
             'num_class': num_class,
@@ -43,8 +43,7 @@ class LightGBMClassifier(BaseClassifier):
         pred_y = np.argmax(pred_y_prob, axis=1)
         return pred_y
 
-    def get_params(self, deep=True):
-        return self.param
-
-    def set_params(self, **param):
-        print('set', param)
+    def get_params(self, deep=False):
+        ret = copy.deepcopy(self.param)
+        ret['label_encoder'] = self.label_encoder
+        return ret
