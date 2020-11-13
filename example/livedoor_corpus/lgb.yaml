@@ -21,15 +21,7 @@ preprocess:
         - 助詞
         - 助動詞
 
-bin_dir: voting-model
+bin_dir: lgb-model
 
 classifier:
-  type: voting
-  args:
-    estimators:
-      - type: svm
-        args:
-          C: 10.
-      - type: rf
-        args:
-          n_estimators: 100
+  type: lgb

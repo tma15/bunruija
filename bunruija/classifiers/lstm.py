@@ -2,14 +2,14 @@ import logging
 
 import torch
 
-from bunruija.classifiers.classifier import BaseClassifier
+from bunruija.classifiers.classifier import NeuralBaseClassifier
 from bunruija.modules import StaticEmbedding
 
 
 logger = logging.getLogger(__name__)
 
 
-class LSTMClassifier(BaseClassifier):
+class LSTMClassifier(NeuralBaseClassifier):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
