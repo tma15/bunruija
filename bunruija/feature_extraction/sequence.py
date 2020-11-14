@@ -10,10 +10,11 @@ class SequenceVectorizer:
             tokenizer,
             max_features=None,
             keep_raw_word=True,
+            dictionary=Dictionary(),
             **kwargs):
 
         self.tokenizer = tokenizer
-        self.dictionary = Dictionary()
+        self.dictionary = dictionary
         self.max_features = max_features
         self.keep_raw_word = keep_raw_word
 
@@ -21,6 +22,14 @@ class SequenceVectorizer:
         for k, v in kwargs.items():
             if hasattr(self, k):
                 setattr(self, k, v)
+
+    def get_params(self, deep=True):
+        return {
+            'tokenizer': self.tokenizer,
+            'max_features': self.max_features,
+            'dictionary': self.dictionary,
+            'keep_raw_word': self.keep_raw_word,
+        }
 
     def fit(self, raw_documents):
         for row_id, document in enumerate(raw_documents):

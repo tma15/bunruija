@@ -32,6 +32,7 @@ class Binarizer:
         labels_train, texts_train = self.load_data(self.config['preprocess']['data']['train'])
 
         label_encoder = LabelEncoder()
+
         y_train = label_encoder.fit_transform(labels_train)
 
         v = build_vectorizer(self.config)

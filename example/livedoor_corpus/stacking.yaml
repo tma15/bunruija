@@ -21,10 +21,10 @@ preprocess:
         - 助詞
         - 助動詞
 
-bin_dir: voting-model
+bin_dir: stacking-model
 
 classifier:
-  type: voting
+  type: stacking
   args:
     estimators:
       - type: svm
@@ -33,3 +33,6 @@ classifier:
       - type: rf
         args:
           n_estimators: 100
+      - type: lgb
+    final_estimator:
+      type: lr

@@ -2,18 +2,17 @@ import logging
 
 import torch
 
-from bunruija.classifiers.classifier import BaseClassifier
+from bunruija.classifiers.classifier import NeuralBaseClassifier
 from bunruija.modules import StaticEmbedding
 
 
 logger = logging.getLogger(__name__)
 
 
-class LSTMClassifier(BaseClassifier):
+class LSTMClassifier(NeuralBaseClassifier):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        label_encoder = kwargs['label_encoder']
         self.embedding_path = kwargs.get('static_embedding_path', None)
 
         self.pad = self.dictionary.get_index('<pad>')
@@ -43,7 +42,7 @@ class LSTMClassifier(BaseClassifier):
 
         self.out = torch.nn.Linear(
             2 * self.dim_hid,
-            len(list(label_encoder.classes_)),
+            len(self.dictionary),
             bias=True)
         logger.info(self)
 

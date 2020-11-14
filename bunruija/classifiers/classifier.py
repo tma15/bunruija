@@ -2,6 +2,10 @@ import logging
 import time
 
 import numpy as np
+from sklearn.base import (
+    BaseEstimator,
+    ClassifierMixin
+)
 import torch
 import torch.nn.functional as F
 
@@ -9,6 +13,17 @@ from bunruija.feature_extraction.sequence import SequenceVectorizer
 
 
 logger = logging.getLogger(__name__)
+
+
+class BaseClassifier(BaseEstimator, ClassifierMixin):
+    def __init__(self):
+        super().__init__()
+
+    def fit(self, X, y):
+        raise NotImplementedError
+
+    def predict(self, X):
+        raise NotImplementedError
 
 
 def collate_fn(padding_value):
@@ -38,7 +53,7 @@ def move_to_cuda(batch):
     return batch
 
 
-class BaseClassifier(torch.nn.Module):
+class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
     def __init__(self, **kwargs):
         super().__init__()
 
