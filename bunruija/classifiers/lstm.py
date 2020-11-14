@@ -13,7 +13,6 @@ class LSTMClassifier(NeuralBaseClassifier):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        label_encoder = kwargs['label_encoder']
         self.embedding_path = kwargs.get('static_embedding_path', None)
 
         self.pad = self.dictionary.get_index('<pad>')
@@ -43,7 +42,7 @@ class LSTMClassifier(NeuralBaseClassifier):
 
         self.out = torch.nn.Linear(
             2 * self.dim_hid,
-            len(list(label_encoder.classes_)),
+            len(self.dictionary),
             bias=True)
         logger.info(self)
 
