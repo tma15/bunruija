@@ -32,6 +32,7 @@ class Trainer:
 
         with open(Path(self.config.get('bin_dir', '.')) / 'model.bunruija', 'wb') as f:
             self.model.static_embed = None
+
             model_data['classifier'] = self.model
 
             if hasattr(self.model, 'classifier_args'):
@@ -44,6 +45,6 @@ class Trainer:
             y_pred = self.model.predict(X_dev)
 
             fscore = sklearn.metrics.f1_score(y_dev, y_pred, average='micro')
-            logger.info(f'F-score on dev: {fscore}')
+            print(f'F-score on dev: {fscore}')
             report = sklearn.metrics.classification_report(y_pred, y_dev)
-            logger.info(report)
+            print(report)

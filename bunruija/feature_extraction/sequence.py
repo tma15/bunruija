@@ -1,10 +1,11 @@
 import numpy as np
 from scipy.sparse import csr_matrix
+from sklearn.base import TransformerMixin
 
 from bunruija.data import Dictionary
 
 
-class SequenceVectorizer:
+class SequenceVectorizer(TransformerMixin):
     def __init__(
             self,
             tokenizer,
@@ -12,6 +13,7 @@ class SequenceVectorizer:
             keep_raw_word=True,
             dictionary=Dictionary(),
             **kwargs):
+        super().__init__()
 
         self.tokenizer = tokenizer
         self.dictionary = dictionary
@@ -47,6 +49,7 @@ class SequenceVectorizer:
                 filtered_dict.add(k, v)
 
             self.dictionary = filtered_dict
+        return self
 
     def transform(self, raw_documents):
         data = []
@@ -77,11 +80,6 @@ class SequenceVectorizer:
             return s, raw_words
         else:
             return s
-
-    def fit_transform(self, raw_documents):
-        self.fit(raw_documents)
-        x = self.transform(raw_documents)
-        return x
 
     def __call__(self, text):
         ret = self.tokenizer(text)

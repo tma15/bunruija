@@ -58,15 +58,14 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
         super().__init__()
 
         vectorizer = kwargs['vectorizer']
-        if not isinstance(vectorizer, SequenceVectorizer):
-            raise ValueError(vectorizer)
 
         self.kwargs = kwargs
         self.device = kwargs.get('device', 'cpu')
         self.max_epochs = kwargs.get('max_epochs', 3)
         self.batch_size = kwargs.get('batch_size', 20)
 
-        self.dictionary = vectorizer.dictionary
+        self.dictionaries = [v.dictionary for _, v in vectorizer.transformer_list]
+        self.dictionary = self.dictionaries[0]
         self.optimizer_type = kwargs.get('optimizer', 'adam')
 
     def fit(self, X, y):

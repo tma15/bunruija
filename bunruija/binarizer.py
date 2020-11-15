@@ -35,30 +35,39 @@ class Binarizer:
 
         y_train = label_encoder.fit_transform(labels_train)
 
-        v = build_vectorizer(self.config)
-        x_train = v.fit_transform(texts_train)
+        vectorizer = build_vectorizer(self.config)
+
+        x_train = vectorizer.fit_transform(texts_train)
 
         if 'dev' in self.config['preprocess']['data']:
             labels_dev, texts_dev = self.load_data(self.config['preprocess']['data']['dev'])
             y_dev = label_encoder.transform(labels_dev)
-            x_dev = v.transform(texts_dev)
+            x_dev = vectorizer.transform(texts_dev)
 
         if 'test' in self.config['preprocess']['data']:
             labels_test, texts_test = self.load_data(self.config['preprocess']['data']['test'])
             y_test = label_encoder.transform(labels_test)
-            x_test = v.transform(texts_test)
+            x_test = vectorizer.transform(texts_test)
 
         with open(Path(self.config.get('bin_dir', '.')) / 'model.bunruija', 'wb') as f:
-            if v.tokenizer is None:
-                tokenizer_name = None
-            else:
-                tokenizer_name = v.tokenizer.__class__.__name__
 
-            v.set_params(tokenizer=None)
+            tokenizer_names = []
+            for i in range(len(vectorizer.transformer_list)):
+                if hasattr(vectorizer.transformer_list[i][1], 'tokenizer'):
+                    if vectorizer.transformer_list[i][1].tokenizer is None:
+                        tokenizer_name = None
+                    else:
+                        tokenizer_name = (
+                            vectorizer.transformer_list[i][1]
+                            .tokenizer.__class__.__name__
+                        )
+                    vectorizer.transformer_list[i][1].set_params(tokenizer=None)
+                    tokenizer_names.append(tokenizer_name)
+
             pickle.dump({
                     'label_encoder': label_encoder,
-                    'vectorizer': v,
-                    'tokenizer': tokenizer_name
+                    'vectorizer': vectorizer,
+                    'tokenizer': tokenizer_names,
                 }, f)
 
         with open(Path(self.config.get('bin_dir', '.')) / 'data.bunruija', 'wb') as f:

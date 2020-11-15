@@ -20,8 +20,10 @@ class Predictor:
             self.vectorizer = model_data['vectorizer']
 
             tokenizer_name = model_data['tokenizer']
-            tokenizer = getattr(bunruija.tokenizers, tokenizer_name)()
-            self.vectorizer.tokenizer = tokenizer
+            for i in range(len(self.vectorizer.transformer_list)):
+                if hasattr(self.vectorizer.transformer_list[i][1], 'tokenizer'):
+                    tokenizer = getattr(bunruija.tokenizers, tokenizer_name[i])()
+                    self.vectorizer.transformer_list[i][1].set_params(tokenizer=tokenizer)
 
     def __call__(self, text):
         if isinstance(text, str):

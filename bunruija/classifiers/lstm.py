@@ -59,7 +59,7 @@ class LSTMClassifier(NeuralBaseClassifier):
         }
 
     def convert_data(self, X, y=None):
-        if isinstance(X, tuple):
+        if len(X) == 2 and isinstance(X[1], list):
             indices = X[0]
             raw_words = X[1]
             has_raw_words = True
