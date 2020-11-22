@@ -13,11 +13,34 @@ class MeCabTokenizer(BaseTokenizer):
         exclude_pos = kwargs.get('exclude_pos', [])
         self.filters = [PosFilter(p) for p in exclude_pos]
 
-        dict_path = kwargs.get('dict_path', None)
-        if dict_path:
-            self._mecab = MeCab.Tagger(f'-d {dict_path}')
+        self.dict_path = kwargs.get('dict_path', None)
+        if self.dict_path:
+            self._mecab = MeCab.Tagger(f'-d {self.dict_path}')
         else:
             self._mecab = MeCab.Tagger()
+
+    def __getstate__(self):
+        return {
+            'lemmatize': self.lemmatize,
+            'filters': self.filters,
+            'dict_path': self.dict_path,
+        }
+
+    def __setstate__(self, state):
+        for k, v in state.items():
+            setattr(self, k, v)
+
+    def __getnewargs__(self):
+        return ()
+
+    def __reduce_ex__(self, proto):
+        func = MeCabTokenizer
+        args = self.__getnewargs__()
+        state = self.__getstate__()
+        listitems = None
+        dictitems = None
+        rv = (func, args, state, listitems, dictitems)
+        return rv
 
     def __call__(self, text):
         result = self._mecab.parse(text).rstrip()

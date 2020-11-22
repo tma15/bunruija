@@ -19,12 +19,6 @@ class Predictor:
             self.label_encoder = model_data['label_encoder']
             self.vectorizer = model_data['vectorizer']
 
-            tokenizer_name = model_data['tokenizer']
-            for i in range(len(self.vectorizer.transformer_list)):
-                if hasattr(self.vectorizer.transformer_list[i][1], 'tokenizer'):
-                    tokenizer = getattr(bunruija.tokenizers, tokenizer_name[i])()
-                    self.vectorizer.transformer_list[i][1].set_params(tokenizer=tokenizer)
-
     def __call__(self, text):
         if isinstance(text, str):
             x = self.vectorizer.transform([text])

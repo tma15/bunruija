@@ -50,25 +50,10 @@ class Binarizer:
             x_test = vectorizer.transform(texts_test)
 
         with open(Path(self.config.get('bin_dir', '.')) / 'model.bunruija', 'wb') as f:
-
-            tokenizer_names = []
-            for i in range(len(vectorizer.transformer_list)):
-                if hasattr(vectorizer.transformer_list[i][1], 'tokenizer'):
-                    if vectorizer.transformer_list[i][1].tokenizer is None:
-                        tokenizer_name = None
-                    else:
-                        tokenizer_name = (
-                            vectorizer.transformer_list[i][1]
-                            .tokenizer.__class__.__name__
-                        )
-                    vectorizer.transformer_list[i][1].set_params(tokenizer=None)
-                    tokenizer_names.append(tokenizer_name)
-
             pickle.dump({
-                    'label_encoder': label_encoder,
-                    'vectorizer': vectorizer,
-                    'tokenizer': tokenizer_names,
-                }, f)
+                'label_encoder': label_encoder,
+                'vectorizer': vectorizer,
+            }, f)
 
         with open(Path(self.config.get('bin_dir', '.')) / 'data.bunruija', 'wb') as f:
             data = {
