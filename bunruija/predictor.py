@@ -13,8 +13,6 @@ class Predictor:
         with open(Path(config.get('bin_dir', '.')) / 'model.bunruija', 'rb') as f:
             model_data = pickle.load(f)
             self.model = model_data['classifier']
-            if hasattr(self.model, 'reset_module'):
-                self.model.reset_module(**model_data['classifier_args'])
 
             self.label_encoder = model_data['label_encoder']
             self.vectorizer = model_data['vectorizer']

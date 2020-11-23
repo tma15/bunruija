@@ -16,10 +16,16 @@ class StaticEmbedding(torch.nn.Module):
 
         self.processor = PretrainedVectorProcessor()
 
-        self.convert(embedding_path)
-        self.processor.load(embedding_path + '.bunruija')
+        self.embedding_path = embedding_path
+        self.convert(self.embedding_path)
+        self.processor.load(self.embedding_path + '.bunruija')
         self.dim_emb = self.processor.emb_dim
         self.length = self.processor.length
+
+    def __setstate__(self, state):
+        for k, v in state.items():
+            setattr(self, k, v)
+        self.processor.load(self.embedding_path + '.bunruija')
 
     def convert(self, embedding_path):
         ext = '.bunruija'

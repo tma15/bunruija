@@ -4,6 +4,7 @@ import random
 import tempfile
 import unittest
 
+import numpy
 import torch
 
 from bunruija.modules import StaticEmbedding
@@ -15,7 +16,12 @@ def create_dummy_data(data_file, num_tokens=50, dim=100):
         data = 97 + torch.floor(26 * data).int()
         offset = 0
         print(num_tokens, dim, file=f)
-        for i in range(num_tokens):
+
+        token = 'test'
+        embed = list(map(str, torch.randn(dim).tolist()))
+        print(f'{token} {" ".join(embed)}', file=f)
+
+        for i in range(num_tokens - 1):
             token_len = random.randint(1, 10)
             token = ''.join(map(chr, data[offset: offset + token_len]))
             offset += token_len
@@ -32,12 +38,19 @@ class TestStaticEmbedding(unittest.TestCase):
             create_dummy_data(embedding_file, num_tokens=num_tokens)
             module = StaticEmbedding(str(embedding_file))
 
-            self.assertEqual(num_tokens, module.length)
-
             out_file = Path(data_dir) / 'out_file'
             with open(out_file, 'wb') as f:
                 pickle.dump(module, f)
 
+            vec1, status = module.processor.query('test')
+
             with open(out_file, 'rb') as f:
                 m = pickle.load(f)
+
+            vec2, status = m.processor.query('test')
+
+            self.assertTrue('test' in module.processor)
+            self.assertTrue('test' in m.processor)
+            self.assertEqual(num_tokens, module.length)
             self.assertEqual(num_tokens, m.length)
+            numpy.testing.assert_equal(vec1, vec2)

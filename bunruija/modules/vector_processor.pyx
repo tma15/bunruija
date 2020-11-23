@@ -2,6 +2,7 @@
 # distutils: sources = bunruija/modules/bunruija_vector.cc
 from functools import lru_cache
 
+import cython
 from libcpp cimport bool
 from libcpp.string cimport string
 from libcpp.vector cimport vector
@@ -38,10 +39,11 @@ cdef class Status:
         return f'Status(status_code={self.thisptr.status_code}, status_message=\"{msg}\")'
 
 
+@cython.auto_pickle(True)
 cdef class PretrainedVectorProcessor:
     cdef CppPretrainedVectorProcessor *thisptr
 
-    def __cinit__(self):
+    def __init__(self):
         self.thisptr = new CppPretrainedVectorProcessor()
 
     def convert(self, db_file, input_file):
@@ -55,7 +57,7 @@ cdef class PretrainedVectorProcessor:
         status = Status(status_.status_code, status_.status_message)
         return status
 
-    @lru_cache(maxsize=1000)
+    @lru_cache(maxsize=100)
     def query(self, word):
         cdef string word_ = string(bytes(word.encode('utf-8')))
         cdef vector[float] vec_;
@@ -71,6 +73,21 @@ cdef class PretrainedVectorProcessor:
         status_ = self.thisptr.contains(word_, &out_)
         status = Status(status_.status_code, status_.status_message)
         return out_
+
+    def __getstate__(self):
+        return {}
+
+    def __setstate__(self, state):
+        for k, v in state.items():
+            setattr(self, k, v)
+
+    def __reduce_ex__(self, proto):
+        func = PretrainedVectorProcessor
+        args = ()
+        state = self.__getstate__()
+        listitems = None
+        dictitems = None
+        return (func, args, state, listitems, dictitems)
 
     @property
     def emb_dim(self):
