@@ -51,6 +51,7 @@ class PretrainedVectorProcessor {
     int dim_;
     int length_;
     int precision_;
+    bool is_word2vec_format_;
 };
 
 } // bunruija

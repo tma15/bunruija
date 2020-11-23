@@ -67,9 +67,14 @@ Status PretrainedVectorProcessor::convert(const char *db_file, const char *input
         sqlite3_exec(db_, "BEGIN;", nullptr, nullptr, nullptr),
         SQLITE_OK,
         sqlite3_errmsg(db_))
+
+      if (is_word2vec_format_) {
+        continue;
+      }
     }
 
     Status status = process_line(&line);
+
     if (status.status_code != 0) {
       std::cerr << status.status_message << std::endl;
       exit(status.status_code);
@@ -192,11 +197,14 @@ Status PretrainedVectorProcessor::initialize_db(const char *db_file, std::string
     }
   }
   std::string number(number_begin, number_begin + number_length);
+  elems.push_back(number);
 
   if (found_vector_delimiter) {
     dim_ = elems.size();
+    is_word2vec_format_ = false;
   } else {
     dim_ = std::stoi(number);
+    is_word2vec_format_ = true;
   }
 
   int ret;
@@ -216,8 +224,6 @@ Status PretrainedVectorProcessor::initialize_db(const char *db_file, std::string
   ss << ");";
   std::string create_stmt = ss.str();
 
-//  std::cout << create_stmt << std::endl;
-
   ret = sqlite3_exec(
       db_,
       create_stmt.c_str(),
@@ -230,8 +236,6 @@ Status PretrainedVectorProcessor::initialize_db(const char *db_file, std::string
   ss_fmt << "CREATE TABLE `bunruija_format` (key TEXT COLLATE NOCASE, value INTEGER);";
   std::string create_fmt_stmt = ss_fmt.str();
 
-//  std::cout << create_fmt_stmt << std::endl;
-
   ret = sqlite3_exec(
       db_,
       create_fmt_stmt.c_str(),
@@ -239,7 +243,6 @@ Status PretrainedVectorProcessor::initialize_db(const char *db_file, std::string
       nullptr,
       nullptr);
   RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
-
 
   return Status(0, "");
 }
@@ -249,7 +252,6 @@ Status PretrainedVectorProcessor::process_line(std::string *line) {
 //  std::cout << "#" << *line << std::endl;
   const char *begin = line->data();
   const char *end = line->data() + line->size();
-
 
   std::string word_delimiter(" ");
   std::string vector_delimiter(" ");
@@ -270,7 +272,6 @@ Status PretrainedVectorProcessor::process_line(std::string *line) {
 
     if (c == word_delimiter) {
       std::string word(line->begin(), line->begin() + word_mb_length);
-//      std::cout << "word:" << word << std::endl;
 
       ret = sqlite3_bind_text(stmt_, 1, word.c_str(), strlen(word.c_str()), SQLITE_TRANSIENT);
       RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
@@ -291,7 +292,6 @@ Status PretrainedVectorProcessor::process_line(std::string *line) {
       std::string number(number_begin, number_begin + number_length);
       float val = std::stof(number);
       int v = val * pow(10, precision_);
-//      std::cout << "Num" << d << ": \"" << v << "\"" << std::endl;
 
       ret = sqlite3_bind_int64(stmt_, d, v);
       RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
@@ -306,7 +306,6 @@ Status PretrainedVectorProcessor::process_line(std::string *line) {
   std::string number(number_begin, number_begin + number_length);
   float val = std::stof(number);
   int v = val * pow(10, precision_);
-//  std::cout << "Last Num" << d << ": \"" << v << "\"" << std::endl;
 
   ret = sqlite3_bind_int64(stmt_, d, v);
   RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
