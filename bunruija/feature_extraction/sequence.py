@@ -2,13 +2,14 @@ import numpy as np
 from scipy.sparse import csr_matrix
 from sklearn.base import TransformerMixin
 
+from bunruija import tokenizers
 from bunruija.data import Dictionary
 
 
 class SequenceVectorizer(TransformerMixin):
     def __init__(
             self,
-            tokenizer,
+            tokenizer=None,
             max_features=None,
             keep_raw_word=True,
             dictionary=Dictionary(),
@@ -17,8 +18,25 @@ class SequenceVectorizer(TransformerMixin):
 
         self.tokenizer = tokenizer
         self.dictionary = dictionary
+        self.vocabulary_ = dictionary.index_to_element
         self.max_features = max_features
         self.keep_raw_word = keep_raw_word
+
+    def __repr__(self):
+        args = []
+        if self.tokenizer:
+            args.append(f'tokenizer={self.tokenizer}')
+        if self.max_features:
+            args.append(f'max_features={self.max_features}')
+        out = f'{self.__class__.__name__}({", ".join(args)})'
+        return out
+
+    def build_tokenizer(self):
+        if self.tokenizer is not None:
+            return self.tokenizer
+        
+        self.tokenizer = tokenizers.build_default_tokenizer()
+        return self.tokenizer
 
     def set_params(self, **kwargs):
         for k, v in kwargs.items():
@@ -33,9 +51,11 @@ class SequenceVectorizer(TransformerMixin):
             'keep_raw_word': self.keep_raw_word,
         }
 
-    def fit(self, raw_documents):
+    def fit(self, raw_documents, y=None):
+        tokenizer = self.build_tokenizer()
+
         for row_id, document in enumerate(raw_documents):
-            elements = self.tokenizer(document)
+            elements = tokenizer(document)
             for element in elements:
                 self.dictionary.add(element)
 
@@ -58,8 +78,9 @@ class SequenceVectorizer(TransformerMixin):
         col = []
         max_col = 0
 
+        tokenizer = self.build_tokenizer()
         for row_id, document in enumerate(raw_documents):
-            elements = self.tokenizer(document)
+            elements = tokenizer(document)
             max_col = max(max_col, len(elements))
 
             for i, element in enumerate(elements):
@@ -82,5 +103,6 @@ class SequenceVectorizer(TransformerMixin):
             return s
 
     def __call__(self, text):
-        ret = self.tokenizer(text)
+        tokenizer = self.build_tokenizer()
+        ret = tokenizer(text)
         return ret

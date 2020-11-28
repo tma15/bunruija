@@ -57,28 +57,28 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
     def __init__(self, **kwargs):
         super().__init__()
 
-        vectorizer = kwargs['vectorizer']
-
         self.kwargs = kwargs
         self.device = kwargs.get('device', 'cpu')
         self.max_epochs = kwargs.get('max_epochs', 3)
         self.batch_size = kwargs.get('batch_size', 20)
 
-        self.dictionaries = [v.dictionary for _, v in vectorizer.transformer_list]
-        self.dictionary = self.dictionaries[0]
         self.optimizer_type = kwargs.get('optimizer', 'adam')
 
+    def init_layer(self, data):
+        pass
+
     def fit(self, X, y):
-        self.to(self.device)
-
-        self.train()
-
         data = self.convert_data(X, y)
+        self.init_layer(data)
 
         optimizer = self.build_optimizer()
         logger.info(f'{optimizer}')
         start_at = time.perf_counter()
 
+        self.to(self.device)
+        self.train()
+
+        logger.info(f'{self}')
         for epoch in range(self.max_epochs):
             loss_epoch = 0.
 

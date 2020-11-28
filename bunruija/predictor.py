@@ -15,14 +15,9 @@ class Predictor:
             self.model = model_data['classifier']
 
             self.label_encoder = model_data['label_encoder']
-            self.vectorizer = model_data['vectorizer']
 
     def __call__(self, text):
-        if isinstance(text, str):
-            x = self.vectorizer.transform([text])
-        else:
-            x = text
-
+        x = [text]
         y = self.model.predict(x)
 
         if isinstance(text, str):

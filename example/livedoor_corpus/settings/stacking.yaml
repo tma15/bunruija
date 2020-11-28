@@ -1,0 +1,28 @@
+preprocess:
+  data:
+    train: train.csv
+    dev: dev.csv
+    test: test.csv
+
+bin_dir: models/stacking-model
+
+classifier:
+  type: stacking
+  args:
+    estimators:
+      - - type: tfidf
+        - type: svm
+          args:
+            C: 10.
+      - - type: tfidf
+        - type: rf
+          args:
+            n_estimators: 100
+      - - type: tfidf
+        - type: lgb
+      - - type: sequence
+        - type: lstm
+          args:
+            dim_emb: 64
+    final_estimator:
+      type: svm

@@ -1,5 +1,6 @@
 import logging
 
+import numpy as np
 import torch
 
 from bunruija.classifiers.classifier import NeuralBaseClassifier
@@ -15,7 +16,6 @@ class LSTMClassifier(NeuralBaseClassifier):
 
         self.embedding_path = kwargs.get('static_embedding_path', None)
 
-        self.pad = self.dictionary.get_index('<pad>')
         self.dim_emb = kwargs.get('dim_emb', 32)
         self.dim_hid = kwargs.get('dim_hid', 128)
         self.num_layers = kwargs.get('num_layers', 1)
@@ -26,37 +26,35 @@ class LSTMClassifier(NeuralBaseClassifier):
         else:
             self.static_embed = None
 
-        self.embed = torch.nn.Embedding(
-            len(self.dictionary),
-            self.dim_emb,
-            padding_idx=self.pad,
-        )
-
         self.lstm = torch.nn.LSTM(
-            input_size=(self.dim_emb + self.static_embed.dim_emb
-                if self.static_embed else self.dim_emb),
+            input_size=(
+                self.dim_emb + self.static_embed.dim_emb
+                if self.static_embed else self.dim_emb
+            ),
             hidden_size=self.dim_hid,
             num_layers=self.num_layers,
             bidirectional=self.bidirectional,
         )
 
+    def init_layer(self, data):
+        y = []
+        max_input_idx = 0
+        for data_i in data:
+            y.append(data_i['label'])
+            max_input_idx = max(max_input_idx, np.max(data_i['inputs']))
+
+        self.embed = torch.nn.Embedding(
+            max_input_idx + 1,
+            self.dim_emb,
+            padding_idx=0,
+        )
+        self.pad = 0
+
+        num_classes = np.unique(y)
         self.out = torch.nn.Linear(
             2 * self.dim_hid,
-            len(self.dictionary),
+            len(num_classes),
             bias=True)
-        logger.info(self)
-
-    def reset_module(self, **kwargs):
-        embedding_path = kwargs.get('static_embedding_path', None)
-        if embedding_path:
-            self.static_embed = StaticEmbedding(embedding_path)
-        else:
-            self.static_embed = None
-
-    def classifier_args(self):
-        return {
-            'embedding_path': self.embedding_path
-        }
 
     def convert_data(self, X, y=None):
         if len(X) == 2 and isinstance(X[1], list):
@@ -88,11 +86,18 @@ class LSTMClassifier(NeuralBaseClassifier):
         x = batch['inputs']
         lengths = (x != self.pad).sum(dim=1)
 
+        if (x >= self.embed.weight.size(0)).any():
+            print(x)
+
         x = self.embed(x)
         if self.static_embed is not None:
             x_static = self.static_embed(batch)
             x_static = x_static.to(x.device)
             x = torch.cat([x, x_static], dim=2)
+
+        if (lengths == 0).any():
+            print(batch['inputs'])
+            print(lengths)
 
         packed = torch.nn.utils.rnn.pack_padded_sequence(
             x,

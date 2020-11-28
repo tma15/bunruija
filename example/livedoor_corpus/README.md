@@ -19,9 +19,9 @@ This script creates data for text classification where text is the title of a te
 Bunruija can be used as follows:
 
 ```
-bunruija-preprocess -y svm.yaml 
-bunruija-train -y svm.yaml 
-bunruija-evaluate -y svm.yaml 
+bunruija-preprocess -y settings/svm.yaml 
+bunruija-train -y settings/svm.yaml 
+bunruija-evaluate -y settings/svm.yaml 
 ```
 
 As you see, all you have to do is to prepare datasets and a yaml file that contains all settings for text classification.

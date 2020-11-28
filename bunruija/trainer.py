@@ -1,4 +1,5 @@
 import logging
+import os
 import pickle
 from pathlib import Path
 
@@ -31,12 +32,7 @@ class Trainer:
             model_data = pickle.load(f)
 
         with open(Path(self.config.get('bin_dir', '.')) / 'model.bunruija', 'wb') as f:
-            self.model.static_embed = None
-
             model_data['classifier'] = self.model
-
-            if hasattr(self.model, 'classifier_args'):
-                model_data['classifier_args'] = self.model.classifier_args()
             pickle.dump(model_data, f)
 
         if 'label_dev' in self.data:

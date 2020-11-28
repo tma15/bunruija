@@ -17,6 +17,13 @@ logging.basicConfig(
 logger = logging.getLogger('bunruija_cli.gen_yaml')
 
 
+def infer_vectorizer(model_type):
+    if model_type in ['lstm']:
+        return 'sequence'
+    else:
+        return 'tfidf'
+
+
 def main(args):
     parser = options.get_default_gen_yaml_parser()
     args = parser.parse_args(args)
@@ -28,17 +35,21 @@ def main(args):
                 'dev': None,
                 'test': None,
             },
-            'vectorizer': get_default_vectorizer_setting_by_model(args.model),
-            'tokenizer': {
-                'type': 'mecab',
-                'args': {
-                    'lemmatize': True,
-                }
-            },
         },
-        'classifier': {
-            'type': args.model,
-        }
+        'tokenizer': {
+            'type': 'mecab',
+            'args': {
+                'lemmatize': True,
+            }
+        },
+        'classifier': [
+            {
+                'type': infer_vectorizer(args.model),
+            },
+            {
+                'type': args.model,
+            },
+        ],
     }
 
     if os.path.exists(args.yaml):
@@ -46,6 +57,8 @@ def main(args):
 
     with open(args.yaml, 'w') as f:
         yaml.dump(setting, f)
+    print(setting)
+
 
 def cli_main():
     main(sys.argv)

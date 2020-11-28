@@ -6,22 +6,21 @@ from sklearn.pipeline import FeatureUnion
 
 from bunruija.tokenizers import build_tokenizer
 
+from ..registry import BUNRUIJA_REGISTRY
 from .sequence import SequenceVectorizer
 
 
-BUNRUIJA_VECTORIZER_REGISTRY = {
-    'sequence': SequenceVectorizer,
-    'tfidf': TfidfVectorizer,
-}
+BUNRUIJA_REGISTRY['sequence'] = SequenceVectorizer
+BUNRUIJA_REGISTRY['tfidf'] = TfidfVectorizer
 
 logger = logging.getLogger(__name__)
 
 
 # https://stackoverflow.com/questions/9336646/python-decorator-with-multiprocessing-fails
 def register_vectorizer(vectorizer_name, vectorizer):
-    if vectorizer_name in BUNRUIJA_VECTORIZER_REGISTRY:
+    if vectorizer_name in BUNRUIJA_REGISTRY:
         raise KeyError
-    BUNRUIJA_VECTORIZER_REGISTRY[vectorizer_name] = vectorizer
+    BUNRUIJA_REGISTRY[vectorizer_name] = vectorizer
 
 # def register_vectorizer(vectorizer_name):
 #     def f(vectorizer):
@@ -58,7 +57,6 @@ def register_vectorizer(vectorizer_name, vectorizer):
 #         BUNRUIJA_VECTORIZER_REGISTRY[self.vectorizer_name] = new_vectorizer
 
 
-
 def build_vectorizer(config, tokenizer=None):
     vectorizer_setting = config.get('preprocess', {}).get('vectorizer', {})
 
@@ -72,11 +70,11 @@ def build_vectorizer(config, tokenizer=None):
             logger.info(f'vectorizer args: {vectorizer_args}')
 
             if vectorizer_type == 'tfidf':
-                vectorizer = BUNRUIJA_VECTORIZER_REGISTRY[vectorizer_type](
+                vectorizer = BUNRUIJA_REGISTRY[vectorizer_type](
                     tokenizer=build_tokenizer(config),
                     **vectorizer_args)
             else:
-                vectorizer = BUNRUIJA_VECTORIZER_REGISTRY[vectorizer_type](
+                vectorizer = BUNRUIJA_REGISTRY[vectorizer_type](
                     **vectorizer_args)
             vectorizers.append((vectorizer_name, vectorizer))
     else:
@@ -86,11 +84,11 @@ def build_vectorizer(config, tokenizer=None):
         logger.info(f'vectorizer args: {vectorizer_args}')
 
         if vectorizer_type in ['tfidf', 'sequence']:
-            vectorizer = BUNRUIJA_VECTORIZER_REGISTRY[vectorizer_type](
+            vectorizer = BUNRUIJA_REGISTRY[vectorizer_type](
                 tokenizer=build_tokenizer(config),
                 **vectorizer_args)
         else:
-            vectorizer = BUNRUIJA_VECTORIZER_REGISTRY[vectorizer_type](
+            vectorizer = BUNRUIJA_REGISTRY[vectorizer_type](
                 **vectorizer_args)
         vectorizers = [(vectorizer_type, vectorizer)]
 

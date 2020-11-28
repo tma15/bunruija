@@ -11,7 +11,10 @@ class MeCabTokenizer(BaseTokenizer):
         )
         self.lemmatize = kwargs.get('lemmatize', False)
         exclude_pos = kwargs.get('exclude_pos', [])
-        self.filters = [PosFilter(p) for p in exclude_pos]
+        if len(exclude_pos) > 0:
+            self.filters = [PosFilter(exclude_pos)]
+        else:
+            self.filters = None
 
         self.dict_path = kwargs.get('dict_path', None)
         if self.dict_path:
@@ -42,6 +45,16 @@ class MeCabTokenizer(BaseTokenizer):
         rv = (func, args, state, listitems, dictitems)
         return rv
 
+    def __repr__(self):
+        args = []
+        args.append(f'lemmatize={self.lemmatize}')
+        if self.dict_path:
+            args.append(f'dict_path={self.dict_path}')
+        if self.filters:
+            args.append(f'filters={self.filters}')
+        out = f'{self.__class__.__name__}({", ".join(args)})'
+        return out
+
     def __call__(self, text):
         result = self._mecab.parse(text).rstrip()
         ret = []
@@ -52,7 +65,7 @@ class MeCabTokenizer(BaseTokenizer):
             surface, feature = elems
             features = feature.split(',')
 
-            if any([f(surface, features) for f in self.filters]):
+            if self.filters and any([f(surface, features) for f in self.filters]):
                 continue
             else:
                 if self.lemmatize:

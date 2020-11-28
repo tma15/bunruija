@@ -2,8 +2,6 @@ import logging
 from pathlib import Path
 import pickle
 
-import bunruija.classifiers.classifier
-
 import lightgbm
 from sklearn.svm import SVC
 from sklearn.ensemble import (
@@ -12,61 +10,87 @@ from sklearn.ensemble import (
     VotingClassifier
 )
 from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import Pipeline
 
+from ..registry import BUNRUIJA_REGISTRY
+from ..tokenizers import build_tokenizer
 from .lstm import LSTMClassifier
 
 
-BUNRUIJA_CLASSIFIER_REGISTRY = {
-    'svm': SVC,
-    'rf': RandomForestClassifier,
-    'lgb': lightgbm.LGBMClassifier,
-    'lr': LogisticRegression,
-    'lstm': LSTMClassifier,
-    'stacking': StackingClassifier,
-    'voting': VotingClassifier,
-}
+BUNRUIJA_REGISTRY['svm'] = SVC
+BUNRUIJA_REGISTRY['rf'] = RandomForestClassifier
+BUNRUIJA_REGISTRY['lgb'] = lightgbm.LGBMClassifier
+BUNRUIJA_REGISTRY['lr'] = LogisticRegression
+BUNRUIJA_REGISTRY['lstm'] = LSTMClassifier
+BUNRUIJA_REGISTRY['pipeline'] = Pipeline
+BUNRUIJA_REGISTRY['stacking'] = StackingClassifier
+BUNRUIJA_REGISTRY['voting'] = VotingClassifier
 
 
 logger = logging.getLogger(__name__)
 
 
-def build_model(config):
-    model_type = config.get('classifier', {}).get('type', 'svm')
-    model_args = config.get('classifier', {}).get('args', {})
+class ClassifierBuilder:
+    def __init__(self, config):
+        self.config = config
 
-    additional_args = {}
-    with open(Path(config.get('bin_dir', '.')) / 'model.bunruija', 'rb') as f:
-        model_data = pickle.load(f)
-        additional_args['vectorizer'] = model_data['vectorizer']
+    def maybe_need_more_arg(self, estimator_type):
+        if estimator_type in ['tfidf', 'sequence']:
+            tokenizer = build_tokenizer(self.config)
+            return {'tokenizer': tokenizer}
+        else:
+            return {}
 
-    if model_type in ['stacking', 'voting']:
-        estimators = model_args.pop('estimators')
-        for estimator_data in estimators:
+    def build_estimator(self, estimator_data):
+        if isinstance(estimator_data, list):
+            estimators = [self.build_estimator(s) for s in estimator_data]
+            estimator_type = 'pipeline'
+            estimator = BUNRUIJA_REGISTRY[estimator_type](estimators)
+        else:
             estimator_type = estimator_data['type']
             estimator_args = estimator_data.get('args', {})
+            additional_args = self.maybe_need_more_arg(estimator_type)
+            estimator_args.update(additional_args)
+            estimator = BUNRUIJA_REGISTRY[estimator_type](**estimator_args)
+        return estimator_type, estimator
+    
+    def build(self):
+        setting = self.config['classifier']
 
-            if estimator_type in ['lstm']:
-                estimator_args['vectorizer'] = additional_args['vectorizer']
-            estimator = BUNRUIJA_CLASSIFIER_REGISTRY[estimator_type](**estimator_args)
-            if not 'estimators' in model_args:
-                model_args['estimators'] = []
-            model_args['estimators'].append((estimator_type, estimator))
+        if isinstance(setting, list):
+            model = self.build_estimator(setting)[1]
+        elif isinstance(setting, dict):
+            model_type = setting['type']
+            model_args = setting.get('args', {})
 
-    if model_type == 'stacking':
-        final_estimator_data = model_args.pop('final_estimator', {})
-        final_estimator_type = final_estimator_data.get('type', None)
-        if final_estimator_type:
-            final_estimator_args = final_estimator_data.get('args', {})
-            final_estimator = BUNRUIJA_CLASSIFIER_REGISTRY[final_estimator_type](**final_estimator_args)
-        else:
-            final_estimator = None
+            if model_type in ['stacking', 'voting']:
+                estimators = model_args.pop('estimators')
+                for i, estimator_data in enumerate(estimators):
+                    estimator_type, estimator = self.build_estimator(estimator_data)
+                    if not 'estimators' in model_args:
+                        model_args['estimators'] = []
+                    name = f'{estimator_type}.{i}'
+                    model_args['estimators'].append((name, estimator))
 
-        model_args['final_estimator'] = final_estimator
+            if model_type == 'stacking':
+                final_estimator_data = model_args.pop('final_estimator', {})
+                final_estimator_type = final_estimator_data.get('type', None)
+                if final_estimator_type:
+                    final_estimator_args = final_estimator_data.get('args', {})
+                    final_estimator = BUNRUIJA_REGISTRY[final_estimator_type](**final_estimator_args)
+                else:
+                    final_estimator = None
 
-    if model_type in ['lstm']:
-        model_args['vectorizer'] = additional_args['vectorizer']
+                model_args['final_estimator'] = final_estimator
 
-    logger.info(f'model type: {model_type}')
-    logger.info(f'model args: {model_args}')
-    model = BUNRUIJA_CLASSIFIER_REGISTRY[model_type](**model_args)
+            logger.info(f'model type: {model_type}')
+            logger.info(f'model args: {model_args}')
+            model = BUNRUIJA_REGISTRY[model_type](**model_args)
+        logger.info(model)
+        return model
+
+
+def build_model(config):
+    builder = ClassifierBuilder(config)
+    model = builder.build()
     return model
