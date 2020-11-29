@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.sparse import csr_matrix
 from sklearn.base import TransformerMixin
+import transformers
 
 from bunruija import tokenizers
 from bunruija.data import Dictionary
@@ -81,16 +82,27 @@ class SequenceVectorizer(TransformerMixin):
         tokenizer = self.build_tokenizer()
         for row_id, document in enumerate(raw_documents):
             elements = tokenizer(document)
-            max_col = max(max_col, len(elements))
 
-            for i, element in enumerate(elements):
-                if element in self.dictionary:
-                    if self.keep_raw_word:
-                        raw_words.append(element)
-                    index = self.dictionary.get_index(element)
+            if isinstance(elements, transformers.tokenization_utils_base.BatchEncoding):
+                input_ids = elements['input_ids']
+                max_col = max(max_col, len(input_ids))
+
+                for i, index in enumerate(input_ids):
                     data.append(index)
                     row.append(row_id)
                     col.append(i)
+
+            else:
+                max_col = max(max_col, len(elements))
+
+                for i, element in enumerate(elements):
+                    if element in self.dictionary:
+                        if self.keep_raw_word:
+                            raw_words.append(element)
+                        index = self.dictionary.get_index(element)
+                        data.append(index)
+                        row.append(row_id)
+                        col.append(i)
 
         data = np.array(data)
         row = np.array(row)

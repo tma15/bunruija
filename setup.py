@@ -18,6 +18,7 @@ setup(
         'mecab-python3==0.996.5',
         'pyyaml',
         'torch>=1.6.0',
+        'transformers>=3.5.1',
         'scikit-learn>=0.23.2',
         'unidic-lite',
     ],

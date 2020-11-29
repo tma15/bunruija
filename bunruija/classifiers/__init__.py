@@ -15,6 +15,7 @@ from sklearn.pipeline import Pipeline
 from ..registry import BUNRUIJA_REGISTRY
 from ..tokenizers import build_tokenizer
 from .lstm import LSTMClassifier
+from .transformer import TransformerClassifier
 
 
 BUNRUIJA_REGISTRY['svm'] = SVC
@@ -24,6 +25,7 @@ BUNRUIJA_REGISTRY['lr'] = LogisticRegression
 BUNRUIJA_REGISTRY['lstm'] = LSTMClassifier
 BUNRUIJA_REGISTRY['pipeline'] = Pipeline
 BUNRUIJA_REGISTRY['stacking'] = StackingClassifier
+BUNRUIJA_REGISTRY['transformer'] = TransformerClassifier
 BUNRUIJA_REGISTRY['voting'] = VotingClassifier
 
 

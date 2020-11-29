@@ -56,32 +56,6 @@ class LSTMClassifier(NeuralBaseClassifier):
             len(num_classes),
             bias=True)
 
-    def convert_data(self, X, y=None):
-        if len(X) == 2 and isinstance(X[1], list):
-            indices = X[0]
-            raw_words = X[1]
-            has_raw_words = True
-        else:
-            has_raw_words = False
-            indices = X
-            raw_words = None
-
-        data = []
-        for i in range(len(indices.indptr) - 1):
-            start = indices.indptr[i]
-            end = indices.indptr[i + 1]
-            data_i = {
-                'inputs': indices.data[start: end],
-            }
-
-            if y is not None:
-                data_i['label'] = y[i]
-
-            if has_raw_words:
-                data_i['raw_words'] = raw_words[start: end]
-            data.append(data_i)
-        return data
-
     def __call__(self, batch):
         x = batch['inputs']
         lengths = (x != self.pad).sum(dim=1)
