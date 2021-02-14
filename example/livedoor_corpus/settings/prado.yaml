@@ -23,5 +23,5 @@ classifier:
       dim_hid: 64
       optimizer: adamw
       lr: 0.001
-      max_epochs: 50
+      max_epochs: 300
       weight_decay: 0.01
