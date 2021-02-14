@@ -130,7 +130,7 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
                 del loss
 
             elapsed = time.perf_counter() - start_at
-            logger.info(f'epoch:{epoch} loss:{loss_epoch:.2f} elapsed:{elapsed:.2f}')
+            logger.info(f'epoch:{epoch+1} loss:{loss_epoch:.2f} elapsed:{elapsed:.2f}')
 
     def reset_module(self, **kwargs):
         pass
