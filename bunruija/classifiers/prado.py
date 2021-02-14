@@ -16,6 +16,16 @@ class Hasher:
         return hash_
 
 
+class WeightMask:
+    def __init__(self, index):
+        self.index = torch.tensor(index)
+
+    def __call__(self, module, _):
+        mask = module.raw_weight.new_ones(module.raw_weight.size())
+        mask.index_fill_(2, self.index, 0.)
+        module.weight = module.raw_weight * mask
+
+
 class ProjectedAttention(torch.nn.Module):
     def __init__(self, kernel_sizes, dim_hid, skip_bigrams=None):
         super().__init__()
@@ -33,8 +43,10 @@ class ProjectedAttention(torch.nn.Module):
         if isinstance(skip_bigrams, list):
             for c, skip_gram in zip(self.convs_value, skip_bigrams):
                 if isinstance(skip_gram, list):
-                    for i in skip_gram:
-                        torch.nn.init.zeros_(c.weight[:, :, i])
+                    c.raw_weight = c.weight
+                    del c.weight
+                    weight_mask = WeightMask(torch.tensor(skip_gram))
+                    c.register_forward_pre_hook(weight_mask)
                 elif skip_gram is None:
                     continue
                 else:
@@ -115,7 +127,7 @@ class PRADO(NeuralBaseClassifier):
         self.distort = kwargs.get('distortion_probability', 0.25)
 
         self.kernel_sizes = kwargs.get('kernel_sizes', [2, 3, 3, 4])
-        self.skip_bigrams = kwargs.get('skip_bigrams', [None, None, [1], [1, 2]]
+        self.skip_bigrams = kwargs.get('skip_bigrams', [None, None, [1], [1, 2]])
         self.attention = ProjectedAttention(
             self.kernel_sizes,
             self.dim_hid,
