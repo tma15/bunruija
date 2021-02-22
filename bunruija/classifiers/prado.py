@@ -18,11 +18,11 @@ class Hasher:
 
 class WeightMask:
     def __init__(self, index):
-        self.index = torch.tensor(index)
+        self.index = index
 
     def __call__(self, module, _):
         mask = module.raw_weight.new_ones(module.raw_weight.size())
-        mask.index_fill_(2, self.index, 0.)
+        mask.index_fill_(2, self.index.to(mask.device), 0.)
         module.weight = module.raw_weight * mask
 
 
@@ -137,21 +137,14 @@ class PRADO(NeuralBaseClassifier):
         self.batch_norm_attn = torch.nn.BatchNorm1d(self.dim_hid)
 
     def init_layer(self, data):
-        y = []
-        max_input_idx = 0
-        for data_i in data:
-            y.append(data_i['label'])
-
         self.pad = 0
-
-        num_classes = np.unique(y)
         self.fc = torch.nn.Linear(
             len(self.kernel_sizes) * self.dim_hid,
-            len(num_classes),
+            len(self.labels),
             bias=True)
 
     def word_string_distort(self, word):
-        if self.distort == 0:
+        if self.distort == 0 or len(word) == 0:
             return word
         else:
             if random.random() < self.distort:

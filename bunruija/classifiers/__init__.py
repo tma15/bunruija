@@ -1,4 +1,4 @@
-import logging
+from logging import getLogger
 from pathlib import Path
 import pickle
 
@@ -31,7 +31,7 @@ BUNRUIJA_REGISTRY['transformer'] = TransformerClassifier
 BUNRUIJA_REGISTRY['voting'] = VotingClassifier
 
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 class ClassifierBuilder:

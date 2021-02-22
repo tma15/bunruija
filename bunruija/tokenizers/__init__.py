@@ -1,11 +1,13 @@
 from ..registry import BUNRUIJA_REGISTRY
 from .tokenizer import BaseTokenizer
 from .mecab_tokenizer import MeCabTokenizer
+from .space_tokenizer import SpaceTokenizer
 
 from transformers import AutoTokenizer
 
 
 BUNRUIJA_REGISTRY['mecab'] = MeCabTokenizer
+BUNRUIJA_REGISTRY['space'] = SpaceTokenizer
 BUNRUIJA_REGISTRY['auto'] = AutoTokenizer
 
 

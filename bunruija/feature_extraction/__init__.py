@@ -1,5 +1,5 @@
+from logging import getLogger
 import functools
-import logging
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.pipeline import FeatureUnion
@@ -13,7 +13,7 @@ from .sequence import SequenceVectorizer
 BUNRUIJA_REGISTRY['sequence'] = SequenceVectorizer
 BUNRUIJA_REGISTRY['tfidf'] = TfidfVectorizer
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 # https://stackoverflow.com/questions/9336646/python-decorator-with-multiprocessing-fails
@@ -21,41 +21,6 @@ def register_vectorizer(vectorizer_name, vectorizer):
     if vectorizer_name in BUNRUIJA_REGISTRY:
         raise KeyError
     BUNRUIJA_REGISTRY[vectorizer_name] = vectorizer
-
-# def register_vectorizer(vectorizer_name):
-#     def f(vectorizer):
-#         class new_vectorizer(vectorizer):
-#             def fit(self, raw_documents):
-#                 return super().fit(raw_documents)
-
-#             def transforme(self, raw_documents):
-#                 return super().transform(raw_documents)
-
-#         new_vectorizer.__name__ = vectorizer.__name__
-#         BUNRUIJA_VECTORIZER_REGISTRY[vectorizer_name] = new_vectorizer
-#     return f
-
-# def register_vectorizer(vectorizer_name):
-#     def f(vectorizer):
-#         print(vectorizer)
-#         BUNRUIJA_VECTORIZER_REGISTRY[vectorizer_name] = vectorizer
-#     return f
-
-# class register_vectorizer:
-#     def __init__(self, vectorizer_name):
-#         self.vectorizer_name = vectorizer_name
-
-#     def __call__(self, vectorizer):
-#         class new_vectorizer(vectorizer):
-#             def fit(self, raw_documents):
-#                 return super().fit(raw_documents)
-
-#             def transforme(self, raw_documents):
-#                 return super().transform(raw_documents)
-
-#         new_vectorizer.__name__ = vectorizer.__name__
-#         BUNRUIJA_VECTORIZER_REGISTRY[self.vectorizer_name] = new_vectorizer
-
 
 def build_vectorizer(config, tokenizer=None):
     vectorizer_setting = config.get('preprocess', {}).get('vectorizer', {})
