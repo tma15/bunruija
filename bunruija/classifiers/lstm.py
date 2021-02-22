@@ -37,10 +37,8 @@ class LSTMClassifier(NeuralBaseClassifier):
         )
 
     def init_layer(self, data):
-        y = []
         max_input_idx = 0
         for data_i in data:
-            y.append(data_i['label'])
             max_input_idx = max(max_input_idx, np.max(data_i['inputs']))
 
         self.embed = torch.nn.Embedding(
@@ -53,7 +51,7 @@ class LSTMClassifier(NeuralBaseClassifier):
         num_classes = np.unique(y)
         self.out = torch.nn.Linear(
             2 * self.dim_hid,
-            len(num_classes),
+            len(self.labels),
             bias=True)
 
     def __call__(self, batch):

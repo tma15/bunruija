@@ -1,4 +1,4 @@
-import logging
+from logging import getLogger
 import time
 
 import numpy as np
@@ -12,7 +12,7 @@ import torch.nn.functional as F
 from bunruija.feature_extraction.sequence import SequenceVectorizer
 
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 class BaseClassifier(BaseEstimator, ClassifierMixin):
@@ -63,11 +63,13 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
         self.batch_size = kwargs.get('batch_size', 20)
 
         self.optimizer_type = kwargs.get('optimizer', 'adam')
+        self.labels = set()
 
     def init_layer(self, data):
         pass
 
     def convert_data(self, X, y=None):
+        logger.info('Loading data')
         if len(X) == 2 and isinstance(X[1], list):
             indices = X[0]
             raw_words = X[1]
@@ -87,6 +89,7 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
 
             if y is not None:
                 data_i['label'] = y[i]
+                self.labels.add(y[i])
 
             if has_raw_words:
                 data_i['raw_words'] = raw_words[start: end]
@@ -103,10 +106,14 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
 
         self.to(self.device)
         self.train()
+        log_interval = 100
 
         logger.info(f'{self}')
+        step = 0
+        loss_accum = 0
+        n_samples_accum = 0
         for epoch in range(self.max_epochs):
-            loss_epoch = 0.
+#             loss_epoch = 0.
 
             for batch in torch.utils.data.DataLoader(
                 data,
@@ -122,15 +129,27 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
                 logits = self(batch)
                 loss = F.nll_loss(
                     torch.log_softmax(logits, dim=1),
-                    batch['labels']
+                    batch['labels'],
+                    reduction='sum',
                 )
-                loss_epoch += loss.item()
-                loss.backward()
+#                 loss_epoch += loss.item()
+                loss_accum += loss.item()
+                n_samples_accum += len(batch['labels'])
+                (loss / len(batch['labels'])).backward()
                 optimizer.step()
+                step += 1
                 del loss
 
-            elapsed = time.perf_counter() - start_at
-            logger.info(f'epoch:{epoch+1} loss:{loss_epoch:.2f} elapsed:{elapsed:.2f}')
+                if step % log_interval == 0:
+                    loss_accum /= n_samples_accum
+                    elapsed = time.perf_counter() - start_at
+                    logger.info(f'epoch:{epoch+1} step:{step} '
+                                f'loss:{loss_accum:.2f} elapsed:{elapsed:.2f}')
+                    loss_accum = 0
+                    n_samples_accum = 0
+
+#             elapsed = time.perf_counter() - start_at
+#             logger.info(f'epoch:{epoch+1} loss:{loss_epoch:.2f} elapsed:{elapsed:.2f}')
 
     def reset_module(self, **kwargs):
         pass
