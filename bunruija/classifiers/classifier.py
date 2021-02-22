@@ -15,6 +15,20 @@ from bunruija.feature_extraction.sequence import SequenceVectorizer
 logger = getLogger(__name__)
 
 
+
+def _addindent(s_, numSpaces):
+    s = s_.split('\n')
+    # don't do anything for single-line stuff
+    if len(s) == 1:
+        return s_
+    first = s.pop(0)
+    s = [(numSpaces * ' ') + line for line in s]
+    s = '\n'.join(s)
+    s = first + '\n' + s
+    return s
+
+
+
 class BaseClassifier(BaseEstimator, ClassifierMixin):
     def __init__(self):
         super().__init__()
@@ -63,13 +77,38 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
         self.batch_size = kwargs.get('batch_size', 20)
 
         self.optimizer_type = kwargs.get('optimizer', 'adam')
+        self.log_interval = kwargs.get('log_intarval', 100)
         self.labels = set()
 
+#     def __repr__(self):
+    def __str__(self):
+        extra_lines = []
+        extra_repr = self.extra_repr()
+        # empty string will be split into list ['']
+        if extra_repr:
+            extra_lines = extra_repr.split('\n')
+        child_lines = []
+        for key, module in self._modules.items():
+            mod_str = repr(module)
+            mod_str = _addindent(mod_str, 2)
+            child_lines.append('(' + key + '): ' + mod_str)
+        lines = extra_lines + child_lines
+
+        main_str = self._get_name() + '('
+        if lines:
+            # simple one-liner info, which most builtin Modules will use
+            if len(extra_lines) == 1 and not child_lines:
+                main_str += extra_lines[0]
+            else:
+                main_str += '\n  ' + '\n  '.join(lines) + '\n'
+
+        main_str += ')'
+        return main_str
+
     def init_layer(self, data):
-        pass
+        raise NotImplementedError
 
     def convert_data(self, X, y=None):
-        logger.info('Loading data')
         if len(X) == 2 and isinstance(X[1], list):
             indices = X[0]
             raw_words = X[1]
@@ -106,7 +145,6 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
 
         self.to(self.device)
         self.train()
-        log_interval = 100
 
         logger.info(f'{self}')
         step = 0
@@ -140,7 +178,7 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
                 step += 1
                 del loss
 
-                if step % log_interval == 0:
+                if step % self.log_interval == 0:
                     loss_accum /= n_samples_accum
                     elapsed = time.perf_counter() - start_at
                     logger.info(f'epoch:{epoch+1} step:{step} '

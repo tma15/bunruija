@@ -26,80 +26,80 @@ class WeightMask:
         module.weight = module.raw_weight * mask
 
 
+class ConvolutionLayer(torch.nn.Module):
+    def __init__(self, kernel_size, dim_hid):
+        super().__init__()
+        self.dim_hid = dim_hid
+        self.conv = torch.nn.Conv2d(
+            1,
+            self.dim_hid,
+            kernel_size=(kernel_size, self.dim_hid),
+            stride=1
+        )
+
+        self.batch_norm = torch.nn.BatchNorm1d(self.dim_hid)
+
+    def __call__(self, x):
+        x = self.conv(x).squeeze(3)
+        x = self.batch_norm(x)
+        return x
+
+
+class ProjectAttentionLayer(torch.nn.Module):
+    def __init__(self, kernel_size, dim_hid, skip_bigram=None):
+        super().__init__()
+        self.conv_value = ConvolutionLayer(kernel_size, dim_hid)
+
+        if isinstance(skip_bigram, list):
+            self.conv_value.conv.raw_weight = self.conv_value.conv.weight
+            del self.conv_value.conv.weight
+            weight_mask = WeightMask(torch.tensor(skip_bigram))
+            self.conv_value.conv.register_forward_pre_hook(weight_mask)
+        elif skip_bigram is None:
+            pass
+        else:
+            raise ValueError(skip_gram)
+
+        self.conv_attn = ConvolutionLayer(kernel_size, dim_hid)
+        self.zero_pad = torch.nn.ZeroPad2d((0, 0, kernel_size - 1, 0))
+
+    def __call__(self, x_value_in, x_attn_in):
+        # (bsz, output_channel, seq_len)
+        x_value_in = self.zero_pad(x_value_in)
+        x_value = self.conv_value(x_value_in)
+
+        # (bsz, output_channel, seq_len)
+        x_attn_in = self.zero_pad(x_attn_in)
+        x_attn = self.conv_attn(x_attn_in)
+        x_attn = torch.softmax(x_attn, dim=2)
+
+        x = x_attn * x_value
+        # (bsz, output_channel)
+        x = torch.sum(x, dim=2)
+        return x
+
+
 class ProjectedAttention(torch.nn.Module):
     def __init__(self, kernel_sizes, dim_hid, skip_bigrams=None):
         super().__init__()
         self.dim_hid = dim_hid
 
-        self.convs_value = torch.nn.ModuleList([
-            torch.nn.Conv2d(
-                1,
-                self.dim_hid,
-                kernel_size=(kernel_size, self.dim_hid),
-                stride=1,
-            ) for kernel_size in kernel_sizes
-        ])
-
         if isinstance(skip_bigrams, list):
-            for c, skip_gram in zip(self.convs_value, skip_bigrams):
-                if isinstance(skip_gram, list):
-                    c.raw_weight = c.weight
-                    del c.weight
-                    weight_mask = WeightMask(torch.tensor(skip_gram))
-                    c.register_forward_pre_hook(weight_mask)
-                elif skip_gram is None:
-                    continue
-                else:
-                    raise ValueError(skip_gram)
-
-        self.convs_attn = torch.nn.ModuleList([
-            torch.nn.Conv2d(
-                1,
-                self.dim_hid,
-                kernel_size=(kernel_size, self.dim_hid),
-                stride=1,
-            ) for kernel_size in kernel_sizes
-        ])
-
-        self.zero_pads = torch.nn.ModuleList([
-            torch.nn.ZeroPad2d((0, 0, kernel_size - 1, 0))
-            for kernel_size in kernel_sizes
-        ])
-
-        self.batch_norms_value = torch.nn.ModuleList([
-            torch.nn.BatchNorm1d(self.dim_hid)
-            for _ in kernel_sizes
-        ])
-
-        self.batch_norms_attn = torch.nn.ModuleList([
-            torch.nn.BatchNorm1d(self.dim_hid)
-            for _ in kernel_sizes
-        ])
+            self.layers = torch.nn.ModuleList([
+                ProjectAttentionLayer(kernel_size, dim_hid, skip_bigram=skip_bigram)
+                for kernel_size, skip_bigram in zip(kernel_sizes, skip_bigrams)
+            ])
+        else:
+            self.layers = torch.nn.ModuleList([
+                ProjectAttentionLayer(kernel_size, dim_hid, skip_bigram=None)
+                for kernel_size in kernel_sizes
+            ])
 
     def __call__(self, x_value_in, x_attn_in):
         x_list = []
 
-        for conv_value, conv_attn, zero_pad, batch_norm_value, batch_norm_attn in zip(
-                self.convs_value,
-                self.convs_attn,
-                self.zero_pads,
-                self.batch_norms_value,
-                self.batch_norms_attn
-        ):
-            # (bsz, output_channel, seq_len)
-            x_value_in = zero_pad(x_value_in)
-            x_value = conv_value(x_value_in).squeeze(3)
-            x_value = batch_norm_value(x_value)
-
-            # (bsz, output_channel, seq_len)
-            x_attn_in = zero_pad(x_attn_in)
-            x_attn = conv_attn(x_attn_in).squeeze(3)
-            x_attn = batch_norm_attn(x_attn)
-            x_attn = torch.softmax(x_attn, dim=2)
-
-            x = x_attn * x_value
-            # (bsz, output_channel)
-            x = torch.sum(x, dim=2)
+        for layer in self.layers:
+            x = layer(x_value_in, x_attn_in)
             x_list.append(x)
         x = torch.cat(x_list, dim=1)
         return x
