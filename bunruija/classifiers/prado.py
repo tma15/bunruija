@@ -22,7 +22,7 @@ class WeightMask:
 
     def __call__(self, module, _):
         mask = module.raw_weight.new_ones(module.raw_weight.size())
-        mask.index_fill_(2, self.index, 0.)
+        mask.index_fill_(2, self.index.to(mask.device), 0.)
         module.weight = module.raw_weight * mask
 
 
