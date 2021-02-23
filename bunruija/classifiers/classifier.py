@@ -76,12 +76,13 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
         self.max_epochs = kwargs.get('max_epochs', 3)
         self.batch_size = kwargs.get('batch_size', 20)
 
-        self.optimizer_type = kwargs.get('optimizer', 'adam')
         self.log_interval = kwargs.get('log_intarval', 100)
+        self.optimizer_type = kwargs.get('optimizer', 'adam')
+        self.save_every_step = kwargs.get('save_every_step', -1)
+        self.saver = kwargs.get('saver', None)
         self.labels = set()
 
-#     def __repr__(self):
-    def __str__(self):
+    def __repr__(self):
         extra_lines = []
         extra_repr = self.extra_repr()
         # empty string will be split into list ['']
@@ -151,8 +152,6 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
         loss_accum = 0
         n_samples_accum = 0
         for epoch in range(self.max_epochs):
-#             loss_epoch = 0.
-
             for batch in torch.utils.data.DataLoader(
                 data,
                 batch_size=self.batch_size,
@@ -170,7 +169,6 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
                     batch['labels'],
                     reduction='sum',
                 )
-#                 loss_epoch += loss.item()
                 loss_accum += loss.item()
                 n_samples_accum += len(batch['labels'])
                 (loss / len(batch['labels'])).backward()
@@ -186,8 +184,12 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
                     loss_accum = 0
                     n_samples_accum = 0
 
-#             elapsed = time.perf_counter() - start_at
-#             logger.info(f'epoch:{epoch+1} loss:{loss_epoch:.2f} elapsed:{elapsed:.2f}')
+                if (
+                    self.save_every_step > -1
+                    and self.saver
+                    and step % self.save_every_step == 0
+                ):
+                    self.saver(self)
 
     def reset_module(self, **kwargs):
         pass
@@ -212,6 +214,7 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
             p.grad = None
 
     def predict(self, X):
+        self.to(self.device)
         self.eval()
 
         data = self.convert_data(X)
