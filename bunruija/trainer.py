@@ -1,6 +1,6 @@
 import os
-import pickle
 from pathlib import Path
+import pickle
 
 import sklearn
 import torch
@@ -18,18 +18,14 @@ class Trainer:
             self.data = pickle.load(f)
 
         self.model = bunruija.classifiers.build_model(self.config)
+        self.saver = bunruija.classifiers.util.Saver(self.config)
 
     def train(self):
         y_train = self.data['label_train']
         X_train = self.data['data_train']
         self.model.fit(X_train, y_train)
 
-        with open(Path(self.config.get('bin_dir', '.')) / 'model.bunruija', 'rb') as f:
-            model_data = pickle.load(f)
-
-        with open(Path(self.config.get('bin_dir', '.')) / 'model.bunruija', 'wb') as f:
-            model_data['classifier'] = self.model
-            pickle.dump(model_data, f)
+        self.saver(self.model)
 
         if 'label_dev' in self.data:
             y_dev = self.data['label_dev']
