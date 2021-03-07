@@ -145,12 +145,12 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
 
         self.to(self.device)
         self.train()
-        log_interval = 100
 
         logger.info(f'{self}')
         step = 0
         loss_accum = 0
         n_samples_accum = 0
+        start_at_accum = time.perf_counter()
         for epoch in range(self.max_epochs):
             for batch in torch.utils.data.DataLoader(
                 data,
@@ -179,10 +179,13 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
                 if step % self.log_interval == 0:
                     loss_accum /= n_samples_accum
                     elapsed = time.perf_counter() - start_at
+                    batch_per_sec = n_samples_accum / (time.perf_counter() - start_at_accum)
                     logger.info(f'epoch:{epoch+1} step:{step} '
-                                f'loss:{loss_accum:.2f} elapsed:{elapsed:.2f}')
+                                f'loss:{loss_accum:.2f} bps:{batch_per_sec:.2f} '
+                                f'elapsed:{elapsed:.2f}')
                     loss_accum = 0
                     n_samples_accum = 0
+                    start_at_accum = time.perf_counter()
 
                 if (
                     self.save_every_step > -1
