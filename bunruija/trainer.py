@@ -1,4 +1,3 @@
-import logging
 import os
 import pickle
 from pathlib import Path
@@ -8,9 +7,6 @@ import torch
 import yaml
 
 import bunruija
-
-
-logger = logging.getLogger(__name__)
 
 
 class Trainer:

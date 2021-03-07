@@ -1,4 +1,4 @@
-import logging
+from logging import getLogger
 from pathlib import Path
 import pickle
 
@@ -15,9 +15,11 @@ from sklearn.pipeline import Pipeline
 from ..registry import BUNRUIJA_REGISTRY
 from ..tokenizers import build_tokenizer
 from .lstm import LSTMClassifier
+from .prado import PRADO
 from .transformer import TransformerClassifier
 
 
+BUNRUIJA_REGISTRY['prado'] = PRADO
 BUNRUIJA_REGISTRY['svm'] = SVC
 BUNRUIJA_REGISTRY['rf'] = RandomForestClassifier
 BUNRUIJA_REGISTRY['lgb'] = lightgbm.LGBMClassifier
@@ -29,7 +31,7 @@ BUNRUIJA_REGISTRY['transformer'] = TransformerClassifier
 BUNRUIJA_REGISTRY['voting'] = VotingClassifier
 
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 class ClassifierBuilder:

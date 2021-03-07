@@ -1,0 +1,25 @@
+preprocess:
+  data:
+    train: train.csv
+    test: test.csv
+
+tokenizer:
+  type: space
+
+bin_dir: models/prado-model
+
+classifier:
+  - type: sequence
+    args:
+      only_raw_word: true
+  - type: prado
+    args:
+      device: cpu
+      batch_size: 16
+      n_features: 512
+      dim_emb: 64
+      dim_hid: 64
+      optimizer: adamw
+      lr: 0.001
+      max_epochs: 3
+      weight_decay: 0.01

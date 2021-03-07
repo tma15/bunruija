@@ -13,6 +13,7 @@ class SequenceVectorizer(TransformerMixin):
             tokenizer=None,
             max_features=None,
             keep_raw_word=True,
+            only_raw_word=False,
             dictionary=Dictionary(),
             **kwargs):
         super().__init__()
@@ -22,6 +23,7 @@ class SequenceVectorizer(TransformerMixin):
         self.vocabulary_ = dictionary.index_to_element
         self.max_features = max_features
         self.keep_raw_word = keep_raw_word
+        self.only_raw_word = only_raw_word
 
     def __repr__(self):
         args = []
@@ -29,6 +31,8 @@ class SequenceVectorizer(TransformerMixin):
             args.append(f'tokenizer={self.tokenizer}')
         if self.max_features:
             args.append(f'max_features={self.max_features}')
+        args.append(f'keep_raw_word={self.keep_raw_word}')
+        args.append(f'only_raw_word={self.only_raw_word}')
         out = f'{self.__class__.__name__}({", ".join(args)})'
         return out
 
@@ -50,9 +54,13 @@ class SequenceVectorizer(TransformerMixin):
             'max_features': self.max_features,
             'dictionary': self.dictionary,
             'keep_raw_word': self.keep_raw_word,
+            'only_raw_word': self.only_raw_word,
         }
 
     def fit(self, raw_documents, y=None):
+        if self.only_raw_word:
+            return self
+
         tokenizer = self.build_tokenizer()
 
         for row_id, document in enumerate(raw_documents):
@@ -96,13 +104,22 @@ class SequenceVectorizer(TransformerMixin):
                 max_col = max(max_col, len(elements))
 
                 for i, element in enumerate(elements):
-                    if element in self.dictionary:
-                        if self.keep_raw_word:
-                            raw_words.append(element)
-                        index = self.dictionary.get_index(element)
+                    if self.only_raw_word:
+                        raw_words.append(element)
+                        index = 1
                         data.append(index)
                         row.append(row_id)
                         col.append(i)
+                    else:
+                        if element in self.dictionary:
+                            if self.keep_raw_word:
+                                raw_words.append(element)
+
+                            index = self.dictionary.get_index(element)
+
+                            data.append(index)
+                            row.append(row_id)
+                            col.append(i)
 
         data = np.array(data)
         row = np.array(row)

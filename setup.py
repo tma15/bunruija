@@ -16,6 +16,7 @@ setup(
     install_requires=[
         'lightgbm',
         'mecab-python3==0.996.5',
+        'mmh3',
         'pyyaml',
         'torch>=1.6.0',
         'transformers>=3.5.1',
