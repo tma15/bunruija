@@ -5,6 +5,7 @@ import numpy as np
 import torch
 
 from bunruija.classifiers.classifier import NeuralBaseClassifier
+from bunruija.classifiers.prado.string_projector import StringProjectorOp
 
 
 class Hasher:
@@ -116,6 +117,7 @@ class PRADO(NeuralBaseClassifier):
         self.random_char = None
         self.n_features = kwargs.get('n_features', 512)
         self.hasher = Hasher(self.n_features)
+        self.string_proj = StringProjectorOp()
 
         self.dim_emb = kwargs.get('dim_emb', 64)
         self.mapping_table = [0, 1, -1, 0]
@@ -197,6 +199,10 @@ class PRADO(NeuralBaseClassifier):
         return x
 
     def __call__(self, batch):
+        x = self.string_proj('test')
+        print(x)
+        exit()
+
         projection = self.string_projection(batch)
         projection = projection.to(batch['inputs'].device)
         mask = (batch['inputs'] == self.pad).unsqueeze(2)
