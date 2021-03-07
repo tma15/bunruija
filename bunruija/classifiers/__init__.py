@@ -14,9 +14,11 @@ from sklearn.pipeline import Pipeline
 
 from ..registry import BUNRUIJA_REGISTRY
 from ..tokenizers import build_tokenizer
+from .classifier import NeuralBaseClassifier
 from .lstm import LSTMClassifier
 from .prado import PRADO
 from .transformer import TransformerClassifier
+from . import util
 
 
 BUNRUIJA_REGISTRY['prado'] = PRADO
@@ -55,17 +57,22 @@ class ClassifierBuilder:
             estimator_args = estimator_data.get('args', {})
             additional_args = self.maybe_need_more_arg(estimator_type)
             estimator_args.update(additional_args)
+
+            if isinstance(BUNRUIJA_REGISTRY[estimator_type], NeuralBaseClassifier):
+                estimator_args['saver'] = self.saver
             estimator = BUNRUIJA_REGISTRY[estimator_type](**estimator_args)
         return estimator_type, estimator
     
     def build(self):
         setting = self.config['classifier']
+        self.saver = util.Saver(self.config)
 
         if isinstance(setting, list):
             model = self.build_estimator(setting)[1]
         elif isinstance(setting, dict):
             model_type = setting['type']
             model_args = setting.get('args', {})
+            model_args['saver'] = self.saver
 
             if model_type in ['stacking', 'voting']:
                 estimators = model_args.pop('estimators')
@@ -91,6 +98,7 @@ class ClassifierBuilder:
             logger.info(f'model args: {model_args}')
             model = BUNRUIJA_REGISTRY[model_type](**model_args)
         logger.info(model)
+
         return model
 
 

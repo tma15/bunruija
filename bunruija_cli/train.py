@@ -28,3 +28,7 @@ def main(args):
 
 def cli_main():
     main(sys.argv[1:])
+
+
+if __name__ == '__main__':
+    cli_main()
