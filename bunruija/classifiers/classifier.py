@@ -15,7 +15,6 @@ from bunruija.feature_extraction.sequence import SequenceVectorizer
 logger = getLogger(__name__)
 
 
-
 def _addindent(s_, numSpaces):
     s = s_.split('\n')
     # don't do anything for single-line stuff
@@ -26,7 +25,6 @@ def _addindent(s_, numSpaces):
     s = '\n'.join(s)
     s = first + '\n' + s
     return s
-
 
 
 class BaseClassifier(BaseEstimator, ClassifierMixin):
@@ -110,6 +108,7 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
         raise NotImplementedError
 
     def convert_data(self, X, y=None):
+        logger.info('Loading data')
         if len(X) == 2 and isinstance(X[1], list):
             indices = X[0]
             raw_words = X[1]
@@ -146,6 +145,7 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
 
         self.to(self.device)
         self.train()
+        log_interval = 100
 
         logger.info(f'{self}')
         step = 0

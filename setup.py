@@ -10,7 +10,9 @@ setup(
         Extension(
             'bunruija.modules.vector_processor',
             sources=['bunruija/modules/vector_processor.pyx'],
-            libraries=['sqlite3']
+            libraries=['sqlite3'],
+            extra_compile_args=['-std=c++11'],
+            extra_link_args=['-std=c++11'],
         )
     ]),
     install_requires=[
