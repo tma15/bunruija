@@ -12,33 +12,6 @@
 
 namespace bunruija {
 
-//void one_char_length(const char *begin, const char *end, size_t *mblen) {
-//  const size_t len = end - begin;
-
-//  if (static_cast<unsigned char>(begin[0]) < 0x80) {
-//    *mblen = 1;
-//  } else if (len >= 2 && (begin[0] & 0xE0) == 0xC0) {
-//    const uint32_t cp = (((begin[0] & 0x1F) << 6) | ((begin[1] & 0x3F)));
-//    if (cp >= 0x0080) {
-//      *mblen = 2;
-//    }
-//  } else if (len >= 3 && (begin[0] & 0xF0) == 0xE0) {
-//    const uint32_t cp = (((begin[0] & 0x0F) << 12) | ((begin[1] & 0x3F) << 6) |
-//                       ((begin[2] & 0x3F)));
-//    if (cp >= 0x0800) {
-//      *mblen = 3;
-//    }
-//  } else if (len >= 4 && (begin[0] & 0xf8) == 0xF0) {
-//    const uint32_t cp = (((begin[0] & 0x07) << 18) | ((begin[1] & 0x3F) << 12) |
-//                       ((begin[2] & 0x3F) << 6) | ((begin[3] & 0x3F)));
-//    if (cp >= 0x10000) {
-//      *mblen = 4;
-//    }
-//  }
-  // Invalid UTF-8.
-//  *mblen = 1;
-//}
-
 
 Status PretrainedVectorProcessor::convert(const char *db_file, const char *input_file) {
   std::ifstream ifs(input_file);

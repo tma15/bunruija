@@ -1,6 +1,8 @@
 import os
 from setuptools import Extension, setup, find_packages
+
 from Cython.Build import cythonize
+import numpy
 
 
 CXX_SOURCES = [os.path.join('csrc', x) for x in os.listdir('csrc') if x.endswith('cc')]
@@ -23,7 +25,7 @@ setup(
         Extension(
             'bunruija.classifiers.prado.string_projector',
             sources=['bunruija/classifiers/prado/string_projector.pyx'] + CXX_SOURCES,
-            include_dirs=['include'],
+            include_dirs=['include', numpy.get_include()],
             extra_compile_args=['-std=c++11'],
             extra_link_args=['-std=c++11'],
         )

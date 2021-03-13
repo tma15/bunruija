@@ -115,9 +115,12 @@ class PRADO(NeuralBaseClassifier):
         super().__init__(**kwargs)
 
         self.random_char = None
+        self.make_fast = kwargs.get('make_fast', False)
         self.n_features = kwargs.get('n_features', 512)
         self.hasher = Hasher(self.n_features)
-        self.string_proj = StringProjectorOp()
+
+        if self.make_fast:
+            self.string_proj = StringProjectorOp(self.n_features)
 
         self.dim_emb = kwargs.get('dim_emb', 64)
         self.mapping_table = [0, 1, -1, 0]
@@ -199,11 +202,24 @@ class PRADO(NeuralBaseClassifier):
         return x
 
     def __call__(self, batch):
-        x = self.string_proj('test')
-        print(x)
-        exit()
+        if self.make_fast:
+            projection = self.string_proj(batch['words'])
+            projection = torch.from_numpy(projection)
+        else:
+            projection = self.string_projection(batch)
 
-        projection = self.string_projection(batch)
+#         max_seq_len = max(len(words) for words in batch['words'])
+#         for b in range(len(batch['words'])):
+#             print(len(batch['words'][b]))
+#             for w in range(max_seq_len):
+#                 if w < len(batch['words'][b]):
+#                     word = batch['words'][b][w]
+#                     print(w, word, projection[b, w].tolist())
+#                 else:
+#                     print(w, projection[b, w].tolist())
+#             print()
+#         exit()
+
         projection = projection.to(batch['inputs'].device)
         mask = (batch['inputs'] == self.pad).unsqueeze(2)
 
