@@ -27,4 +27,15 @@ class Hasher {
 };
 
 
+class StringDistorter {
+  public:
+    StringDistorter() {}
+    StringDistorter(float distortion_probability);
+    void distort(const std::string &string, std::string *output);
+
+  private:
+    float distortion_probability_;
+};
+
+
 } // namespace bunruija

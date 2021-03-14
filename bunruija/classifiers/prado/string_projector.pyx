@@ -13,7 +13,8 @@ np.import_array()
 
 cdef extern from "bunruija/string_projector_op.h" namespace "bunruija":
     cdef cppclass CppStringProjectorOp "bunruija::StringProjectorOp":
-        CppStringProjectorOp(int feature_size) except +
+        CppStringProjectorOp(int feature_size, float distortion_probability) except +
+        void train(bool mode)
         bool is_training()
         void call "operator()" (vector[vector[string]], float *)
 
@@ -22,10 +23,11 @@ cdef extern from "bunruija/string_projector_op.h" namespace "bunruija":
 cdef class StringProjectorOp:
     cdef CppStringProjectorOp *thisptr
     cpdef int feature_size
+    cpdef float distortion_probability
 
-    def __init__(self, feature_size):
+    def __init__(self, feature_size, distortion_probability):
         self.feature_size = feature_size
-        self.thisptr = new CppStringProjectorOp(feature_size)
+        self.thisptr = new CppStringProjectorOp(feature_size, distortion_probability)
 
     def __call__(self, batch_words):
         bsz = len(batch_words)
@@ -37,11 +39,15 @@ cdef class StringProjectorOp:
         self.thisptr.call(batch_words, &projection[0, 0, 0])
         return projection.reshape(bsz, max_num_words, self.feature_size)
 
+    def train(self, mode=True):
+        self.thisptr.train(mode)
+
     def __getstate__(self):
         return {}
 
     def __getnewargs__(self):
-        return self.feature_size,
+        return (self.feature_size,
+                self.distortion_probability)
 
     def __setstate__(self, state):
         for k, v in state.items():

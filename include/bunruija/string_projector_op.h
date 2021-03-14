@@ -14,12 +14,14 @@ constexpr int kincrement = 32;
 class StringProjectorOp {
   public:
     StringProjectorOp() {}
-    StringProjectorOp(int feature_size);
+    StringProjectorOp(int feature_size, float distortion_probability);
+    void train(bool mode);
     bool is_training();
     void operator()(const std::vector<std::vector<std::string>> &words, float *projection);
 
   private:
     Hasher hasher_;
+    StringDistorter distorter_;
     int feature_size_;
     bool is_training_;
 

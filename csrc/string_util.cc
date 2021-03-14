@@ -61,13 +61,9 @@ std::pair<uint64_t, uint64_t> Hasher::murmur_hash(const char *data, const size_t
   const size_t len_aligned = len & ~0x7;
   const char *end = data + len_aligned;
 
-//  std::cout << std::endl;
-//  std::cout << "len_aligned:" << len_aligned << " " << len << std::endl;
-//  std::cout << "data:" << data << " end:" << end << std::endl;
   for (const char *p = data; p != end; p += 8) {
     hash = step(hash, load_64variable_length(p, 8));
     hash2 ^= hash;
-//    std::cout << "hash:" << hash << " hash2:" << hash2 << std::endl;
   }
 
   if ((len & 0x7) != 0) {
@@ -113,6 +109,15 @@ void Hasher::get_more_bits(uint64_t hash, uint64_t hash2, uint64_t *rlow, uint64
   hash2 ^= hash;
   *rhigh = shift_mix(hash);
   *rlow = shift_mix(hash2 * kMul2) * kMul2;
+}
+
+
+StringDistorter::StringDistorter(float distortion_probability)
+  : distortion_probability_(distortion_probability) {
+}
+
+
+void StringDistorter::distort(const std::string &string, std::string *output) {
 }
 
 

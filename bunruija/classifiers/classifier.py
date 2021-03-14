@@ -74,7 +74,7 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
         self.max_epochs = kwargs.get('max_epochs', 3)
         self.batch_size = kwargs.get('batch_size', 20)
 
-        self.log_interval = kwargs.get('log_intarval', 100)
+        self.log_interval = kwargs.get('log_interval', 100)
         self.optimizer_type = kwargs.get('optimizer', 'adam')
         self.save_every_step = kwargs.get('save_every_step', -1)
         self.saver = kwargs.get('saver', None)

@@ -118,9 +118,10 @@ class PRADO(NeuralBaseClassifier):
         self.make_fast = kwargs.get('make_fast', False)
         self.n_features = kwargs.get('n_features', 512)
         self.hasher = Hasher(self.n_features)
+        self.distort = kwargs.get('distortion_probability', 0.25)
 
         if self.make_fast:
-            self.string_proj = StringProjectorOp(self.n_features)
+            self.string_proj = StringProjectorOp(self.n_features, self.distort)
 
         self.dim_emb = kwargs.get('dim_emb', 64)
         self.mapping_table = [0, 1, -1, 0]
@@ -132,7 +133,6 @@ class PRADO(NeuralBaseClassifier):
 
         dropout = kwargs.get('dropout', 0.5)
         self.dropout = torch.nn.Dropout(p=dropout)
-        self.distort = kwargs.get('distortion_probability', 0.25)
 
         self.kernel_sizes = kwargs.get('kernel_sizes', [2, 3, 3, 4])
         self.skip_bigrams = kwargs.get('skip_bigrams', [None, None, [1], [1, 2]])
@@ -143,6 +143,11 @@ class PRADO(NeuralBaseClassifier):
 
         self.batch_norm_value = torch.nn.BatchNorm1d(self.dim_hid)
         self.batch_norm_attn = torch.nn.BatchNorm1d(self.dim_hid)
+
+    def train(self, mode=True):
+        super().train(mode)
+        if self.make_fast:
+            self.string_proj.train(mode)
 
     def init_layer(self, data):
         self.pad = 0

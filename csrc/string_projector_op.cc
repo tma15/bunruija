@@ -7,14 +7,22 @@
 namespace bunruija {
 
 
-StringProjectorOp::StringProjectorOp(int feature_size)
+StringProjectorOp::StringProjectorOp(int feature_size, float distortion_probability)
   : hasher_(Hasher(feature_size)),
-    feature_size_(feature_size) {
+    feature_size_(feature_size),
+    distorter_(StringDistorter(distortion_probability)) {
 }
 
-bool StringProjectorOp::is_training() {
-  return false;
+
+void StringProjectorOp::train(bool mode) {
+  is_training_ = mode;
 }
+
+
+bool StringProjectorOp::is_training() {
+  return is_training_;
+}
+
 
 void StringProjectorOp::operator()(
     const std::vector<std::vector<std::string>> &batch_words, float *projection) {
