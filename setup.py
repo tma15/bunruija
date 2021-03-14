@@ -5,8 +5,8 @@ from Cython.Build import cythonize
 import numpy
 
 
-CXX_SOURCES = [os.path.join('csrc', x) for x in os.listdir('csrc') if x.endswith('cc')]
-print(CXX_SOURCES)
+# CXX_SOURCES = [os.path.join('csrc', x) for x in os.listdir('csrc') if x.endswith('cc')]
+# print(CXX_SOURCES)
 
 
 setup(
@@ -16,7 +16,10 @@ setup(
     ext_modules=cythonize([
         Extension(
             'bunruija.modules.vector_processor',
-            sources=['bunruija/modules/vector_processor.pyx'] + CXX_SOURCES,
+            sources=(
+                ['bunruija/modules/vector_processor.pyx']
+                + ['csrc/keyed_vector.cc', 'csrc/string_util.cc']
+            ),
             libraries=['sqlite3'],
             include_dirs=['include'],
             extra_compile_args=['-std=c++11'],
@@ -24,7 +27,10 @@ setup(
         ),
         Extension(
             'bunruija.classifiers.prado.string_projector',
-            sources=['bunruija/classifiers/prado/string_projector.pyx'] + CXX_SOURCES,
+            sources=(
+                ['bunruija/classifiers/prado/string_projector.pyx']
+                + ['csrc/string_projector_op.cc', 'csrc/string_util.cc']
+            ),
             include_dirs=['include', numpy.get_include()],
             extra_compile_args=['-std=c++11'],
             extra_link_args=['-std=c++11'],
