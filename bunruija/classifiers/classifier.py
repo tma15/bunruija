@@ -108,7 +108,9 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
         raise NotImplementedError
 
     def convert_data(self, X, y=None):
-        logger.info('Loading data')
+        if y is not None:
+            logger.info('Loading data')
+
         if len(X) == 2 and isinstance(X[1], list):
             indices = X[0]
             raw_words = X[1]

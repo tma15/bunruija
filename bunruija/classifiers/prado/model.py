@@ -115,7 +115,7 @@ class PRADO(NeuralBaseClassifier):
         super().__init__(**kwargs)
 
         self.random_char = None
-        self.make_fast = kwargs.get('make_fast', False)
+        self.make_fast = kwargs.get('make_fast', True)
         self.n_features = kwargs.get('n_features', 512)
         self.hasher = Hasher(self.n_features)
         self.distort = kwargs.get('distortion_probability', 0.25)
