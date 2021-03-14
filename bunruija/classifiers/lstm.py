@@ -48,7 +48,6 @@ class LSTMClassifier(NeuralBaseClassifier):
         )
         self.pad = 0
 
-        num_classes = np.unique(y)
         self.out = torch.nn.Linear(
             2 * self.dim_hid,
             len(self.labels),

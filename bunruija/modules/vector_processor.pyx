@@ -1,5 +1,4 @@
 # distutils: language = c++
-# distutils: sources = bunruija/modules/bunruija_vector.cc
 from functools import lru_cache
 
 import cython
@@ -10,13 +9,14 @@ from libcpp.vector cimport vector
 import numpy as np
 
 
-cdef extern from "bunruija_vector.h" namespace "bunruija":
+cdef extern from "bunruija/status.h" namespace "bunruija":
     cdef cppclass CppStatus "bunruija::Status":
         CppStatus() except +
         CppStatus(int, string) except +
         int status_code
         string status_message
 
+cdef extern from "bunruija/keyed_vector.h" namespace "bunruija":
     cdef cppclass CppPretrainedVectorProcessor "bunruija::PretrainedVectorProcessor":
         CppPretrainedVectorProcessor() except +
         CppStatus convert(char *, char *)

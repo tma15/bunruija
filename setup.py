@@ -1,5 +1,12 @@
+import os
 from setuptools import Extension, setup, find_packages
+
 from Cython.Build import cythonize
+import numpy
+
+
+# CXX_SOURCES = [os.path.join('csrc', x) for x in os.listdir('csrc') if x.endswith('cc')]
+# print(CXX_SOURCES)
 
 
 setup(
@@ -9,8 +16,22 @@ setup(
     ext_modules=cythonize([
         Extension(
             'bunruija.modules.vector_processor',
-            sources=['bunruija/modules/vector_processor.pyx'],
+            sources=(
+                ['bunruija/modules/vector_processor.pyx']
+                + ['csrc/keyed_vector.cc', 'csrc/string_util.cc']
+            ),
             libraries=['sqlite3'],
+            include_dirs=['include'],
+            extra_compile_args=['-std=c++11'],
+            extra_link_args=['-std=c++11'],
+        ),
+        Extension(
+            'bunruija.classifiers.prado.string_projector',
+            sources=(
+                ['bunruija/classifiers/prado/string_projector.pyx']
+                + ['csrc/string_projector_op.cc', 'csrc/string_util.cc']
+            ),
+            include_dirs=['include', numpy.get_include()],
             extra_compile_args=['-std=c++11'],
             extra_link_args=['-std=c++11'],
         )

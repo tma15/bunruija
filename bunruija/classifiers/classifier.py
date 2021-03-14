@@ -74,7 +74,7 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
         self.max_epochs = kwargs.get('max_epochs', 3)
         self.batch_size = kwargs.get('batch_size', 20)
 
-        self.log_interval = kwargs.get('log_intarval', 100)
+        self.log_interval = kwargs.get('log_interval', 100)
         self.optimizer_type = kwargs.get('optimizer', 'adam')
         self.save_every_step = kwargs.get('save_every_step', -1)
         self.saver = kwargs.get('saver', None)
@@ -108,7 +108,9 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
         raise NotImplementedError
 
     def convert_data(self, X, y=None):
-        logger.info('Loading data')
+        if y is not None:
+            logger.info('Loading data')
+
         if len(X) == 2 and isinstance(X[1], list):
             indices = X[0]
             raw_words = X[1]
@@ -145,12 +147,12 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
 
         self.to(self.device)
         self.train()
-        log_interval = 100
 
         logger.info(f'{self}')
         step = 0
         loss_accum = 0
         n_samples_accum = 0
+        start_at_accum = time.perf_counter()
         for epoch in range(self.max_epochs):
             for batch in torch.utils.data.DataLoader(
                 data,
@@ -179,10 +181,13 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
                 if step % self.log_interval == 0:
                     loss_accum /= n_samples_accum
                     elapsed = time.perf_counter() - start_at
+                    batch_per_sec = n_samples_accum / (time.perf_counter() - start_at_accum)
                     logger.info(f'epoch:{epoch+1} step:{step} '
-                                f'loss:{loss_accum:.2f} elapsed:{elapsed:.2f}')
+                                f'loss:{loss_accum:.2f} bps:{batch_per_sec:.2f} '
+                                f'elapsed:{elapsed:.2f}')
                     loss_accum = 0
                     n_samples_accum = 0
+                    start_at_accum = time.perf_counter()
 
                 if (
                     self.save_every_step > -1

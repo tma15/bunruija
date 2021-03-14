@@ -5,6 +5,7 @@ import numpy as np
 import torch
 
 from bunruija.classifiers.classifier import NeuralBaseClassifier
+from bunruija.classifiers.prado.string_projector import StringProjectorOp
 
 
 class Hasher:
@@ -114,8 +115,13 @@ class PRADO(NeuralBaseClassifier):
         super().__init__(**kwargs)
 
         self.random_char = None
+        self.make_fast = kwargs.get('make_fast', True)
         self.n_features = kwargs.get('n_features', 512)
         self.hasher = Hasher(self.n_features)
+        self.distort = kwargs.get('distortion_probability', 0.25)
+
+        if self.make_fast:
+            self.string_proj = StringProjectorOp(self.n_features, self.distort)
 
         self.dim_emb = kwargs.get('dim_emb', 64)
         self.mapping_table = [0, 1, -1, 0]
@@ -127,7 +133,6 @@ class PRADO(NeuralBaseClassifier):
 
         dropout = kwargs.get('dropout', 0.5)
         self.dropout = torch.nn.Dropout(p=dropout)
-        self.distort = kwargs.get('distortion_probability', 0.25)
 
         self.kernel_sizes = kwargs.get('kernel_sizes', [2, 3, 3, 4])
         self.skip_bigrams = kwargs.get('skip_bigrams', [None, None, [1], [1, 2]])
@@ -138,6 +143,11 @@ class PRADO(NeuralBaseClassifier):
 
         self.batch_norm_value = torch.nn.BatchNorm1d(self.dim_hid)
         self.batch_norm_attn = torch.nn.BatchNorm1d(self.dim_hid)
+
+    def train(self, mode=True):
+        super().train(mode)
+        if self.make_fast:
+            self.string_proj.train(mode)
 
     def init_layer(self, data):
         self.pad = 0
@@ -197,7 +207,24 @@ class PRADO(NeuralBaseClassifier):
         return x
 
     def __call__(self, batch):
-        projection = self.string_projection(batch)
+        if self.make_fast:
+            projection = self.string_proj(batch['words'])
+            projection = torch.from_numpy(projection)
+        else:
+            projection = self.string_projection(batch)
+
+#         max_seq_len = max(len(words) for words in batch['words'])
+#         for b in range(len(batch['words'])):
+#             print(len(batch['words'][b]))
+#             for w in range(max_seq_len):
+#                 if w < len(batch['words'][b]):
+#                     word = batch['words'][b][w]
+#                     print(w, word, projection[b, w].tolist())
+#                 else:
+#                     print(w, projection[b, w].tolist())
+#             print()
+#         exit()
+
         projection = projection.to(batch['inputs'].device)
         mask = (batch['inputs'] == self.pad).unsqueeze(2)
 
