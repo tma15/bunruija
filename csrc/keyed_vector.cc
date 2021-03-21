@@ -138,8 +138,9 @@ Status PretrainedVectorProcessor::initialize_db(const char *db_file, std::string
 
   // Consume the first element
   while (true) {
-    size_t multibyte_len;
-    one_char_length(begin, end, &multibyte_len);
+//    size_t multibyte_len;
+//    one_char_length(begin, end, &multibyte_len);
+    size_t multibyte_len = one_char_length(begin);
     std::string c(begin, begin + multibyte_len);
 
     begin += multibyte_len;
@@ -223,7 +224,6 @@ Status PretrainedVectorProcessor::initialize_db(const char *db_file, std::string
 
 
 Status PretrainedVectorProcessor::process_line(std::string *line) {
-//  std::cout << "#" << *line << std::endl;
   const char *begin = line->data();
   const char *end = line->data() + line->size();
 
@@ -237,9 +237,9 @@ Status PretrainedVectorProcessor::process_line(std::string *line) {
   size_t word_mb_length = 0;
 
   while (true) {
-    size_t multibyte_len;
-    one_char_length(begin, end, &multibyte_len);
-
+//    size_t multibyte_len;
+//    one_char_length(begin, end, &multibyte_len);
+    size_t multibyte_len = one_char_length(begin);
     std::string c(begin, begin + multibyte_len);
 
     begin += multibyte_len;

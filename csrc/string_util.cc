@@ -1,4 +1,5 @@
 #include <cassert>
+#include <random>
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
@@ -119,7 +120,91 @@ StringDistorter::StringDistorter(float distortion_probability)
 
 
 void StringDistorter::distort(const std::string &string, std::string *output) {
+  const char *begin = string.data();
+  const char *end = string.data() + string.size();
+
+  std::vector<std::string> characters;
+  while (true) {
+    size_t multibyte_len = one_char_length(begin);
+    std::string c(begin, begin + multibyte_len);
+    characters.push_back(c);
+    if (begin + multibyte_len == end) {
+      break;
+    }
+    begin += multibyte_len;
+  }
+  unsigned len = characters.size();
+
+  std::random_device seed_generator;
+  std::mt19937 random_engine(seed_generator());
+  std::uniform_real_distribution<float> dist(0., 1.);
+  std::uniform_int_distribution<int> idist(0, len - 1);
+
+  float p = dist(random_engine);
+  if (distortion_probability_ > 0.
+      && distortion_probability_ > p) {
+
+//    std::cout << "Distort: " << string << std::endl;
+    float distortion_type = dist(random_engine);
+    unsigned index = idist(random_engine);
+
+    if (distortion_type < 0.33) {
+      random_char_ = characters[index];
+      if (len > 1) {
+//        std::cout << "Remove at " << index << std::endl;
+        remove(characters, index, output);
+      }
+    } else if (distortion_type < 0.66) {
+      if (len > 2) {
+        random_char_ = characters[index];
+        characters.erase(characters.begin() + index, characters.begin() + index + 1);
+        unsigned iindex = idist(random_engine);
+//        std::cout << "Replace " << index << " with " << iindex << std::endl;
+        insert(characters, iindex, random_char_, output);
+      } else {
+        *output = string;
+      }
+    } else {
+      if (random_char_ != "") {
+//        std::cout << "Insert at " << index << std::endl;
+        insert(characters, index, random_char_, output);
+      } else {
+        *output = string;
+      }
+    }
+
+//    std::cout << "RESULT: " << *output << std::endl;
+//    std::cout << std::endl;
+  }
+//  exit(1);
 }
+
+
+void StringDistorter::remove(
+    const std::vector<std::string> &src, unsigned index, std::string *dist) {
+
+  for (unsigned i = 0; i < src.size(); ++i) {
+    if (i == index) {
+      continue;
+    }
+    *dist += src[i];
+  }
+}
+
+
+void StringDistorter::insert(const std::vector<std::string> &src, unsigned index,
+    const std::string &c, std::string *dst) {
+
+  for (unsigned i = 0; i < src.size(); ++i) {
+    if (i == index) {
+      *dst += c;
+      *dst += src[i];
+    } else {
+      *dst += src[i];
+    }
+  }
+}
+
 
 
 } // namespace bunruija
