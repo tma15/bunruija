@@ -38,7 +38,14 @@ void StringProjectorOp::operator()(
     const std::vector<std::string> &words = batch_words[batch_index];
 
     for (int word_index = 0; word_index < words.size(); ++word_index) {
-      const std::string &word = words[word_index];
+      std::string word;
+      if (is_training_) {
+        const std::string &original_word = words[word_index];
+        distorter_.distort(original_word, &word);
+      } else {
+        word = words[word_index];
+      }
+
       hasher_.get_hash_codes(word, &hash_codes);
 
       for (int hash_index = 0, k = 0; hash_index < hash_codes.size(); ++hash_index) {

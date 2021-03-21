@@ -5,7 +5,11 @@
 
 namespace bunruija {
 
+inline size_t one_char_length(const char *src) {
+  return "\1\1\1\1\1\1\1\1\1\1\1\1\2\2\3\4"[(*src & 0xFF) >> 4];
+}
 
+// Deprecated
 void one_char_length(const char *begin, const char *end, size_t *mblen);
 
 
@@ -35,6 +39,11 @@ class StringDistorter {
 
   private:
     float distortion_probability_;
+    std::string random_char_ = "";
+
+    void remove(const std::vector<std::string> &src, unsigned index, std::string *dst);
+    void insert(const std::vector<std::string> &src, unsigned index,
+                const std::string &c, std::string *dst);
 };
 
 
