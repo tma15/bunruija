@@ -17,6 +17,7 @@ from ..tokenizers import build_tokenizer
 from .classifier import NeuralBaseClassifier
 from .lstm import LSTMClassifier
 from .prado import PRADO
+from .qrnn import QRNN
 from .transformer import TransformerClassifier
 from . import util
 
@@ -28,6 +29,7 @@ BUNRUIJA_REGISTRY['lgb'] = lightgbm.LGBMClassifier
 BUNRUIJA_REGISTRY['lr'] = LogisticRegression
 BUNRUIJA_REGISTRY['lstm'] = LSTMClassifier
 BUNRUIJA_REGISTRY['pipeline'] = Pipeline
+BUNRUIJA_REGISTRY['qrnn'] = QRNN
 BUNRUIJA_REGISTRY['stacking'] = StackingClassifier
 BUNRUIJA_REGISTRY['transformer'] = TransformerClassifier
 BUNRUIJA_REGISTRY['voting'] = VotingClassifier
