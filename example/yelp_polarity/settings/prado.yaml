@@ -15,7 +15,7 @@ classifier:
   - type: prado
     args:
       device: cpu
-      batch_size: 16
+      batch_size: 32
       n_features: 512
       dim_emb: 64
       dim_hid: 64
