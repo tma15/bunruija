@@ -21,6 +21,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install nose
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          python setup.py install
       - name: Test with nosetests
         run: |
           nosetests
