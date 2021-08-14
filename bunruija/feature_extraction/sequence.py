@@ -89,7 +89,10 @@ class SequenceVectorizer(TransformerMixin):
 
         tokenizer = self.build_tokenizer()
         for row_id, document in enumerate(raw_documents):
-            elements = tokenizer(document)
+            if isinstance(tokenizer, transformers.PreTrainedTokenizerBase):
+                elements = tokenizer(document, truncation=True)
+            else:
+                elements = tokenizer(document)
 
             if isinstance(elements, transformers.tokenization_utils_base.BatchEncoding):
                 input_ids = elements['input_ids']
