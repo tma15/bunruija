@@ -11,6 +11,8 @@ from bunruija.predictor import Predictor
 
 
 class Evaluator:
+    """Evaluates a trained model
+    """
     def __init__(self, args):
         with open(args.yaml) as f:
             self.config = yaml.load(f, Loader=yaml.SafeLoader)

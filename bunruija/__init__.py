@@ -8,6 +8,7 @@ import bunruija.predictor
 import bunruija.tokenizers
 import bunruija.trainer
 
+from .binarizer import Binarizer
 from .evaluator import Evaluator
 from .predictor import Predictor
 from .trainer import Trainer
