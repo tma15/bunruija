@@ -10,6 +10,8 @@ from bunruija.feature_extraction import build_vectorizer
 
 
 class Binarizer:
+    """Binarizes data
+    """
     def __init__(self, config_file):
         self.config_file = config_file
         with open(config_file) as f:

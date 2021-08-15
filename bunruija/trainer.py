@@ -10,7 +10,9 @@ import bunruija
 
 
 class Trainer:
-    def __init__(self, config_file):
+    """Trains a text classification model.
+    """
+    def __init__(self, config_file: str):
         with open(config_file) as f:
             self.config = yaml.load(f, Loader=yaml.SafeLoader)
 
