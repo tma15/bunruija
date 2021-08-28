@@ -13,7 +13,9 @@ Welcome to Bunruija's documentation!
    tutorial
 
    binarizer
+   classifier
    evaluator
+   feature_extraction
    trainer
 
 
