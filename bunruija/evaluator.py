@@ -27,7 +27,7 @@ class Evaluator:
 
     def evaluate(self):
         if self.evaluate_time:
-            with open(self.config.get('preprocess', {}).get('data', {}).get('test', '')) as f:
+            with open(self.config.get('data', {}).get('test', '')) as f:
                 reader = csv.reader(f)
                 y_pred = []
                 y_test = []
