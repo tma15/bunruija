@@ -115,7 +115,7 @@ class PRADO(NeuralBaseClassifier):
         super().__init__(**kwargs)
 
         self.random_char = None
-        self.make_fast = kwargs.get('make_fast', True)
+        self.make_fast = kwargs.get('make_fast', False)
         self.n_features = kwargs.get('n_features', 512)
         self.hasher = Hasher(self.n_features)
         self.distort = kwargs.get('distortion_probability', 0.25)
@@ -131,7 +131,7 @@ class PRADO(NeuralBaseClassifier):
         self.fc_value = torch.nn.Linear(self.n_features, self.dim_hid)
         self.fc_attn = torch.nn.Linear(self.n_features, self.dim_hid)
 
-        dropout = kwargs.get('dropout', 0.5)
+        dropout = kwargs.get('dropout', 0.15)
         self.dropout = torch.nn.Dropout(p=dropout)
 
         self.kernel_sizes = kwargs.get('kernel_sizes', [2, 3, 3, 4])
@@ -212,18 +212,6 @@ class PRADO(NeuralBaseClassifier):
             projection = torch.from_numpy(projection)
         else:
             projection = self.string_projection(batch)
-
-#         max_seq_len = max(len(words) for words in batch['words'])
-#         for b in range(len(batch['words'])):
-#             print(len(batch['words'][b]))
-#             for w in range(max_seq_len):
-#                 if w < len(batch['words'][b]):
-#                     word = batch['words'][b][w]
-#                     print(w, word, projection[b, w].tolist())
-#                 else:
-#                     print(w, projection[b, w].tolist())
-#             print()
-#         exit()
 
         projection = projection.to(batch['inputs'].device)
         mask = (batch['inputs'] == self.pad).unsqueeze(2)

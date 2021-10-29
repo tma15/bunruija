@@ -1,8 +1,7 @@
-preprocess:
-  data:
-    train: train.csv
-    dev: dev.csv
-    test: test.csv
+data:
+  train: train.csv
+  dev: dev.csv
+  test: test.csv
 
 bin_dir: models/transformer-model
 
@@ -15,8 +14,9 @@ classifier:
   - type: sequence
   - type: transformer
     args:
+      device: cuda:0
       from_pretrained: cl-tohoku/bert-base-japanese
       optimizer: adamw
       lr: 3e-5
-      max_epochs: 3
+      max_epochs: 10
       weight_decay: 0.01

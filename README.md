@@ -12,5 +12,6 @@ See `example` for understanding how bunruija is easy to use.
 
 ## Install
 ```
-python setup.py install
+pip install -r requirements.txt
+pip install -e .
 ```

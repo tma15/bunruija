@@ -316,10 +316,8 @@ Status PretrainedVectorProcessor::query(const std::string &query, std::vector<fl
     for (int d = 0; d < dim_; ++d) {
       int v = sqlite3_column_int64(stmt_, d + 1);
       float value = float(v) / float(pow(10, precision_));
-//      std::cout << query << " " << d << " " << value << std::endl;
       vector->push_back(value);
     }
-//    std::cout << query << " " << "size:" << vector->size() << std::endl;
     break;
   }
   RETURN_STATUS_IF_NOT_EQ(sqlite3_reset(stmt_), SQLITE_OK, sqlite3_errmsg(db_))

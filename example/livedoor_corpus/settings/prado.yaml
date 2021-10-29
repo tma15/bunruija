@@ -1,8 +1,7 @@
-preprocess:
-  data:
-    train: train.csv
-    dev: dev.csv
-    test: test.csv
+data:
+  train: train.csv
+  dev: dev.csv
+  test: test.csv
 
 tokenizer:
   type: mecab
@@ -14,16 +13,15 @@ bin_dir: models/prado-model
 classifier:
   - type: sequence
     args:
-      max_features: 10000
+      max_features: 30000
   - type: prado
     args:
-      make_fast: true
       batch_size: 10
       n_features: 512
-      dim_emb: 64
-      dim_hid: 64
+      dim_emb: 256
+      dim_hid: 512
       optimizer: adamw
       lr: 0.001
-      max_epochs: 3
+      max_epochs: 10
       weight_decay: 0.01
       log_interval: 100

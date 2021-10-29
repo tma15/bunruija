@@ -16,6 +16,7 @@ Welcome to Bunruija's documentation!
    classifier
    evaluator
    feature_extraction
+   predictor
    trainer
 
 

@@ -9,8 +9,10 @@ def main(args):
     args = parser.parse_args(args)
 
     predictor = Predictor(args.yaml)
-    label = predictor('スマホを買った')
-    print(label)
+    while True:
+        text = input()
+        label = predictor(text)
+        print(label)
 
 
 def cli_main():

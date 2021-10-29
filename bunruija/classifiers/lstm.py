@@ -16,8 +16,9 @@ class LSTMClassifier(NeuralBaseClassifier):
 
         self.embedding_path = kwargs.get('static_embedding_path', None)
 
-        self.dim_emb = kwargs.get('dim_emb', 32)
-        self.dim_hid = kwargs.get('dim_hid', 128)
+        self.dim_emb = kwargs.get('dim_emb', 256)
+        self.dim_hid = kwargs.get('dim_hid', 512)
+        self.dropout_prob = kwargs.get('dropout', 0.15)
         self.num_layers = kwargs.get('num_layers', 1)
         self.bidirectional = kwargs.get('bidirectional', True)
 
@@ -25,6 +26,8 @@ class LSTMClassifier(NeuralBaseClassifier):
             self.static_embed = StaticEmbedding(self.embedding_path)
         else:
             self.static_embed = None
+
+        self.dropout = torch.nn.Dropout(self.dropout_prob)
 
         self.lstm = torch.nn.LSTM(
             input_size=(
@@ -34,6 +37,7 @@ class LSTMClassifier(NeuralBaseClassifier):
             hidden_size=self.dim_hid,
             num_layers=self.num_layers,
             bidirectional=self.bidirectional,
+            dropout=self.dropout_prob if self.num_layers > 1 else 0.
         )
 
     def init_layer(self, data):
@@ -58,7 +62,8 @@ class LSTMClassifier(NeuralBaseClassifier):
         lengths = (x != self.pad).sum(dim=1)
 
         if (x >= self.embed.weight.size(0)).any():
-            print(x)
+            logger.error(f'elements of x are larger than embedding size')
+            logger.error(x)
 
         x = self.embed(x)
         if self.static_embed is not None:
@@ -66,13 +71,11 @@ class LSTMClassifier(NeuralBaseClassifier):
             x_static = x_static.to(x.device)
             x = torch.cat([x, x_static], dim=2)
 
-        if (lengths == 0).any():
-            print(batch['inputs'])
-            print(lengths)
+        x = self.dropout(x)
 
         packed = torch.nn.utils.rnn.pack_padded_sequence(
             x,
-            lengths,
+            lengths.cpu(),
             batch_first=True,
             enforce_sorted=False
         )
@@ -81,5 +84,7 @@ class LSTMClassifier(NeuralBaseClassifier):
 
         # (bsz, seq_len, 2 * hidden_size)
         x, _ = torch.nn.utils.rnn.pad_packed_sequence(rnn_out, batch_first=True)
+
+        x = self.dropout(x)
         x = self.out(x[:, 0])
         return x

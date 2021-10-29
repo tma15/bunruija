@@ -1,10 +1,10 @@
-Evaluator
+Predictor
 ====================================
 
 ================
-Evaluator module
+Predictor module
 ================
 
-.. automodule:: bunruija.Evaluator
+.. automodule:: bunruija.Predictor
    :members:
 

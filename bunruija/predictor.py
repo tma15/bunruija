@@ -6,6 +6,8 @@ import bunruija
 
 
 class Predictor:
+    """Predicts labels
+    """
     def __init__(self, config_file):
         with open(config_file) as f:
             config = yaml.load(f, Loader=yaml.SafeLoader)

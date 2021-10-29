@@ -1,8 +1,7 @@
-preprocess:
-  data:
-    train: train.csv
-    dev: dev.csv
-    test: test.csv
+data:
+  train: train.csv
+  dev: dev.csv
+  test: test.csv
 
 bin_dir: models/stacking-model
 

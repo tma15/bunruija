@@ -79,6 +79,7 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
         self.save_every_step = kwargs.get('save_every_step', -1)
         self.saver = kwargs.get('saver', None)
         self.labels = set()
+        logger.info(f'device: {self.device}')
 
     def __repr__(self):
         extra_lines = []

@@ -77,8 +77,10 @@ class QRNN(NeuralBaseClassifier):
 
         self.dim_emb = kwargs.get('dim_emb', 256)
         self.dim_hid = kwargs.get('dim_hid', 128)
+        self.dropout_prob = kwargs.get('dropout', 0.15)
         self.window_size = kwargs.get('window_size', 3)
 
+        self.dropout = torch.nn.Dropout(self.dropout_prob)
         self.layers = torch.nn.ModuleList()
         self.bidirectional = kwargs.get('bidirectional', True)
         num_layers = kwargs.get('num_layers', 2)
@@ -116,8 +118,13 @@ class QRNN(NeuralBaseClassifier):
         lengths = (src_tokens != self.pad).sum(dim=1)
 
         x = self.embed(src_tokens)
-        for layer in self.layers:
+        x = self.dropout(x)
+
+        for i, layer in enumerate(self.layers):
             x = layer(x)
+            if i < len(self.layers) - 1:
+                x = self.dropout(x)
+
         x = torch.nn.functional.adaptive_max_pool2d(
             x,
             (1, 2 * self.dim_hid if self.bidirectional else self.dim_hid))

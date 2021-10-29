@@ -1,8 +1,7 @@
-preprocess:
-  data:
-    train: train.csv
-    dev: dev.csv
-    test: test.csv
+data:
+  train: train.csv
+  dev: dev.csv
+  test: test.csv
 
 tokenizer:
   type: mecab
@@ -14,15 +13,17 @@ bin_dir: models/qrnn-model
 classifier:
   - type: sequence
     args:
-      max_features: 10000
+      max_features: 30000
   - type: qrnn
     args:
-      batch_size: 2
+      device: cuda:0
+      batch_size: 32
       n_features: 512
-      dim_emb: 64
-      dim_hid: 128
+      dim_emb: 512
+      dim_hid: 1024
+      num_layers: 2
       optimizer: adamw
       lr: 0.001
-      max_epochs: 3
+      max_epochs: 10
       weight_decay: 0.01
       log_interval: 100

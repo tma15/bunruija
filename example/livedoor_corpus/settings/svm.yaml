@@ -1,8 +1,7 @@
-preprocess:
-  data:
-    train: train.csv
-    dev: dev.csv
-    test: test.csv
+data:
+  train: train.csv
+  dev: dev.csv
+  test: test.csv
 
 tokenizer:
   type: mecab

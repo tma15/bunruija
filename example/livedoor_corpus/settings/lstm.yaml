@@ -1,8 +1,7 @@
-preprocess:
-  data:
-    train: train.csv
-    dev: dev.csv
-    test: test.csv
+data:
+  train: train.csv
+  dev: dev.csv
+  test: test.csv
 
 tokenizer:
   type: mecab
@@ -14,14 +13,16 @@ bin_dir: models/lstm-model
 classifier:
   - type: sequence
     args:
-      max_features: 10000
+      max_features: 30000
   - type: lstm
     args:
-      batch_size: 10
-      dim_emb: 16
-      dim_hid: 32
+      device: cuda:0
+      batch_size: 8
+      dim_emb: 256
+      dim_hid: 512
+      num_layers: 1
       optimizer: adamw
-      static_embedding_path: jawiki.all_vectors.300d.txt
+#       static_embedding_path: jawiki.all_vectors.300d.txt
       lr: 0.001
       max_epochs: 10
       weight_decay: 0.01
