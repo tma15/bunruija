@@ -31,13 +31,13 @@ As you see, all you have to do is to prepare datasets and a yaml file that conta
 ## Comparison of classification performance
 Evaluation was conducted on Google Colaboratory (Colab).
 
-|model|configuration file         |F1-score (%)|Average inference time on CPU (s)|pre-trained|
-|-----|---------------------------|------------|---------------------------------|-----------|
-|BERT |`transformer.yaml`         | 87         |         0.022485                |   yes     |
-|SVM  |`svm.yaml`                 | 82         |         0.002723                |   no      |
-|QRNN |`qrnn.yaml`                | 80         |         0.016569                |   no      |
-|PRADO|`prado.yaml`               | 79         |         0.023537                |   no      |
-|LSTM |`lstm.yaml`                | 75         |         0.007223                |   no      |
+|model|configuration file         |F1-score (%)|Average inference time on CPU (s)|Model size|pre-trained|
+|-----|---------------------------|------------|---------------------------------|----------|-----------|
+|BERT |`transformer.yaml`         | 87         |         0.022485                | 423M     | yes       |
+|SVM  |`svm.yaml`                 | 82         |         0.002723                | 3.1M     | no        |
+|QRNN |`qrnn.yaml`                | 80         |         0.016569                | 200M     | no        |
+|PRADO|`prado.yaml`               | 79         |         0.023537                | 34M      | no        |
+|LSTM |`lstm.yaml`                | 75         |         0.007223                | 587M     | no        |
 
 
 Fine-tuning of classifiers other than SVM are conducted on a single GPU of Colab.
