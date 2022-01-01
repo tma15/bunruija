@@ -29,12 +29,10 @@ def main(args):
     args = parser.parse_args(args)
 
     setting = {
-        'preprocess': {
-            'data': {
-                'train': None,
-                'dev': None,
-                'test': None,
-            },
+        'data': {
+            'train': None,
+            'dev': None,
+            'test': None,
         },
         'tokenizer': {
             'type': 'mecab',

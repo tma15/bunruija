@@ -1,0 +1,35 @@
+[tool.poetry]
+name = "bunruija"
+version = "0.1.0"
+description = "A text classification toolkit"
+authors = ["Takuya Makino <takuyamakino15@gmail.com>"]
+build = "build.py"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+Cython = "^0.29.26"
+numpy = "^1.22.0"
+lightgbm = "^3.3.1"
+mecab-python3 = "^0.996.5"
+PyYAML = "^6.0"
+torch = "^1.10.1"
+transformers = "^4.15.0"
+scikit-learn = "^1.0.2"
+unidic-lite = "^1.0.8"
+mmh3 = "^3.0.0"
+fugashi = "^1.1.1"
+ipadic = "^1.0.0"
+
+[tool.poetry.dev-dependencies]
+nose = "^1.3.7"
+
+[tool.poetry.scripts]
+bunruija-evaluate = 'bunruija_cli.evaluate:cli_main'
+bunruija-predict = 'bunruija_cli.predict:cli_main'
+bunruija-preprocess = 'bunruija_cli.preprocess:cli_main'
+bunruija-train = 'bunruija_cli.train:cli_main'
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+

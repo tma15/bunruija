@@ -12,6 +12,5 @@ See `example` for understanding how bunruija is easy to use.
 
 ## Install
 ```
-pip install -r requirements.txt
-pip install -e .
+poetry install
 ```
