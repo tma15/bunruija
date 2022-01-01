@@ -49,9 +49,9 @@ class TestBinary(unittest.TestCase):
     def rewrite_data_path(self, data_dir, yaml_file):
         with open(yaml_file, 'r') as f:
             setting = yaml.load(f, Loader=yaml.SafeLoader)
-            setting['preprocess']['data']['train'] = str(Path(data_dir) / 'train.csv')
-            setting['preprocess']['data']['dev'] = str(Path(data_dir) / 'dev.csv')
-            setting['preprocess']['data']['test'] = str(Path(data_dir) / 'test.csv')
+            setting['data']['train'] = str(Path(data_dir) / 'train.csv')
+            setting['data']['dev'] = str(Path(data_dir) / 'dev.csv')
+            setting['data']['test'] = str(Path(data_dir) / 'test.csv')
             setting['bin_dir'] = str(Path(data_dir) / 'bin_dir')
 
         with open(yaml_file, 'w') as f:

@@ -25,4 +25,4 @@ jobs:
           poetry install --no-interaction
       - name: Test with nosetests
         run: |
-          poetry run nosetests
+          poetry run nosetests tests/*
