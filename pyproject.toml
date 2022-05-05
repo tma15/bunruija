@@ -22,6 +22,7 @@ scipy = "^1.8.0"
 
 [tool.poetry.dev-dependencies]
 nose = "^1.3.7"
+pytest = "^7.1.2"
 
 [tool.poetry.scripts]
 bunruija-evaluate = 'bunruija_cli.evaluate:cli_main'

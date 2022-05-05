@@ -1,4 +1,6 @@
-import MeCab
+from typing import List
+
+from fugashi import Tagger
 
 from bunruija.tokenizers import BaseTokenizer
 from bunruija.filters import PosFilter
@@ -16,9 +18,9 @@ class MeCabTokenizer(BaseTokenizer):
 
         self.dict_path = kwargs.get("dict_path", None)
         if self.dict_path:
-            self._mecab = MeCab.Tagger(f"-d {self.dict_path}")
+            self._mecab = Tagger(f"-d {self.dict_path}")
         else:
-            self._mecab = MeCab.Tagger()
+            self._mecab = Tagger()
 
     def __getstate__(self):
         return {
@@ -43,7 +45,7 @@ class MeCabTokenizer(BaseTokenizer):
         rv = (func, args, state, listitems, dictitems)
         return rv
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         args = []
         args.append(f"lemmatize={self.lemmatize}")
         if self.dict_path:
@@ -53,21 +55,16 @@ class MeCabTokenizer(BaseTokenizer):
         out = f'{self.__class__.__name__}({", ".join(args)})'
         return out
 
-    def __call__(self, text):
-        result = self._mecab.parse(text).rstrip()
+    def __call__(self, text: str) -> List[str]:
         ret = []
-        for line in result.splitlines()[:-1]:
-            elems = line.rstrip().split()
-            if len(elems) != 2:
-                continue
-            surface, feature = elems
-            features = feature.split(",")
-
-            if self.filters and any([f(surface, features) for f in self.filters]):
+        for word in self._mecab(text):
+            if self.filters and any(
+                [f(word.surface, word.feature) for f in self.filters]
+            ):
                 continue
             else:
                 if self.lemmatize:
-                    ret.append(surface if features[6] == "*" else features[6])
+                    ret.append(word.feature.lemma)
                 else:
-                    ret.append(surface)
+                    ret.append(word.surface)
         return ret
