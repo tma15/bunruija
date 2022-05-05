@@ -9,13 +9,14 @@ from bunruija.data import Dictionary
 
 class SequenceVectorizer(TransformerMixin):
     def __init__(
-            self,
-            tokenizer=None,
-            max_features=None,
-            keep_raw_word=True,
-            only_raw_word=False,
-            dictionary=Dictionary(),
-            **kwargs):
+        self,
+        tokenizer=None,
+        max_features=None,
+        keep_raw_word=True,
+        only_raw_word=False,
+        dictionary=Dictionary(),
+        **kwargs,
+    ):
         super().__init__()
 
         self.tokenizer = tokenizer
@@ -28,18 +29,18 @@ class SequenceVectorizer(TransformerMixin):
     def __repr__(self):
         args = []
         if self.tokenizer:
-            args.append(f'tokenizer={self.tokenizer}')
+            args.append(f"tokenizer={self.tokenizer}")
         if self.max_features:
-            args.append(f'max_features={self.max_features}')
-        args.append(f'keep_raw_word={self.keep_raw_word}')
-        args.append(f'only_raw_word={self.only_raw_word}')
+            args.append(f"max_features={self.max_features}")
+        args.append(f"keep_raw_word={self.keep_raw_word}")
+        args.append(f"only_raw_word={self.only_raw_word}")
         out = f'{self.__class__.__name__}({", ".join(args)})'
         return out
 
     def build_tokenizer(self):
         if self.tokenizer is not None:
             return self.tokenizer
-        
+
         self.tokenizer = tokenizers.build_default_tokenizer()
         return self.tokenizer
 
@@ -50,11 +51,11 @@ class SequenceVectorizer(TransformerMixin):
 
     def get_params(self, deep=True):
         return {
-            'tokenizer': self.tokenizer,
-            'max_features': self.max_features,
-            'dictionary': self.dictionary,
-            'keep_raw_word': self.keep_raw_word,
-            'only_raw_word': self.only_raw_word,
+            "tokenizer": self.tokenizer,
+            "max_features": self.max_features,
+            "dictionary": self.dictionary,
+            "keep_raw_word": self.keep_raw_word,
+            "only_raw_word": self.only_raw_word,
         }
 
     def fit(self, raw_documents, y=None):
@@ -72,8 +73,9 @@ class SequenceVectorizer(TransformerMixin):
             filtered_dict = Dictionary()
             for k, v in sorted(
                 zip(self.dictionary.elements, self.dictionary.count),
-                key=lambda x: x[1], reverse=True
-            )[:self.max_features]:
+                key=lambda x: x[1],
+                reverse=True,
+            )[: self.max_features]:
 
                 filtered_dict.add(k, v)
 
@@ -95,7 +97,7 @@ class SequenceVectorizer(TransformerMixin):
                 elements = tokenizer(document)
 
             if isinstance(elements, transformers.tokenization_utils_base.BatchEncoding):
-                input_ids = elements['input_ids']
+                input_ids = elements["input_ids"]
                 max_col = max(max_col, len(input_ids))
 
                 for i, index in enumerate(input_ids):

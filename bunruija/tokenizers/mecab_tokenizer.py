@@ -6,27 +6,25 @@ from bunruija.filters import PosFilter
 
 class MeCabTokenizer(BaseTokenizer):
     def __init__(self, **kwargs):
-        super().__init__(
-            name='mecab'
-        )
-        self.lemmatize = kwargs.get('lemmatize', False)
-        exclude_pos = kwargs.get('exclude_pos', [])
+        super().__init__(name="mecab")
+        self.lemmatize = kwargs.get("lemmatize", False)
+        exclude_pos = kwargs.get("exclude_pos", [])
         if len(exclude_pos) > 0:
             self.filters = [PosFilter(exclude_pos)]
         else:
             self.filters = None
 
-        self.dict_path = kwargs.get('dict_path', None)
+        self.dict_path = kwargs.get("dict_path", None)
         if self.dict_path:
-            self._mecab = MeCab.Tagger(f'-d {self.dict_path}')
+            self._mecab = MeCab.Tagger(f"-d {self.dict_path}")
         else:
             self._mecab = MeCab.Tagger()
 
     def __getstate__(self):
         return {
-            'lemmatize': self.lemmatize,
-            'filters': self.filters,
-            'dict_path': self.dict_path,
+            "lemmatize": self.lemmatize,
+            "filters": self.filters,
+            "dict_path": self.dict_path,
         }
 
     def __setstate__(self, state):
@@ -47,11 +45,11 @@ class MeCabTokenizer(BaseTokenizer):
 
     def __repr__(self):
         args = []
-        args.append(f'lemmatize={self.lemmatize}')
+        args.append(f"lemmatize={self.lemmatize}")
         if self.dict_path:
-            args.append(f'dict_path={self.dict_path}')
+            args.append(f"dict_path={self.dict_path}")
         if self.filters:
-            args.append(f'filters={self.filters}')
+            args.append(f"filters={self.filters}")
         out = f'{self.__class__.__name__}({", ".join(args)})'
         return out
 
@@ -63,13 +61,13 @@ class MeCabTokenizer(BaseTokenizer):
             if len(elems) != 2:
                 continue
             surface, feature = elems
-            features = feature.split(',')
+            features = feature.split(",")
 
             if self.filters and any([f(surface, features) for f in self.filters]):
                 continue
             else:
                 if self.lemmatize:
-                    ret.append(surface if features[6] == '*' else features[6])
+                    ret.append(surface if features[6] == "*" else features[6])
                 else:
                     ret.append(surface)
         return ret

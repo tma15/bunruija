@@ -6,13 +6,12 @@ import time
 import sklearn
 import yaml
 
-import bunruija
 from bunruija.predictor import Predictor
 
 
 class Evaluator:
-    """Evaluates a trained model
-    """
+    """Evaluates a trained model"""
+
     def __init__(self, args):
         with open(args.yaml) as f:
             self.config = yaml.load(f, Loader=yaml.SafeLoader)
@@ -22,12 +21,13 @@ class Evaluator:
 
         self.predictor = Predictor(args.yaml)
 
-        with open(Path(self.config.get('bin_dir', '.')) / 'data.bunruija', 'rb') as f:
+        data_path = Path(self.config.get("bin_dir", ".")) / "data.bunruija"
+        with open(data_path, "rb") as f:
             self.data = pickle.load(f)
 
     def evaluate(self):
         if self.evaluate_time:
-            with open(self.config.get('data', {}).get('test', '')) as f:
+            with open(self.config.get("data", {}).get("test", "")) as f:
                 reader = csv.reader(f)
                 y_pred = []
                 y_test = []
@@ -40,20 +40,22 @@ class Evaluator:
                     n += 1
                 duration = (time.perf_counter() - start_at) / n
         else:
-            X_test = self.data['data_test']
-            y_test = self.data['label_test']
+            X_test = self.data["data_test"]
+            y_test = self.data["label_test"]
             y_pred = self.predictor(X_test)
 
         labels = list(self.predictor.label_encoder.classes_)
         if self.verbose:
             conf_mat = sklearn.metrics.confusion_matrix(y_test, y_pred)
             for i in range(len(labels)):
-                print('True', 'Pred', 'Num samples', sep='\t')
+                print("True", "Pred", "Num samples", sep="\t")
                 for j in range(len(labels)):
-                    print(labels[i], labels[j], conf_mat[i, j], sep='\t')
+                    print(labels[i], labels[j], conf_mat[i, j], sep="\t")
                 print()
 
-        report = sklearn.metrics.classification_report(y_test, y_pred, target_names=labels)
+        report = sklearn.metrics.classification_report(
+            y_test, y_pred, target_names=labels
+        )
         print(report)
         if self.evaluate_time:
-            print(f'Average prediction time: {duration} sec.')
+            print(f"Average prediction time: {duration} sec.")

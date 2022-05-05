@@ -9,19 +9,19 @@ from bunruija import options
 
 
 logging.basicConfig(
-    format='%(asctime)s | %(levelname)s | %(name)s | %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S',
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
     level=logging.INFO,
     stream=sys.stdout,
 )
-logger = logging.getLogger('bunruija_cli.gen_yaml')
+logger = logging.getLogger("bunruija_cli.gen_yaml")
 
 
 def infer_vectorizer(model_type):
-    if model_type in ['lstm']:
-        return 'sequence'
+    if model_type in ["lstm"]:
+        return "sequence"
     else:
-        return 'tfidf'
+        return "tfidf"
 
 
 def main(args):
@@ -29,23 +29,23 @@ def main(args):
     args = parser.parse_args(args)
 
     setting = {
-        'data': {
-            'train': None,
-            'dev': None,
-            'test': None,
+        "data": {
+            "train": None,
+            "dev": None,
+            "test": None,
         },
-        'tokenizer': {
-            'type': 'mecab',
-            'args': {
-                'lemmatize': True,
-            }
+        "tokenizer": {
+            "type": "mecab",
+            "args": {
+                "lemmatize": True,
+            },
         },
-        'classifier': [
+        "classifier": [
             {
-                'type': infer_vectorizer(args.model),
+                "type": infer_vectorizer(args.model),
             },
             {
-                'type': args.model,
+                "type": args.model,
             },
         ],
     }
@@ -53,7 +53,7 @@ def main(args):
     if os.path.exists(args.yaml):
         raise FileExistsError(args.yaml)
 
-    with open(args.yaml, 'w') as f:
+    with open(args.yaml, "w") as f:
         yaml.dump(setting, f)
     print(setting)
 

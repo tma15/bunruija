@@ -6,12 +6,12 @@ from bunruija.binarizer import Binarizer
 
 
 logging.basicConfig(
-    format='%(asctime)s | %(levelname)s | %(name)s | %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S',
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
     level=logging.INFO,
     stream=sys.stdout,
 )
-logger = logging.getLogger('bunruija_cli.preprocess')
+logger = logging.getLogger("bunruija_cli.preprocess")
 
 
 def main(args):

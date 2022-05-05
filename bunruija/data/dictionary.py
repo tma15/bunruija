@@ -1,6 +1,5 @@
-
 class Dictionary:
-    def __init__(self, pad='<pad>', eos='</s>', bos='<s>'):
+    def __init__(self, pad="<pad>", eos="</s>", bos="<s>"):
         self.elements = []
         self.count = []
         self.index_to_element = {}

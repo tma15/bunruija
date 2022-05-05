@@ -1,4 +1,3 @@
-
 class BaseTokenizer:
     def __init__(self, name=None):
         name = name

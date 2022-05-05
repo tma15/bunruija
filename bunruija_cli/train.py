@@ -1,8 +1,4 @@
-from logging import (
-    basicConfig,
-    getLogger,
-    INFO
-)
+from logging import basicConfig, getLogger, INFO
 import sys
 
 from bunruija import options
@@ -10,12 +6,12 @@ from bunruija import Trainer
 
 
 basicConfig(
-    format='%(asctime)s | %(levelname)s | %(name)s | %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S',
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
     level=INFO,
     stream=sys.stdout,
 )
-logger = getLogger('bunruija_cli.train')
+logger = getLogger("bunruija_cli.train")
 
 
 def main(args):
@@ -30,5 +26,5 @@ def cli_main():
     main(sys.argv[1:])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli_main()
