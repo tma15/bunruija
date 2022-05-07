@@ -60,7 +60,7 @@ class LSTMClassifier(NeuralBaseClassifier):
         lengths = (x != self.pad).sum(dim=1)
 
         if (x >= self.embed.weight.size(0)).any():
-            logger.error(f"elements of x are larger than embedding size")
+            logger.error("elements of x are larger than embedding size")
             logger.error(x)
 
         x = self.embed(x)

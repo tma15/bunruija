@@ -1,7 +1,6 @@
 import logging
 import os
 
-import numpy as np
 import torch
 
 from bunruija.modules.vector_processor import PretrainedVectorProcessor
@@ -40,8 +39,6 @@ class StaticEmbedding(torch.nn.Module):
         return f"{self.__class__.__name__}({self.length}, {self.dim_emb})"
 
     def __call__(self, batch):
-        words = batch["words"]
-
         bsz = len(batch["words"])
         seq_len = 0
         for batch_idx in range(len(batch["words"])):

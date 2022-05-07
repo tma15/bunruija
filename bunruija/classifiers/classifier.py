@@ -6,8 +6,6 @@ from sklearn.base import BaseEstimator, ClassifierMixin
 import torch
 import torch.nn.functional as F
 
-from bunruija.feature_extraction.sequence import SequenceVectorizer
-
 
 logger = getLogger(__name__)
 

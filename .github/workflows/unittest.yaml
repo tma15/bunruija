@@ -23,6 +23,6 @@ jobs:
       - name: Install bunruija and its dependencies
         run: |
           poetry install --no-interaction
-      - name: Test with nosetests
+      - name: Run unit test
         run: |
           poetry run pytest tests
