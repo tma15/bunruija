@@ -1,10 +1,10 @@
 from typing import List
 
-from bunruija.tokenizers import BaseTokenizer
+from .tokenizer import BaseTokenizer
 
 
 class SpaceTokenizer(BaseTokenizer):
-    def __init__(self, reduce_redundant_spaces=True, **kwargs):
+    def __init__(self, reduce_redundant_spaces: bool = True, **kwargs):
         self.reduce_redundant_spaces = reduce_redundant_spaces
         super().__init__(name="space")
 

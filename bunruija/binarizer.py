@@ -2,6 +2,7 @@ import csv
 import os
 from pathlib import Path
 import pickle
+from typing import Tuple
 import yaml
 
 from sklearn.preprocessing import LabelEncoder
@@ -10,7 +11,7 @@ from sklearn.preprocessing import LabelEncoder
 class Binarizer:
     """Binarizes data"""
 
-    def __init__(self, config_file):
+    def __init__(self, config_file: str):
         self.config_file = config_file
         with open(config_file) as f:
             self.config = yaml.load(f, Loader=yaml.SafeLoader)
@@ -18,7 +19,7 @@ class Binarizer:
         if not os.path.exists(self.config.get("bin_dir", ".")):
             os.makedirs(self.config.get("bin_dir", "."))
 
-    def load_data(self, data_path):
+    def load_data(self, data_path: str) -> Tuple[str, str]:
         labels = []
         texts = []
         with open(data_path) as f:

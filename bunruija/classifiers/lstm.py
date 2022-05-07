@@ -1,7 +1,9 @@
 import logging
+from typing import Optional
 
 import numpy as np
 import torch
+from torch.nn import Module
 
 from bunruija.classifiers.classifier import NeuralBaseClassifier
 from bunruija.modules import StaticEmbedding
@@ -14,22 +16,22 @@ class LSTMClassifier(NeuralBaseClassifier):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.embedding_path = kwargs.get("static_embedding_path", None)
+        self.embedding_path: Optional[str] = kwargs.get("static_embedding_path", None)
 
-        self.dim_emb = kwargs.get("dim_emb", 256)
-        self.dim_hid = kwargs.get("dim_hid", 512)
-        self.dropout_prob = kwargs.get("dropout", 0.15)
-        self.num_layers = kwargs.get("num_layers", 1)
-        self.bidirectional = kwargs.get("bidirectional", True)
+        self.dim_emb: int = kwargs.get("dim_emb", 256)
+        self.dim_hid: int = kwargs.get("dim_hid", 512)
+        self.dropout_prob: float = kwargs.get("dropout", 0.15)
+        self.num_layers: int = kwargs.get("num_layers", 1)
+        self.bidirectional: bool = kwargs.get("bidirectional", True)
 
         if self.embedding_path:
             self.static_embed = StaticEmbedding(self.embedding_path)
         else:
             self.static_embed = None
 
-        self.dropout = torch.nn.Dropout(self.dropout_prob)
+        self.dropout: Module = torch.nn.Dropout(self.dropout_prob)
 
-        self.lstm = torch.nn.LSTM(
+        self.lstm: Module = torch.nn.LSTM(
             input_size=(
                 self.dim_emb + self.static_embed.dim_emb
                 if self.static_embed
