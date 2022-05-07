@@ -1,3 +1,5 @@
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+
 import numpy as np
 from scipy.sparse import csr_matrix
 from sklearn.base import TransformerMixin
@@ -10,11 +12,11 @@ from bunruija.data import Dictionary
 class SequenceVectorizer(TransformerMixin):
     def __init__(
         self,
-        tokenizer=None,
-        max_features=None,
-        keep_raw_word=True,
-        only_raw_word=False,
-        dictionary=Dictionary(),
+        tokenizer: Optional[Callable[str, List[str]]] = None,
+        max_features: Optional[int] = None,
+        keep_raw_word: bool = True,
+        only_raw_word: bool = False,
+        dictionary: Dictionary = Dictionary(),
         **kwargs,
     ):
         super().__init__()
@@ -26,7 +28,7 @@ class SequenceVectorizer(TransformerMixin):
         self.keep_raw_word = keep_raw_word
         self.only_raw_word = only_raw_word
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         args = []
         if self.tokenizer:
             args.append(f"tokenizer={self.tokenizer}")
@@ -37,7 +39,7 @@ class SequenceVectorizer(TransformerMixin):
         out = f'{self.__class__.__name__}({", ".join(args)})'
         return out
 
-    def build_tokenizer(self):
+    def build_tokenizer(self) -> Callable[str, List[str]]:
         if self.tokenizer is not None:
             return self.tokenizer
 
@@ -49,7 +51,7 @@ class SequenceVectorizer(TransformerMixin):
             if hasattr(self, k):
                 setattr(self, k, v)
 
-    def get_params(self, deep=True):
+    def get_params(self, deep=True) -> Dict[str, Any]:
         return {
             "tokenizer": self.tokenizer,
             "max_features": self.max_features,
@@ -58,7 +60,7 @@ class SequenceVectorizer(TransformerMixin):
             "only_raw_word": self.only_raw_word,
         }
 
-    def fit(self, raw_documents, y=None):
+    def fit(self, raw_documents: List[str], y=None) -> "SequenceVectorizer":
         if self.only_raw_word:
             return self
 
@@ -82,7 +84,9 @@ class SequenceVectorizer(TransformerMixin):
             self.dictionary = filtered_dict
         return self
 
-    def transform(self, raw_documents):
+    def transform(
+        self, raw_documents: List[str]
+    ) -> Union[csr_matrix, Tuple[csr_matrix, List[str]]]:
         data = []
         raw_words = []
         row = []
