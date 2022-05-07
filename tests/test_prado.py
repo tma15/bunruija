@@ -11,19 +11,19 @@ class TestPRADO(unittest.TestCase):
 
     def test_forward(self):
         data = [
-            {'label': 'fruits'},
-            {'label': 'sports'},
+            {"label": "fruits"},
+            {"label": "sports"},
         ]
         self.model.init_layer(data)
 
         batch = {
-            'inputs': torch.tensor([
-                [1, 1, 1],
-                [2, 3, 0],
-            ], dtype=torch.long),
-            'words': [
-                ['apple', 'banana', 'ball'],
-                ['soccer', 'baseball']
-            ]
+            "inputs": torch.tensor(
+                [
+                    [1, 1, 1],
+                    [2, 3, 0],
+                ],
+                dtype=torch.long,
+            ),
+            "words": [["apple", "banana", "ball"], ["soccer", "baseball"]],
         }
         self.model(batch)
