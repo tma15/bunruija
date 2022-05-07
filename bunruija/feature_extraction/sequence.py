@@ -12,7 +12,7 @@ from bunruija.data import Dictionary
 class SequenceVectorizer(TransformerMixin):
     def __init__(
         self,
-        tokenizer: Optional[Callable[str, List[str]]] = None,
+        tokenizer: Optional[Callable[[str], List[str]]] = None,
         max_features: Optional[int] = None,
         keep_raw_word: bool = True,
         only_raw_word: bool = False,
@@ -39,7 +39,7 @@ class SequenceVectorizer(TransformerMixin):
         out = f'{self.__class__.__name__}({", ".join(args)})'
         return out
 
-    def build_tokenizer(self) -> Callable[str, List[str]]:
+    def build_tokenizer(self) -> Callable[[str], List[str]]:
         if self.tokenizer is not None:
             return self.tokenizer
 
