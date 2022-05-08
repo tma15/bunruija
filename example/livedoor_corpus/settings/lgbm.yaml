@@ -3,19 +3,18 @@ data:
   dev: dev.csv
   test: test.csv
 
-tokenizer:
-  type: mecab
-  args:
-    lemmatize: true
-    exclude_pos:
-      - 助詞
-      - 助動詞
-
 bin_dir: models/lgb-model
 
-classifier:
+pipeline:
   - type: tfidf
     args:
+      tokenizer:
+        type: mecab
+        args:
+          lemmatize: true
+          exclude_pos:
+            - 助詞
+            - 助動詞
       max_features: 10000
       min_df: 3
       ngram_range:

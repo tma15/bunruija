@@ -1,6 +1,7 @@
 from pathlib import Path
 import pickle
-import yaml
+
+import yaml  # type: ignore
 
 
 class Predictor:
@@ -13,7 +14,7 @@ class Predictor:
         model_path = Path(config.get("bin_dir", ".")) / "model.bunruija"
         with open(model_path, "rb") as f:
             model_data = pickle.load(f)
-            self.model = model_data["classifier"]
+            self.model = model_data["pipeline"]
 
             self.label_encoder = model_data["label_encoder"]
 

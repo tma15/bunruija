@@ -1,9 +1,9 @@
 from typing import List
 
-from fugashi import Tagger
+from fugashi import Tagger  # type: ignore
 
-from bunruija.tokenizers import BaseTokenizer
-from bunruija.filters import PosFilter
+from ..filters import PosFilter
+from .tokenizer import BaseTokenizer
 
 
 class MeCabTokenizer(BaseTokenizer):

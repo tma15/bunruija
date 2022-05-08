@@ -1,12 +1,10 @@
 from logging import getLogger
-import functools
 
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.pipeline import FeatureUnion
-
-from bunruija.tokenizers import build_tokenizer
+from sklearn.feature_extraction.text import TfidfVectorizer  # type: ignore
+from sklearn.pipeline import FeatureUnion  # type: ignore
 
 from ..registry import BUNRUIJA_REGISTRY
+from ..tokenizers.util import build_tokenizer
 from .sequence import SequenceVectorizer
 
 

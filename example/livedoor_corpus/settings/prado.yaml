@@ -3,16 +3,15 @@ data:
   dev: dev.csv
   test: test.csv
 
-tokenizer:
-  type: mecab
-  args:
-    lemmatize: false
-
 bin_dir: models/prado-model
 
-classifier:
+pipeline:
   - type: sequence
     args:
+      tokenizer:
+        type: mecab
+        args:
+          lemmatize: false
       max_features: 30000
   - type: prado
     args:

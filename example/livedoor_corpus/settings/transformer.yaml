@@ -5,13 +5,13 @@ data:
 
 bin_dir: models/transformer-model
 
-tokenizer:
-  type: auto
-  args:
-    from_pretrained: cl-tohoku/bert-base-japanese
-
 classifier:
   - type: sequence
+    args:
+      tokenizer:
+        type: auto
+        args:
+          from_pretrained: cl-tohoku/bert-base-japanese
   - type: transformer
     args:
       device: cuda:0

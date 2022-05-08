@@ -2,9 +2,8 @@ import logging
 import os
 import sys
 
-import yaml
+import yaml  # type: ignore
 
-from bunruija.feature_extraction import get_default_vectorizer_setting_by_model
 from bunruija import options
 
 
@@ -18,10 +17,16 @@ logger = logging.getLogger("bunruija_cli.gen_yaml")
 
 
 def infer_vectorizer(model_type):
-    if model_type in ["lstm"]:
-        return "sequence"
+    vectorizer_dict = {
+        "type": None,
+        "args": {"tokenizer": {"type": "mecab", "args": {"lemmatize": True}}},
+    }
+
+    if model_type in ["lstm", "transformer", "prado", "qrnn"]:
+        vectorizer_dict["type"] = "sequence"
     else:
-        return "tfidf"
+        vectorizer_dict["type"] = "tfidf"
+    return vectorizer_dict
 
 
 def main(args):
@@ -34,16 +39,8 @@ def main(args):
             "dev": None,
             "test": None,
         },
-        "tokenizer": {
-            "type": "mecab",
-            "args": {
-                "lemmatize": True,
-            },
-        },
-        "classifier": [
-            {
-                "type": infer_vectorizer(args.model),
-            },
+        "pipeline": [
+            infer_vectorizer(args.model),
             {
                 "type": args.model,
             },

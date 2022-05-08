@@ -147,7 +147,9 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
         self.train()
 
         logger.info(f"{self}")
-        logger.info(sum(p.numel() for p in self.parameters() if p.requires_grad))
+        logger.info(
+            f"Num params: {sum(p.numel() for p in self.parameters() if p.requires_grad)}"
+        )
         step = 0
         loss_accum = 0
         n_samples_accum = 0

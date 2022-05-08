@@ -4,7 +4,7 @@ import tempfile
 import unittest
 
 import torch
-import yaml
+import yaml  # type: ignore
 
 from bunruija_cli import evaluate, gen_yaml, preprocess, train
 

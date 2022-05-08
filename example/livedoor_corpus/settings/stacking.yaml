@@ -5,23 +5,43 @@ data:
 
 bin_dir: models/stacking-model
 
-classifier:
-  type: stacking
-  args:
-    estimators:
-      - - type: tfidf
-        - type: svm
+pipeline:
+  - type: stacking
+    args:
+      estimators:
+        - type: pipeline_0
           args:
-            C: 10.
-      - - type: tfidf
-        - type: rf
+            - type: tfidf
+              args:
+                tokenizer:
+                  type: mecab
+                  args:
+                    lemmatize: true
+                    exclude_pos:
+                      - 助詞
+                      - 助動詞
+            - type: svm
+              args:
+                C: 10.
+        - type: pipeline_1
           args:
-            n_estimators: 100
-      - - type: tfidf
-        - type: lgb
-      - - type: sequence
-        - type: lstm
+            - type: tfidf
+              args:
+                tokenizer:
+                  type: mecab
+            - type: random_forest 
+        - type: pipeline_2
           args:
-            dim_emb: 64
-    final_estimator:
-      type: svm
+            - type: sequence
+              args:
+                tokenizer:
+                  type: mecab
+            - type: lstm
+              args:
+                device: cpu
+                batch_size: 8
+                dim_emb: 256
+                dim_hid: 511
+                num_layers: 1
+      final_estimator:
+        type: svm

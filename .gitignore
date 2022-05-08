@@ -6,3 +6,5 @@ build
 dist
 
 *cpp
+
+example/livedoor_corpus/text

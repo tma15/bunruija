@@ -1,25 +1,24 @@
-from pathlib import Path
 import pickle
 
-import sklearn
-import yaml
+import sklearn  # type: ignore
 
-import bunruija
+from . import BunruijaConfig, PipelineBuilder, Saver
 
 
 class Trainer:
     """Trains a text classification model."""
 
     def __init__(self, config_file: str):
-        with open(config_file) as f:
-            self.config = yaml.load(f, Loader=yaml.SafeLoader)
+        #         with open(config_file) as f:
+        #             self.config = yaml.load(f, Loader=yaml.SafeLoader)
+        self.config = BunruijaConfig.from_yaml(config_file)
 
-        data_path = Path(self.config.get("bin_dir", ".")) / "data.bunruija"
+        data_path = self.config.bin_dir / "data.bunruija"
         with open(data_path, "rb") as f:
             self.data = pickle.load(f)
 
-        self.model = bunruija.classifiers.build_model(self.config)
-        self.saver = bunruija.classifiers.util.Saver(self.config)
+        self.model = PipelineBuilder(self.config).build()
+        self.saver = Saver(self.config)
 
     def train(self):
         y_train = self.data["label_train"]

@@ -1,33 +1,31 @@
 import csv
-from pathlib import Path
 import pickle
 import time
 
 import sklearn
-import yaml
 
-from bunruija.predictor import Predictor
+from .dataclass import BunruijaConfig
+from .predictor import Predictor
 
 
 class Evaluator:
     """Evaluates a trained model"""
 
     def __init__(self, args):
-        with open(args.yaml) as f:
-            self.config = yaml.load(f, Loader=yaml.SafeLoader)
+        self.config = BunruijaConfig.from_yaml(args.yaml)
 
         self.evaluate_time = not args.no_evaluate_time
         self.verbose = args.verbose
 
         self.predictor = Predictor(args.yaml)
 
-        data_path = Path(self.config.get("bin_dir", ".")) / "data.bunruija"
+        data_path = self.config.bin_dir / "data.bunruija"
         with open(data_path, "rb") as f:
             self.data = pickle.load(f)
 
     def evaluate(self):
         if self.evaluate_time:
-            with open(self.config.get("data", {}).get("test", "")) as f:
+            with open(self.config.data.get("test", "")) as f:
                 reader = csv.reader(f)
                 y_pred = []
                 y_test = []
