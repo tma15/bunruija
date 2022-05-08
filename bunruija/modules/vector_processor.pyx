@@ -59,7 +59,7 @@ cdef class PretrainedVectorProcessor:
         status = Status(status_.status_code, status_.status_message)
         return status
 
-    @lru_cache(maxsize=1000)
+    @lru_cache(maxsize=0)
     def query(self, word):
         cdef string word_ = string(bytes(word.encode('utf-8')))
         cdef vector[float] vec_;
@@ -69,7 +69,7 @@ cdef class PretrainedVectorProcessor:
         vec = np.asarray(vec_)
         return vec, status
 
-    @lru_cache(maxsize=1000)
+    @lru_cache(maxsize=0)
     def batch_query(self, words):
         cdef unordered_map[string, vector[float]] vec_;
         status_ = self.thisptr.batch_query([bytes(w.encode("utf-8")) for w in words], &vec_)
