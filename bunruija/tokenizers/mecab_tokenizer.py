@@ -64,7 +64,10 @@ class MeCabTokenizer(BaseTokenizer):
                 continue
             else:
                 if self.lemmatize:
-                    ret.append(word.feature.lemma)
+                    if word.feature.lemma is None:
+                        ret.append(word.surface)
+                    else:
+                        ret.append(word.feature.lemma)
                 else:
                     ret.append(word.surface)
         return ret
