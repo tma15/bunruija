@@ -1,5 +1,6 @@
 #pragma once
 #include <sqlite3.h>
+#include <unordered_map>
 
 #include "bunruija/status.h"
 
@@ -13,6 +14,7 @@ class PretrainedVectorProcessor {
 
     Status convert(const char *db_file, const char *input_file);
     Status query(const std::string &query, std::vector<float> *vector);
+    Status batch_query(const std::vector<std::string> &queries, std::unordered_map<std::string, std::vector<float>> *vectors);
     Status load(const std::string &input_file);
     Status contains(const std::string &query, bool *has);
     int dim() { return dim_; }

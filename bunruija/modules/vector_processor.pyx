@@ -4,6 +4,7 @@ from functools import lru_cache
 import cython
 from libcpp cimport bool
 from libcpp.string cimport string
+from libcpp.unordered_map cimport unordered_map
 from libcpp.vector cimport vector
 
 import numpy as np
@@ -22,6 +23,7 @@ cdef extern from "bunruija/keyed_vector.h" namespace "bunruija":
         CppStatus convert(char *, char *)
         CppStatus load(string)
         CppStatus query(string, vector[float] *)
+        CppStatus batch_query(vector[string], unordered_map[string, vector[float]] *)
         CppStatus contains(string, bool *)
         int dim()
         int length()
@@ -57,7 +59,7 @@ cdef class PretrainedVectorProcessor:
         status = Status(status_.status_code, status_.status_message)
         return status
 
-    @lru_cache(maxsize=100)
+    @lru_cache(maxsize=1000)
     def query(self, word):
         cdef string word_ = string(bytes(word.encode('utf-8')))
         cdef vector[float] vec_;
@@ -66,6 +68,24 @@ cdef class PretrainedVectorProcessor:
 
         vec = np.asarray(vec_)
         return vec, status
+
+    @lru_cache(maxsize=1000)
+    def batch_query(self, words):
+        cdef unordered_map[string, vector[float]] vec_;
+        status_ = self.thisptr.batch_query([bytes(w.encode("utf-8")) for w in words], &vec_)
+        status = Status(status_.status_code, status_.status_message)
+
+        vecs = []
+        for word in words:
+            v = vec_[bytes(word.encode("utf-8"))]
+            if len(v) == 0:
+                v = [0 for _ in range(self.emb_dim)]
+            vecs.append(v)
+#             print(word, "shape", len(v), type(v), type(v[0]))
+        vecs = np.asarray(vecs)
+#         print("shape", vecs.shape)
+
+        return vecs, status
 
     def __contains__(self, word):
         cdef string word_ = string(bytes(word.encode('utf-8')))

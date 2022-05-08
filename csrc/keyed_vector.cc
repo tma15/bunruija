@@ -4,6 +4,7 @@
 #include <math.h>
 #include <sstream>
 #include <sqlite3.h>
+#include <unordered_map>
 #include <vector>
 
 #include "bunruija/keyed_vector.h"
@@ -319,6 +320,55 @@ Status PretrainedVectorProcessor::query(const std::string &query, std::vector<fl
       vector->push_back(value);
     }
     break;
+  }
+  RETURN_STATUS_IF_NOT_EQ(sqlite3_reset(stmt_), SQLITE_OK, sqlite3_errmsg(db_))
+  RETURN_STATUS_IF_NOT_EQ(sqlite3_clear_bindings(stmt_), SQLITE_OK, sqlite3_errmsg(db_))
+
+  return Status(0, "");
+}
+
+
+Status PretrainedVectorProcessor::batch_query(const std::vector<std::string> &query, std::unordered_map<std::string, std::vector<float>> *vector) {
+  int ret;
+
+  std::stringstream ss;
+  ss << "SELECT * FROM bunruija WHERE key IN (";
+  for (int i = 0; i < query.size(); ++i) {
+    ss << "'" << query[i] << "'";
+    if (i < query.size() - 1) {
+      ss << ", ";
+    }
+  }
+  ss << ")";
+  std::string q = ss.str();
+//  std::cout << q << std::endl;
+
+  ret = sqlite3_prepare_v2(
+      db_,
+      q.c_str(),
+      -1,
+      &stmt_,
+      nullptr);
+  RETURN_STATUS_IF_NOT_EQ(ret, SQLITE_OK, sqlite3_errmsg(db_))
+
+  int word_offset = 0;
+  while(sqlite3_step(stmt_) == SQLITE_ROW) {
+    int offset = 0;
+    const unsigned char *word_c = sqlite3_column_text(stmt_, offset);
+    std::string word = std::string(reinterpret_cast<const char *>(word_c));
+    ++offset;
+
+    (*vector)[word] = std::vector<float>(dim_, 0);
+    for (int d = 0; d < dim_; ++d) {
+      int v = sqlite3_column_int64(stmt_, d + 1);
+      float value = float(v) / float(pow(10, precision_));
+      (*vector)[word][d] = value;
+    }
+//    std::cout << word << ":";
+//    for (auto i : (*vector)[word]) { std::cout << i << " "; }
+//    std::cout << std::endl;
+    offset += dim_;
+    ++word_offset;
   }
   RETURN_STATUS_IF_NOT_EQ(sqlite3_reset(stmt_), SQLITE_OK, sqlite3_errmsg(db_))
   RETURN_STATUS_IF_NOT_EQ(sqlite3_clear_bindings(stmt_), SQLITE_OK, sqlite3_errmsg(db_))

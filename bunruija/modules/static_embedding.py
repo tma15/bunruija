@@ -3,7 +3,8 @@ import os
 
 import torch
 
-from bunruija.modules.vector_processor import PretrainedVectorProcessor  # ignore: type
+from bunruija.modules.vector_processor import PretrainedVectorProcessor
+
 
 logger = logging.getLogger(__name__)
 
@@ -39,14 +40,19 @@ class StaticEmbedding(torch.nn.Module):
 
     def forward(self, batch):
         bsz = len(batch["words"])
-        seq_len = 0
+        max_seq_len = 0
         for batch_idx in range(len(batch["words"])):
-            seq_len = max(seq_len, len(batch["words"][batch_idx]))
+            max_seq_len = max(max_seq_len, len(batch["words"][batch_idx]))
 
-        embed = torch.zeros((bsz, seq_len, self.dim_emb))
+        embed = torch.zeros((bsz, max_seq_len, self.dim_emb))
         for batch_idx in range(len(batch["words"])):
-            for t, word in enumerate(batch["words"][batch_idx]):
-                if word in self.processor:
-                    vec, status = self.processor.query(word)
-                    embed[batch_idx, t, :] = torch.from_numpy(vec)
+            vec, status = self.processor.batch_query(tuple(batch["words"][batch_idx]))
+            seq_len = len(batch["words"][batch_idx])
+            embed[batch_idx, :seq_len] = torch.from_numpy(vec)
+
+        #             for t, word in enumerate(batch["words"][batch_idx]):
+        #                 if word in self.processor:
+        #                     vec, status = self.processor.query(word)
+        #                     embed[batch_idx, t, :] = torch.from_numpy(vec)
+        #                     del vec
         return embed
