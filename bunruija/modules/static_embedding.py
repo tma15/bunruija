@@ -3,8 +3,7 @@ import os
 
 import torch
 
-from bunruija.modules.vector_processor import PretrainedVectorProcessor
-
+from bunruija.modules.vector_processor import PretrainedVectorProcessor  # ignore: type
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +37,7 @@ class StaticEmbedding(torch.nn.Module):
     def __repr__(self):
         return f"{self.__class__.__name__}({self.length}, {self.dim_emb})"
 
-    def __call__(self, batch):
+    def forward(self, batch):
         bsz = len(batch["words"])
         seq_len = 0
         for batch_idx in range(len(batch["words"])):

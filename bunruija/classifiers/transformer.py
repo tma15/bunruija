@@ -27,7 +27,7 @@ class TransformerClassifier(NeuralBaseClassifier):
             self.model.config.hidden_size, len(num_classes), bias=True
         )
 
-    def __call__(self, batch):
+    def forward(self, batch):
         input_ids = batch["inputs"]
         x = self.model(input_ids)
         pooled_output = x[1]

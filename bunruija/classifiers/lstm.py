@@ -57,7 +57,7 @@ class LSTMClassifier(NeuralBaseClassifier):
 
         self.out = torch.nn.Linear(2 * self.dim_hid, len(self.labels), bias=True)
 
-    def __call__(self, batch):
+    def forward(self, batch):
         x = batch["inputs"]
         lengths = (x != self.pad).sum(dim=1)
 
