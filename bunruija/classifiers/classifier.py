@@ -2,10 +2,9 @@ from logging import getLogger
 import time
 
 import numpy as np
-from sklearn.base import BaseEstimator, ClassifierMixin
+from sklearn.base import BaseEstimator, ClassifierMixin  # type: ignore
 import torch
 import torch.nn.functional as F
-
 
 logger = getLogger(__name__)
 
@@ -154,6 +153,7 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
         loss_accum = 0
         n_samples_accum = 0
         start_at_accum = time.perf_counter()
+
         for epoch in range(self.max_epochs):
             for batch in torch.utils.data.DataLoader(
                 data,
@@ -167,6 +167,7 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
                     batch = move_to_cuda(batch)
 
                 logits = self(batch)
+
                 loss = F.nll_loss(
                     torch.log_softmax(logits, dim=1),
                     batch["labels"],
@@ -211,7 +212,11 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
         lr = float(self.kwargs.get("lr", 0.001))
         weight_decay = self.kwargs.get("weight_decay", 0.0)
 
-        if self.optimizer_type == "adam":
+        if self.optimizer_type == "sgd":
+            optimizer = torch.optim.SGD(
+                self.parameters(), lr=lr, weight_decay=weight_decay
+            )
+        elif self.optimizer_type == "adam":
             optimizer = torch.optim.Adam(
                 self.parameters(), lr=lr, weight_decay=weight_decay
             )

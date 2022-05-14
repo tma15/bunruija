@@ -55,15 +55,14 @@ class LSTMClassifier(NeuralBaseClassifier):
         )
         self.pad = 0
 
-        self.out = torch.nn.Linear(2 * self.dim_hid, len(self.labels), bias=True)
+        self.fc1 = torch.nn.Linear(2 * self.dim_hid, self.dim_hid, bias=True)
+        self.activation_fn = torch.nn.GELU()
+        self.fc2 = torch.nn.Linear(self.dim_hid, len(self.labels), bias=True)
 
     def forward(self, batch):
         x = batch["inputs"]
+        bsz = x.size(0)
         lengths = (x != self.pad).sum(dim=1)
-
-        if (x >= self.embed.weight.size(0)).any():
-            logger.error("elements of x are larger than embedding size")
-            logger.error(x)
 
         x = self.embed(x)
         if self.static_embed is not None:
@@ -77,11 +76,14 @@ class LSTMClassifier(NeuralBaseClassifier):
             x, lengths.cpu(), batch_first=True, enforce_sorted=False
         )
 
-        rnn_out, (ht, ct) = self.lstm(packed)
+        _, (ht, _) = self.lstm(packed)
 
-        # (bsz, seq_len, 2 * hidden_size)
-        x, _ = torch.nn.utils.rnn.pad_packed_sequence(rnn_out, batch_first=True)
-
+        ht = ht.view(2, self.num_layers, bsz, self.dim_hid)
+        x = torch.cat(
+            [ht[0, self.num_layers - 1, :, :], ht[1, self.num_layers - 1, :, :]], dim=1
+        )
         x = self.dropout(x)
-        x = self.out(x[:, 0])
+        x = self.fc1(x)
+        x = self.activation_fn(x)
+        x = self.fc2(x)
         return x
