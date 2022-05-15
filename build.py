@@ -1,7 +1,7 @@
-from setuptools import Extension
+from setuptools import Extension  # type: ignore
 from distutils.command.build_ext import build_ext
 
-from Cython.Build import cythonize
+from Cython.Build import cythonize  # type: ignore
 import numpy
 
 
