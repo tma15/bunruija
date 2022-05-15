@@ -1,9 +1,9 @@
 import numpy as np
 import torch
-from transformers import AutoModel
+from transformers import AutoModel  # type: ignore
 from transformers import AutoTokenizer
 
-from bunruija.classifiers.classifier import NeuralBaseClassifier
+from .classifier import NeuralBaseClassifier
 
 
 class TransformerClassifier(NeuralBaseClassifier):

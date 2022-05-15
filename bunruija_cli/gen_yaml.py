@@ -26,7 +26,21 @@ def infer_vectorizer(model_type):
         vectorizer_dict["type"] = "sequence"
     else:
         vectorizer_dict["type"] = "tfidf"
+
+    if model_type == "transformer":
+        vectorizer_dict["args"]["tokenizer"]["type"] = "auto"
+        vectorizer_dict["args"]["tokenizer"]["args"] = {
+            "from_pretrained": "cl-tohoku/bert-base-japanese"
+        }
+
     return vectorizer_dict
+
+
+def infer_model_args(model_type):
+    args = {}
+    if model_type == "transformer":
+        args["from_pretrained"] = "cl-tohoku/bert-base-japanese"
+    return args
 
 
 def main(args):
@@ -43,6 +57,7 @@ def main(args):
             infer_vectorizer(args.model),
             {
                 "type": args.model,
+                "args": infer_model_args(args.model),
             },
         ],
     }

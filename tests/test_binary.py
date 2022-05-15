@@ -76,3 +76,6 @@ class TestBinary(unittest.TestCase):
 
     def test_lstm(self):
         self.execute("lstm")
+
+    def test_transformer(self):
+        self.execute("transformer")
