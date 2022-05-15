@@ -248,6 +248,7 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
             if self.device.startswith("cuda"):
                 batch = move_to_cuda(batch)
 
-            maxi = torch.argmax(self(batch), dim=1)
+            with torch.no_grad():
+                maxi = torch.argmax(self(batch), dim=1)
             y.extend(maxi.tolist())
         return np.array(y)
