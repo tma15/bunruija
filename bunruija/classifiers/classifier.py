@@ -32,13 +32,16 @@ class BaseClassifier(BaseEstimator, ClassifierMixin):
         raise NotImplementedError
 
 
-def collate_fn(padding_value):
-    def _collate_fn(samples):
+class Collator:
+    def __init__(self, padding_value):
+        self.padding_value = padding_value
+
+    def __call__(self, samples):
 
         inputs = torch.nn.utils.rnn.pad_sequence(
             [torch.tensor(sample["inputs"]) for sample in samples],
             batch_first=True,
-            padding_value=padding_value,
+            padding_value=self.padding_value,
         )
 
         batch = {"inputs": inputs}
@@ -50,8 +53,6 @@ def collate_fn(padding_value):
             words = [sample["raw_words"] for sample in samples]
             batch["words"] = words
         return batch
-
-    return _collate_fn
 
 
 def move_to_cuda(batch):
@@ -69,6 +70,7 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
         self.device = kwargs.get("device", "cpu")
         self.max_epochs = kwargs.get("max_epochs", 3)
         self.batch_size = kwargs.get("batch_size", 20)
+        self.num_workers = kwargs.get("num_workers", 1)
 
         self.log_interval = kwargs.get("log_interval", 100)
         self.optimizer_type = kwargs.get("optimizer", "adam")
@@ -146,20 +148,21 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
         self.train()
 
         logger.info(f"{self}")
-        logger.info(
-            f"Num params: {sum(p.numel() for p in self.parameters() if p.requires_grad)}"
-        )
+        num_parameters = sum(p.numel() for p in self.parameters() if p.requires_grad)
+        logger.info(f"Num params: {num_parameters}")
         step = 0
         loss_accum = 0
         n_samples_accum = 0
         start_at_accum = time.perf_counter()
 
+        collator = Collator(self.pad)
         for epoch in range(self.max_epochs):
             for batch in torch.utils.data.DataLoader(
                 data,
                 batch_size=self.batch_size,
                 shuffle=True,
-                collate_fn=collate_fn(self.pad),
+                collate_fn=collator,
+                num_workers=self.num_workers,
             ):
                 self.zero_grad()
 
@@ -239,11 +242,13 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
         data = self.convert_data(X)
 
         y = []
+        collator = Collator(self.pad)
         for batch in torch.utils.data.DataLoader(
             data,
             batch_size=self.batch_size,
             shuffle=False,
-            collate_fn=collate_fn(self.pad),
+            collate_fn=collator,
+            num_workers=self.num_workers,
         ):
             if self.device.startswith("cuda"):
                 batch = move_to_cuda(batch)
