@@ -1,97 +1,40 @@
+from typing import Optional
+
 import numpy as np
 import torch
 
 from bunruija.classifiers.classifier import NeuralBaseClassifier
-
-
-class QRNNLayer(torch.nn.Module):
-    def __init__(self, input_size, output_size, window_size=2, bidirectional=True):
-        super().__init__()
-
-        self.num_gates = 3
-        self.window_size = window_size
-        self.input_size = input_size
-        self.output_size = output_size
-        self.bidirectional = bidirectional
-
-        if self.bidirectional:
-            self.fc = torch.nn.Linear(
-                self.window_size * input_size, 2 * output_size * self.num_gates
-            )
-        else:
-            self.fc = torch.nn.Linear(
-                self.window_size * input_size, output_size * self.num_gates
-            )
-
-    def forward(self, x):
-        bsz = x.size(0)
-        seq_len = x.size(1)
-        window_tokens = [x]
-        for i in range(self.window_size - 1):
-            prev_x = x[:, : -(i + 1), :]
-            prev_x = torch.cat(
-                [prev_x.new_zeros(bsz, i + 1, self.input_size), prev_x], dim=1
-            )
-            window_tokens.insert(0, prev_x)
-        x = torch.stack(window_tokens, dim=2)
-        x = x.view(bsz, seq_len, -1)
-        x = self.fc(x)
-        z, f, o = x.chunk(self.num_gates, dim=2)
-
-        z = torch.tanh(z)
-        f = torch.sigmoid(f)
-        seq_len = z.size(1)
-
-        c = torch.zeros_like(z)
-
-        if self.bidirectional:
-            c = c.view(bsz, seq_len, 2, self.output_size)
-            f = f.view(bsz, seq_len, 2, self.output_size)
-            z = z.view(bsz, seq_len, 2, self.output_size)
-            for t in range(seq_len):
-                if t == 0:
-                    c[:, t, 0] = (1 - f[:, t, 0]) * z[:, t, 0]
-                else:
-                    c[:, t, 0] = (
-                        f[:, t, 0] * c[:, t - 1, 0].clone()
-                        + (1 - f[:, t, 0]) * z[:, t, 0]
-                    )
-            for t in range(seq_len - 1, -1, -1):
-                if t == seq_len - 1:
-                    c[:, t, 0] = (1 - f[:, t, 0]) * z[:, t, 0]
-                else:
-                    c[:, t, 0] = (
-                        f[:, t, 0] * c[:, t + 1, 0].clone()
-                        + (1 - f[:, t, 0]) * z[:, t, 0]
-                    )
-            c = c.view(bsz, seq_len, 2 * self.output_size)
-        else:
-            for t in range(seq_len):
-                if t == 0:
-                    c[:, t] = (1 - f[:, t]) * z[:, t]
-                else:
-                    c[:, t] = f[:, t] * c[:, t - 1].clone() + (1 - f[:, t]) * z[:, t]
-
-        h = torch.sigmoid(o) * c
-        return h
+from bunruija.classifiers.qrnn.qrnn_layer import QRNNLayer
+from bunruija.modules import StaticEmbedding
 
 
 class QRNN(NeuralBaseClassifier):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.dim_emb = kwargs.get("dim_emb", 256)
-        self.dim_hid = kwargs.get("dim_hid", 128)
-        self.dropout_prob = kwargs.get("dropout", 0.15)
-        self.window_size = kwargs.get("window_size", 3)
+        self.embedding_path: Optional[str] = kwargs.get("static_embedding_path", None)
+
+        self.dim_emb: int = kwargs.get("dim_emb", 256)
+        self.dim_hid: int = kwargs.get("dim_hid", 128)
+        self.dropout_prob: float = kwargs.get("dropout", 0.15)
+        self.window_size: int = kwargs.get("window_size", 3)
+        self.bidirectional: bool = kwargs.get("bidirectional", True)
+
+        if self.embedding_path:
+            self.static_embed = StaticEmbedding(self.embedding_path)
+        else:
+            self.static_embed = None
 
         self.dropout = torch.nn.Dropout(self.dropout_prob)
         self.layers = torch.nn.ModuleList()
-        self.bidirectional = kwargs.get("bidirectional", True)
         num_layers = kwargs.get("num_layers", 2)
         for i in range(num_layers):
             if i == 0:
-                input_size = self.dim_emb
+                input_size = (
+                    self.dim_emb + self.static_embed.dim_emb
+                    if self.static_embed
+                    else self.dim
+                )
             else:
                 input_size = 2 * self.dim_hid if self.bidirectional else self.dim_hid
 
@@ -122,11 +65,15 @@ class QRNN(NeuralBaseClassifier):
             bias=True,
         )
 
-    def __call__(self, batch):
+    def forward(self, batch):
         src_tokens = batch["inputs"]
-        lengths = (src_tokens != self.pad).sum(dim=1)
 
         x = self.embed(src_tokens)
+        if self.static_embed is not None:
+            x_static = self.static_embed(batch)
+            x_static = x_static.to(x.device)
+            x = torch.cat([x, x_static], dim=2)
+
         x = self.dropout(x)
 
         for i, layer in enumerate(self.layers):

@@ -8,21 +8,22 @@ bin_dir: models/qrnn-model
 pipeline:
   - type: sequence
     args:
-    tokenizer:
-      type: mecab
-      args:
-        lemmatize: false
-      max_features: 30000
+      tokenizer:
+        type: mecab
+        args:
+          lemmatize: false
+        max_features: 30000
   - type: qrnn
     args:
-      device: cuda:0
+      device: cpu
       batch_size: 32
-      n_features: 512
-      dim_emb: 512
-      dim_hid: 1024
+      dim_emb: 128
+      dim_hid: 256
       num_layers: 2
       optimizer: adamw
       lr: 0.001
       max_epochs: 10
       weight_decay: 0.01
-      log_interval: 100
+      log_interval: 10
+      static_embedding_path: jawiki.all_vectors.300d.txt
+      num_workers: 2
