@@ -1,5 +1,6 @@
 import torch
 import torch.nn.functional as F
+from torch.nn.utils.rnn import PackedSequence
 
 
 class QRNNLayer(torch.nn.Module):
@@ -50,7 +51,27 @@ class QRNNLayer(torch.nn.Module):
         )
         return x
 
-    def forward(self, x: torch.Tensor):
+    def forward(self, x):
+        if isinstance(x, PackedSequence):
+            return self.forward_packed_sequence(x)
+        elif isinstance(x, torch.Tensor):
+            return self.forward_tensor(x)
+
+    def forward_packed_sequence(self, x):
+        print(x)
+
+    #         batch_sizes = x.batch_sizes
+    #         num_steps = batch_sizes[0]
+    #         print(batch_sizes)
+    #         input_offset = 0
+    #         pre_compute_input = self.fc(x.data)
+    #         for i in range(num_steps):
+    #             batch_size = batch_sizes[i]
+    #             step_input = pre_compute_input.narrow(0, input_offset, batch_size)
+    #             input_offset += batch_size
+    #             print(i, batch_size, step_input.size())
+
+    def forward_tensor(self, x: torch.Tensor):
         """
         Args:
             x (torch.Tensor): (bsz, seq_len, input_size)
