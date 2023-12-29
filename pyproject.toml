@@ -3,7 +3,10 @@ name = "bunruija"
 version = "0.1.0"
 description = "A text classification toolkit"
 authors = ["Takuya Makino <takuyamakino15@gmail.com>"]
-build = "build.py"
+
+[tool.poetry.build]
+script = "build.py"
+generate-setup-file = true
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"

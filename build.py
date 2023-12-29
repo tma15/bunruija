@@ -3,8 +3,6 @@ from distutils.command.build_ext import build_ext
 
 from Cython.Build import cythonize  # type: ignore
 
-# import numpy
-
 
 def build(setup_kwargs):
     ext_modules = cythonize(
@@ -20,16 +18,6 @@ def build(setup_kwargs):
                 extra_compile_args=["-std=c++11"],
                 extra_link_args=["-std=c++11"],
             ),
-            # Extension(
-            #     "bunruija.classifiers.prado.string_projector",
-            #     sources=(
-            #         ["bunruija/classifiers/prado/string_projector.pyx"]
-            #         + ["csrc/string_projector_op.cc", "csrc/string_util.cc"]
-            #     ),
-            #     include_dirs=["include", numpy.get_include()],
-            #     extra_compile_args=["-std=c++11"],
-            #     extra_link_args=["-std=c++11"],
-            # ),
         ]
     )
 
