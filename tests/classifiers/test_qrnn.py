@@ -46,6 +46,25 @@ class TestQNNLayer(unittest.TestCase):
         assert_equal = functools.partial(torch.testing.assert_close, rtol=0, atol=0)
         assert_equal(expected, x)
 
+    def test_packed_sequence_forward(self):
+        x = torch.tensor(
+            [
+                [1, 2, 3],
+                [4, 5, 0],
+            ]
+        )
+        lengths = (x != 0).sum(1)
+
+        embedding = torch.nn.Embedding(10, self.dim_emb, padding_idx=0)
+        x = embedding(x)
+        print(x.size())
+
+        x = torch.nn.utils.rnn.pack_padded_sequence(
+            x, lengths, batch_first=True, enforce_sorted=False
+        )
+        print(x)
+        x = self.layer(x)
+
     def test_forward(self):
         bsz = 3
         seq_len = 5
