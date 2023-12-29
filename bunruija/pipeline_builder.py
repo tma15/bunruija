@@ -26,7 +26,7 @@ class PipelineBuilder:
 
         def _update_arg_value(x):
             if isinstance(x, list):
-                return [_update_arg_value(_) for _ in x]
+                return tuple([_update_arg_value(_) for _ in x])
             elif isinstance(x, dict):
                 if "tokenizer" in x.get("args", {}):
                     tokenizer = build_tokenizer(x["args"]["tokenizer"])
