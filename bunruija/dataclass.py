@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List
 
-import yaml  # type: ignore
+import ruamel.yaml  # type: ignore
 
 
 @dataclass
@@ -20,7 +20,8 @@ class BunruijaConfig:
     @classmethod
     def from_yaml(cls, config_file):
         with open(config_file) as f:
-            config = yaml.load(f, Loader=yaml.SafeLoader)
+            yaml = ruamel.yaml.YAML()
+            config = yaml.load(f)
 
             return cls(
                 data=config["data"],
