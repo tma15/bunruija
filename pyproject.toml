@@ -33,5 +33,5 @@ bunruija-train = 'bunruija_cli.train:cli_main'
 line-length = 88
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core>=1.0.0", "setuptools"]
 build-backend = "poetry.core.masonry.api"
