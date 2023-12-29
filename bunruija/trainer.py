@@ -9,8 +9,6 @@ class Trainer:
     """Trains a text classification model."""
 
     def __init__(self, config_file: str):
-        #         with open(config_file) as f:
-        #             self.config = yaml.load(f, Loader=yaml.SafeLoader)
         self.config = BunruijaConfig.from_yaml(config_file)
 
         data_path = self.config.bin_dir / "data.bunruija"

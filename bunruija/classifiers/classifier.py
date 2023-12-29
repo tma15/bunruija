@@ -37,7 +37,6 @@ class Collator:
         self.padding_value = padding_value
 
     def __call__(self, samples):
-
         inputs = torch.nn.utils.rnn.pad_sequence(
             [torch.tensor(sample["inputs"]) for sample in samples],
             batch_first=True,
