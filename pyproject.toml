@@ -24,6 +24,7 @@ scipy = "^1.8.0"
 hydra-core = "^1.2.0"
 loguru = "^0.7.2"
 datasets = "^2.16.0"
+ruamel-yaml = "^0.18.5"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.2"
