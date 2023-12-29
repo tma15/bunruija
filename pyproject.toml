@@ -3,22 +3,26 @@ name = "bunruija"
 version = "0.1.0"
 description = "A text classification toolkit"
 authors = ["Takuya Makino <takuyamakino15@gmail.com>"]
-build = "build.py"
+
+[tool.poetry.build]
+script = "build.py"
+generate-setup-file = true
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.11"
-# python = "^3.8"
+python = ">=3.10,<3.11"
 Cython = "^0.29.26"
 lightgbm = "^3.3.1"
 PyYAML = "^6.0"
-torch = "^1.10.1"
-transformers = "^4.15.0"
+torch = "^2.1.2"
+transformers = "^4.36.2"
 unidic-lite = "^1.0.8"
 mmh3 = "^3.0.0"
 fugashi = "^1.1.1"
 ipadic = "^1.0.0"
 scikit-learn = "^1.0.2"
 scipy = "^1.8.0"
+hydra-core = "^1.2.0"
+loguru = "^0.7.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.2"
@@ -33,5 +37,5 @@ bunruija-train = 'bunruija_cli.train:cli_main'
 line-length = 88
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core>=1.0.0", "setuptools", "cython"]
 build-backend = "poetry.core.masonry.api"

@@ -78,7 +78,6 @@ class SequenceVectorizer(TransformerMixin):
                 key=lambda x: x[1],
                 reverse=True,
             )[: self.max_features]:
-
                 filtered_dict.add(k, v)
 
             self.dictionary = filtered_dict

@@ -9,8 +9,8 @@ import yaml  # type: ignore
 from bunruija_cli import evaluate, gen_yaml, preprocess, train
 
 
-def create_dummy_data(data_dir, num_samples=50, num_labels=4, max_len=100):
-    K = 5
+def create_dummy_data(data_dir, num_samples=5, num_labels=3, max_len=100):
+    K = 3
     labels_data = torch.rand(num_samples * K)
     labels_data = 97 + torch.floor(26 * labels_data).int()
     offset = 0
@@ -28,7 +28,14 @@ def create_dummy_data(data_dir, num_samples=50, num_labels=4, max_len=100):
             data = torch.rand(num_samples * max_len)
             data = 97 + torch.floor(26 * data).int()
 
-            for i in range(num_samples):
+            for i in range(num_labels):
+                label = labels[i]
+                sample_len = random.randint(30, max_len)
+                sample_str = "".join(map(chr, data[offset : offset + sample_len]))
+                offset += sample_len
+                print(f"{label},{sample_str}", file=f)
+
+            for i in range(num_samples - num_labels):
                 label = random.choice(labels)
                 sample_len = random.randint(30, max_len)
                 sample_str = "".join(map(chr, data[offset : offset + sample_len]))

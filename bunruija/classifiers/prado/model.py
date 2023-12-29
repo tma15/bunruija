@@ -1,11 +1,9 @@
 import random
 
-import mmh3
-import numpy as np
+import mmh3  # type: ignore
 import torch
 
-from bunruija.classifiers.classifier import NeuralBaseClassifier
-from bunruija.classifiers.prado.string_projector import StringProjectorOp
+from ..classifier import NeuralBaseClassifier  # type: ignore
 
 
 class Hasher:
@@ -40,7 +38,7 @@ class ConvolutionLayer(torch.nn.Module):
 
         self.batch_norm = torch.nn.BatchNorm1d(self.dim_hid)
 
-    def __call__(self, x):
+    def forward(self, x):
         x = self.conv(x).squeeze(3)
         x = self.batch_norm(x)
         return x
@@ -59,12 +57,12 @@ class ProjectAttentionLayer(torch.nn.Module):
         elif skip_bigram is None:
             pass
         else:
-            raise ValueError(skip_gram)
+            raise ValueError(skip_bigram)
 
         self.conv_attn = ConvolutionLayer(kernel_size, dim_hid)
         self.zero_pad = torch.nn.ZeroPad2d((0, 0, kernel_size - 1, 0))
 
-    def __call__(self, x_value_in, x_attn_in):
+    def forward(self, x_value_in, x_attn_in):
         # (bsz, output_channel, seq_len)
         x_value_in = self.zero_pad(x_value_in)
         x_value = self.conv_value(x_value_in)
@@ -100,7 +98,7 @@ class ProjectedAttention(torch.nn.Module):
                 ]
             )
 
-    def __call__(self, x_value_in, x_attn_in):
+    def forward(self, x_value_in, x_attn_in):
         x_list = []
 
         for layer in self.layers:
@@ -110,50 +108,14 @@ class ProjectedAttention(torch.nn.Module):
         return x
 
 
-class PRADO(NeuralBaseClassifier):
-    def __init__(self, **kwargs):
-
-        super().__init__(**kwargs)
-
-        self.random_char = None
-        self.make_fast = kwargs.get("make_fast", False)
-        self.n_features = kwargs.get("n_features", 512)
+class StringProjector(torch.nn.Module):
+    def __init__(self, n_features, distortion_probability=0.25):
+        super().__init__()
+        self.n_features = n_features
         self.hasher = Hasher(self.n_features)
-        self.distort = kwargs.get("distortion_probability", 0.25)
-
-        if self.make_fast:
-            self.string_proj = StringProjectorOp(self.n_features, self.distort)
-
-        self.dim_emb = kwargs.get("dim_emb", 64)
+        self.distort = distortion_probability
         self.mapping_table = [0, 1, -1, 0]
-
-        self.dim_hid = kwargs.get("dim_hid", 64)
-
-        self.fc_value = torch.nn.Linear(self.n_features, self.dim_hid)
-        self.fc_attn = torch.nn.Linear(self.n_features, self.dim_hid)
-
-        dropout = kwargs.get("dropout", 0.15)
-        self.dropout = torch.nn.Dropout(p=dropout)
-
-        self.kernel_sizes = kwargs.get("kernel_sizes", [2, 3, 3, 4])
-        self.skip_bigrams = kwargs.get("skip_bigrams", [None, None, [1], [1, 2]])
-        self.attention = ProjectedAttention(
-            self.kernel_sizes, self.dim_hid, skip_bigrams=self.skip_bigrams
-        )
-
-        self.batch_norm_value = torch.nn.BatchNorm1d(self.dim_hid)
-        self.batch_norm_attn = torch.nn.BatchNorm1d(self.dim_hid)
-
-    def train(self, mode=True):
-        super().train(mode)
-        if self.make_fast:
-            self.string_proj.train(mode)
-
-    def init_layer(self, data):
-        self.pad = 0
-        self.fc = torch.nn.Linear(
-            len(self.kernel_sizes) * self.dim_hid, len(self.labels), bias=True
-        )
+        self.random_char = None
 
     def word_string_distort(self, word):
         if self.distort == 0 or len(word) == 0:
@@ -178,14 +140,13 @@ class PRADO(NeuralBaseClassifier):
                     word = "".join(word)
             return word
 
-    def string_projection(self, batch):
-        max_seq_len = max(len(words) for words in batch["words"])
+    def forward(self, batch_words):
+        max_seq_len = max(len(words) for words in batch_words)
         x = torch.zeros(
-            len(batch["words"]), max_seq_len, self.n_features, dtype=torch.float32
+            len(batch_words), max_seq_len, self.n_features, dtype=torch.float32
         )
 
-        words_batch = batch["words"]
-        for batch_idx, words in enumerate(words_batch):
+        for batch_idx, words in enumerate(batch_words):
             for t, word in enumerate(words):
                 if self.training:
                     word = self.word_string_distort(word)
@@ -203,12 +164,47 @@ class PRADO(NeuralBaseClassifier):
                 x[batch_idx, t] = torch.tensor(projection)
         return x
 
-    def __call__(self, batch):
-        if self.make_fast:
-            projection = self.string_proj(batch["words"])
-            projection = torch.from_numpy(projection)
-        else:
-            projection = self.string_projection(batch)
+
+class PRADO(NeuralBaseClassifier):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.random_char = None
+
+        self.n_features = kwargs.get("n_features", 512)
+        distort = kwargs.get("distortion_probability", 0.25)
+
+        self.string_proj = StringProjector(self.n_features, distort)
+
+        self.dim_emb = kwargs.get("dim_emb", 64)
+        self.dim_hid = kwargs.get("dim_hid", 64)
+
+        self.fc_value = torch.nn.Linear(self.n_features, self.dim_hid)
+        self.fc_attn = torch.nn.Linear(self.n_features, self.dim_hid)
+
+        dropout = kwargs.get("dropout", 0.15)
+        self.dropout = torch.nn.Dropout(p=dropout)
+
+        self.kernel_sizes = kwargs.get("kernel_sizes", [2, 3, 3, 4])
+        self.skip_bigrams = kwargs.get("skip_bigrams", [None, None, [1], [1, 2]])
+        self.attention = ProjectedAttention(
+            self.kernel_sizes, self.dim_hid, skip_bigrams=self.skip_bigrams
+        )
+
+        self.batch_norm_value = torch.nn.BatchNorm1d(self.dim_hid)
+        self.batch_norm_attn = torch.nn.BatchNorm1d(self.dim_hid)
+
+    def train(self, mode=True):
+        super().train(mode)
+
+    def init_layer(self, data):
+        self.pad = 0
+        self.fc = torch.nn.Linear(
+            len(self.kernel_sizes) * self.dim_hid, len(self.labels), bias=True
+        )
+
+    def forward(self, batch):
+        projection = self.string_proj(batch["words"])
 
         projection = projection.to(batch["inputs"].device)
         mask = (batch["inputs"] == self.pad).unsqueeze(2)
