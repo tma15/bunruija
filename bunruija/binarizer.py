@@ -3,6 +3,7 @@ import os
 import pickle
 from typing import List, Tuple
 
+import numpy as np
 from sklearn.preprocessing import LabelEncoder  # type: ignore
 
 from .dataclass import BunruijaConfig
@@ -19,8 +20,8 @@ class Binarizer:
             os.makedirs(self.config.bin_dir)
 
     def load_data(self, data_path: str) -> Tuple[List[str], List[str]]:
-        labels = []
-        texts = []
+        labels: List[str] = []
+        texts: List[str] = []
         with open(data_path) as f:
             reader = csv.reader(f)
             for row in reader:
@@ -36,15 +37,15 @@ class Binarizer:
         labels_train, texts_train = self.load_data(self.config.data["train"])
 
         label_encoder = LabelEncoder()
-        y_train = label_encoder.fit_transform(labels_train)
+        y_train: np.ndarray = label_encoder.fit_transform(labels_train)
 
         if "dev" in self.config.data:
             labels_dev, texts_dev = self.load_data(self.config.data["dev"])
-            y_dev = label_encoder.transform(labels_dev)
+            y_dev: np.ndarray = label_encoder.transform(labels_dev)
 
         if "test" in self.config.data:
             labels_test, texts_test = self.load_data(self.config.data["test"])
-            y_test = label_encoder.transform(labels_test)
+            y_test: np.ndarray = label_encoder.transform(labels_test)
 
         with open(self.config.bin_dir / "data.bunruija", "wb") as f:
             data = {

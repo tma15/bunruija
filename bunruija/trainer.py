@@ -1,5 +1,8 @@
 import pickle
+from pathlib import Path
+from typing import List
 
+import numpy as np
 import sklearn  # type: ignore
 
 from . import BunruijaConfig, PipelineBuilder, Saver
@@ -11,16 +14,16 @@ class Trainer:
     def __init__(self, config_file: str):
         self.config = BunruijaConfig.from_yaml(config_file)
 
-        data_path = self.config.bin_dir / "data.bunruija"
+        data_path: Path = self.config.bin_dir / "data.bunruija"
         with open(data_path, "rb") as f:
-            self.data = pickle.load(f)
+            self.data: dict = pickle.load(f)
 
         self.model = PipelineBuilder(self.config).build()
         self.saver = Saver(self.config)
 
     def train(self):
-        y_train = self.data["label_train"]
-        X_train = self.data["data_train"]
+        y_train: np.ndarray = self.data["label_train"]
+        X_train: List[str] = self.data["data_train"]
         self.model.fit(X_train, y_train)
 
         self.saver(self.model)
