@@ -26,7 +26,7 @@ def infer_vectorizer(model_type):
         vectorizer_dict["type"] = "sequence"
     else:
         vectorizer_dict["type"] = "tfidf"
-        vectorizer_dict["args"] = {
+        vectorizer_dict["args"]["tokenizer"]["args"] = {
             "ngram_range": (1, 3),
         }
 
