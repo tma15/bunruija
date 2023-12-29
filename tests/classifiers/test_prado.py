@@ -3,9 +3,6 @@ import unittest
 import torch
 
 from bunruija.classifiers.prado.model import PRADO, StringProjector
-from bunruija.classifiers.prado.string_projector import (  # type: ignore
-    StringProjectorOp,
-)
 
 
 class TestStringProjection(unittest.TestCase):
@@ -19,15 +16,6 @@ class TestStringProjection(unittest.TestCase):
         print("python", x)
         print(x[0, 1], x[1, 2])
         print(x[0, 0], x[1, 0])
-
-    def test_cpp(self):
-        proj = StringProjectorOp(self.n_features, 0.0)
-        x = proj(self.words)
-
-
-#         print("cpp", x)
-#         print(x[0, 1], x[1, 2])
-#         print(x[0, 0], x[1, 0])
 
 
 class TestPRADO(unittest.TestCase):
