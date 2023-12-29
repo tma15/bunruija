@@ -63,6 +63,7 @@ class TestBinary(unittest.TestCase):
         with tempfile.TemporaryDirectory(f"test_{model}") as data_dir:
             create_dummy_data(data_dir)
             yaml_file = str(Path(data_dir) / "test-binary.yaml")
+
             gen_yaml.main(
                 [
                     "--model",
