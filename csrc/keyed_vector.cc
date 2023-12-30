@@ -364,9 +364,12 @@ Status PretrainedVectorProcessor::batch_query(const std::vector<std::string> &qu
       float value = float(v) / float(pow(10, precision_));
       (*vector)[word][d] = value;
     }
-//    std::cout << word << ":";
-//    for (auto i : (*vector)[word]) { std::cout << i << " "; }
-//    std::cout << std::endl;
+
+    /* std::cout << std::endl; */
+    /* std::cout << "WORD=" << word << ": "; */
+    /* for (auto i : (*vector)[word]) { std::cout << i << " "; } */
+    /* std::cout << std::endl; */
+
     offset += dim_;
     ++word_offset;
   }

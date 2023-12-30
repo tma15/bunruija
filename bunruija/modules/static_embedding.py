@@ -5,7 +5,6 @@ import torch
 
 from bunruija.modules.vector_processor import PretrainedVectorProcessor  # type: ignore
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -36,7 +35,10 @@ class StaticEmbedding(torch.nn.Module):
             self.processor.convert(output_file, embedding_path)
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(vocab_size={self.length}, embedding_size={self.dim_emb})"
+        return (
+            f"{self.__class__.__name__}"
+            f"(vocab_size={self.length}, embedding_size={self.dim_emb})"
+        )
 
     def forward(self, batch):
         bsz = len(batch["words"])
@@ -50,9 +52,4 @@ class StaticEmbedding(torch.nn.Module):
             seq_len = len(batch["words"][batch_idx])
             embed[batch_idx, :seq_len] = torch.from_numpy(vec)
 
-        #             for t, word in enumerate(batch["words"][batch_idx]):
-        #                 if word in self.processor:
-        #                     vec, status = self.processor.query(word)
-        #                     embed[batch_idx, t, :] = torch.from_numpy(vec)
-        #                     del vec
         return embed

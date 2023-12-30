@@ -1,8 +1,8 @@
-from pathlib import Path
 import pickle
 import random
 import tempfile
 import unittest
+from pathlib import Path
 
 import numpy
 import torch
@@ -10,7 +10,11 @@ import torch
 from bunruija.modules import StaticEmbedding
 
 
-def create_dummy_data(data_file, num_tokens=50, dim=100):
+def create_dummy_data(
+    data_file: Path,
+    num_tokens: int = 50,
+    dim: int = 100,
+):
     with open(data_file, "w") as f:
         data = torch.rand(num_tokens * dim)
         data = 97 + torch.floor(26 * data).int()
@@ -18,11 +22,12 @@ def create_dummy_data(data_file, num_tokens=50, dim=100):
         print(num_tokens, dim, file=f)
 
         token = "test"
-        embed_test = torch.randn(dim).tolist()
+        embed_test: list[float] = torch.randn(dim).tolist()
         print(f'{token} {" ".join(list(map(str, embed_test)))}', file=f)
-        token = "a"
-        embed_a = torch.randn(dim).tolist()
-        print(f'{token} {" ".join(list(map(str, embed_a)))}', file=f)
+
+        token = "abc"
+        embed_abc: list[float] = torch.randn(dim).tolist()
+        print(f'{token} {" ".join(list(map(str, embed_abc)))}', file=f)
 
         for i in range(num_tokens - 2):
             token_len = random.randint(1, 10)
@@ -31,7 +36,7 @@ def create_dummy_data(data_file, num_tokens=50, dim=100):
             embed = list(map(str, torch.randn(dim).tolist()))
             print(f'{token} {" ".join(embed)}', file=f)
 
-    return {"a": embed_a, "test": embed_test}
+    return {"abc": embed_abc, "test": embed_test}
 
 
 class TestStaticEmbedding(unittest.TestCase):
@@ -65,10 +70,12 @@ class TestStaticEmbedding(unittest.TestCase):
             embedding_file = Path(data_dir) / "embedding.txt"
 
             num_tokens = random.randint(30, 50)
-            expected = create_dummy_data(embedding_file, num_tokens=num_tokens)
+            expected: dict[str, list[float]] = create_dummy_data(
+                embedding_file, num_tokens=num_tokens
+            )
             module = StaticEmbedding(str(embedding_file))
 
-            vec1, status = module.processor.batch_query(["test", "a"])
+            vec1, status = module.processor.batch_query(["test", "abc"])
 
             numpy.testing.assert_allclose(vec1[0], expected["test"], rtol=1e-3)
-            numpy.testing.assert_allclose(vec1[1], expected["a"], rtol=1e-3)
+            numpy.testing.assert_allclose(vec1[1], expected["abc"], rtol=1e-3)
