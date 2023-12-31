@@ -6,7 +6,6 @@ import ruamel.yaml  # type: ignore
 
 from bunruija import options
 
-
 logging.basicConfig(
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
@@ -26,9 +25,7 @@ def infer_vectorizer(model_type):
         vectorizer_dict["type"] = "sequence"
     else:
         vectorizer_dict["type"] = "tfidf"
-        vectorizer_dict["args"]["tokenizer"]["args"] = {
-            "ngram_range": (1, 3),
-        }
+        vectorizer_dict["args"]["ngram_range"] = (1, 3)
 
     if model_type == "transformer":
         vectorizer_dict["args"]["tokenizer"]["type"] = "auto"
@@ -71,8 +68,12 @@ def main(args):
     yaml = ruamel.yaml.YAML()
     with open(args.yaml, "w") as f:
         yaml.dump(setting, f)
-    print(setting)
+    yaml.dump(setting, sys.stdout)
 
 
 def cli_main():
-    main(sys.argv)
+    main(sys.argv[1:])
+
+
+if __name__ == "__main__":
+    cli_main()

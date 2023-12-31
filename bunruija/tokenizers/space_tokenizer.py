@@ -1,8 +1,10 @@
 from typing import List
 
 from .tokenizer import BaseTokenizer
+from .tokenizer_registry import register_tokenizer
 
 
+@register_tokenizer("space")
 class SpaceTokenizer(BaseTokenizer):
     def __init__(self, reduce_redundant_spaces: bool = True, **kwargs):
         self.reduce_redundant_spaces = reduce_redundant_spaces
