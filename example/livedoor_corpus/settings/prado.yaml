@@ -6,14 +6,14 @@ data:
 bin_dir: models/prado-model
 
 pipeline:
-  - type: sequence
+  - type: bunruija.feature_extraction.sequence.SequenceVectorizer
     args:
       tokenizer:
         type: mecab
         args:
           lemmatize: false
       max_features: 30000
-  - type: prado
+  - type: bunruija.classifiers.prado.PRADO
     args:
       batch_size: 10
       n_features: 512
@@ -21,6 +21,6 @@ pipeline:
       dim_hid: 512
       optimizer: adamw
       lr: 0.001
-      max_epochs: 10
+      max_epochs: 3
       weight_decay: 0.01
       log_interval: 100

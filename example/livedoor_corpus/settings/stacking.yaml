@@ -6,12 +6,12 @@ data:
 bin_dir: models/stacking-model
 
 pipeline:
-  - type: stacking
+  - type: sklearn.ensemble.StackingClassifier
     args:
       estimators:
         - type: pipeline_0
           args:
-            - type: tfidf
+            - type: sklearn.feature_extraction.text.TfidfVectorizer
               args:
                 tokenizer:
                   type: mecab
@@ -20,23 +20,23 @@ pipeline:
                     exclude_pos:
                       - 助詞
                       - 助動詞
-            - type: svm
+            - type: sklearn.svm.SVC
               args:
                 C: 10.
         - type: pipeline_1
           args:
-            - type: tfidf
+            - type: sklearn.feature_extraction.text.TfidfVectorizer
               args:
                 tokenizer:
                   type: mecab
-            - type: random_forest 
+            - type: sklearn.ensemble.RandomForestClassifier
         - type: pipeline_2
           args:
-            - type: sequence
+            - type: bunruija.feature_extraction.sequence.SequenceVectorizer
               args:
                 tokenizer:
                   type: mecab
-            - type: lstm
+            - type: bunruija.classifiers.lstm.LSTMClassifier
               args:
                 device: cpu
                 batch_size: 8
@@ -44,4 +44,4 @@ pipeline:
                 dim_hid: 511
                 num_layers: 1
       final_estimator:
-        type: svm
+        type: sklearn.svm.SVC

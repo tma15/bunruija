@@ -6,7 +6,7 @@ data:
 bin_dir: models/svm-model
 
 pipeline:
-  - type: tfidf
+  - type: sklearn.feature_extraction.text.TfidfVectorizer
     args:
       tokenizer:
         type: mecab
@@ -20,7 +20,7 @@ pipeline:
       ngram_range:
         - 1
         - 3
-  - type: svm
+  - type: sklearn.svm.SVC
     args:
       verbose: false
       C: 10.
