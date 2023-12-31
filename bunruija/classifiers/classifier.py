@@ -1,10 +1,10 @@
-from logging import getLogger
 import time
+from logging import getLogger
 
 import numpy as np
-from sklearn.base import BaseEstimator, ClassifierMixin  # type: ignore
 import torch
 import torch.nn.functional as F
+from sklearn.base import BaseEstimator, ClassifierMixin  # type: ignore
 
 logger = getLogger(__name__)
 
@@ -242,17 +242,18 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
 
         y = []
         collator = Collator(self.pad)
-        for batch in torch.utils.data.DataLoader(
+        data_loader = torch.utils.data.DataLoader(
             data,
             batch_size=self.batch_size,
             shuffle=False,
             collate_fn=collator,
             num_workers=self.num_workers,
-        ):
+        )
+        for batch in data_loader:
             if self.device.startswith("cuda"):
                 batch = move_to_cuda(batch)
 
-            with torch.no_grad():
+            with torch.inference_mode():
                 maxi = torch.argmax(self(batch), dim=1)
             y.extend(maxi.tolist())
         return np.array(y)
