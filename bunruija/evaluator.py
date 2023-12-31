@@ -1,8 +1,8 @@
-import csv
 import pickle
-import time
+from argparse import Namespace
 
-import sklearn
+import numpy as np
+from sklearn.metrics import classification_report, confusion_matrix
 
 from .dataclass import BunruijaConfig
 from .predictor import Predictor
@@ -11,10 +11,9 @@ from .predictor import Predictor
 class Evaluator:
     """Evaluates a trained model"""
 
-    def __init__(self, args):
+    def __init__(self, args: Namespace):
         self.config = BunruijaConfig.from_yaml(args.yaml)
 
-        self.evaluate_time = not args.no_evaluate_time
         self.verbose = args.verbose
 
         self.predictor = Predictor(args.yaml)
@@ -24,36 +23,22 @@ class Evaluator:
             self.data = pickle.load(f)
 
     def evaluate(self):
-        if self.evaluate_time:
-            with open(self.config.data.get("test", "")) as f:
-                reader = csv.reader(f)
-                y_pred = []
-                y_test = []
-                start_at = time.perf_counter()
-                n = 0
-                for row in reader:
-                    y_pred_i = self.predictor(row[1])
-                    y_pred.append(y_pred_i)
-                    y_test.append(row[0])
-                    n += 1
-                duration = (time.perf_counter() - start_at) / n
-        else:
-            X_test = self.data["data_test"]
-            y_test = self.data["label_test"]
-            y_pred = self.predictor(X_test)
+        X_test: list[str] = self.data["data_test"]
+        y_test: np.ndarray = self.data["label_test"]
+        y_pred: np.ndarray = self.predictor(X_test)
 
         labels = list(self.predictor.label_encoder.classes_)
         if self.verbose:
-            conf_mat = sklearn.metrics.confusion_matrix(y_test, y_pred)
+            conf_mat = confusion_matrix(y_test, y_pred)
             for i in range(len(labels)):
                 print("True", "Pred", "Num samples", sep="\t")
                 for j in range(len(labels)):
                     print(labels[i], labels[j], conf_mat[i, j], sep="\t")
                 print()
 
-        report = sklearn.metrics.classification_report(
-            y_test, y_pred, target_names=labels
+        report: str = classification_report(
+            y_test,
+            y_pred,
+            target_names=labels,
         )
         print(report)
-        if self.evaluate_time:
-            print(f"Average prediction time: {duration} sec.")

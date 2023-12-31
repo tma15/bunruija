@@ -1,7 +1,7 @@
-from pathlib import Path
 import random
 import tempfile
 import unittest
+from pathlib import Path
 
 import torch
 import yaml  # type: ignore
@@ -80,10 +80,10 @@ class TestBinary(unittest.TestCase):
             evaluate.main(["-y", yaml_file])
 
     def test_svm(self):
-        self.execute("svm")
+        self.execute("sklearn.svm.SVC")
 
     def test_lstm(self):
-        self.execute("lstm")
+        self.execute("bunruija.classifiers.lstm.LSTMClassifier")
 
     def test_transformer(self):
-        self.execute("transformer")
+        self.execute("bunruija.classifiers.transformer.TransformerClassifier")

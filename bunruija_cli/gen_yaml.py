@@ -21,13 +21,20 @@ def infer_vectorizer(model_type):
         "args": {"tokenizer": {"type": "mecab", "args": {"lemmatize": True}}},
     }
 
-    if model_type in ["lstm", "transformer", "prado", "qrnn"]:
-        vectorizer_dict["type"] = "sequence"
+    if model_type in [
+        "bunruija.classifiers.lstm.LSTMClassifier",
+        "bunruija.classifiers.transformer.TransformerClassifier",
+        "bunruija.classifiers.prado.PRADO",
+        "bunruija.classifiers.qrnn.QRNN",
+    ]:
+        vectorizer_dict[
+            "type"
+        ] = "bunruija.feature_extraction.sequence.SequenceVectorizer"
     else:
-        vectorizer_dict["type"] = "tfidf"
+        vectorizer_dict["type"] = "sklearn.feature_extraction.text.TfidfVectorizer"
         vectorizer_dict["args"]["ngram_range"] = (1, 3)
 
-    if model_type == "transformer":
+    if model_type == "bunruija.classifiers.transformer.TransformerClassifier":
         vectorizer_dict["args"]["tokenizer"]["type"] = "auto"
         vectorizer_dict["args"]["tokenizer"]["args"] = {
             "from_pretrained": "cl-tohoku/bert-base-japanese"
@@ -38,7 +45,7 @@ def infer_vectorizer(model_type):
 
 def infer_model_args(model_type):
     args = {}
-    if model_type == "transformer":
+    if model_type == "bunruija.classifiers.transformer.TransformerClassifier":
         args["from_pretrained"] = "cl-tohoku/bert-base-japanese"
     return args
 
@@ -49,9 +56,9 @@ def main(args):
 
     setting = {
         "data": {
-            "train": None,
-            "dev": None,
-            "test": None,
+            "train": "train.csv",
+            "dev": "dev.csv",
+            "test": "test.csv",
         },
         "pipeline": [
             infer_vectorizer(args.model),

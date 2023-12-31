@@ -1,11 +1,10 @@
+import importlib
 from logging import getLogger
 from typing import List, Union
 
 from sklearn.pipeline import Pipeline  # type: ignore
 
-from .classifiers.classifier import NeuralBaseClassifier
 from .dataclass import BunruijaConfig, PipelineUnit
-from .registry import BUNRUIJA_REGISTRY
 from .saver import Saver
 from .tokenizers.util import build_tokenizer
 
@@ -16,19 +15,22 @@ class PipelineBuilder:
     def __init__(self, config: BunruijaConfig):
         self.config = config
 
+    def _load_class(self, name: str):
+        module_elems: list[str] = name.split(".")
+        module_name: str = ".".join(module_elems[:-1])
+        cls_name: str = module_elems[-1]
+        module = importlib.import_module(module_name)
+        cls = getattr(module, cls_name)
+        return cls
+
     def _maybe_build_tokenizer(self, pipeline_unit: PipelineUnit):
         """If a pipeline_unit has a tokenizer as an argument, build the tokenizer"""
         if "tokenizer" in pipeline_unit.args:
             tokenizer = build_tokenizer(pipeline_unit.args["tokenizer"])
             pipeline_unit.args["tokenizer"] = tokenizer
 
-    def _maybe_build_saver(self, pipeline_unit: PipelineUnit):
-        if isinstance(BUNRUIJA_REGISTRY[pipeline_unit.type], NeuralBaseClassifier):
-            pipeline_unit.args["saver"] = self.saver
-
     def _maybe_update_arg(self, pipeline_unit: PipelineUnit):
         self._maybe_build_tokenizer(pipeline_unit)
-        self._maybe_build_saver(pipeline_unit)
 
         def _update_arg_value(x):
             if isinstance(x, list):
@@ -38,35 +40,31 @@ class PipelineBuilder:
                     tokenizer = build_tokenizer(x["args"]["tokenizer"])
                     x["args"]["tokenizer"] = tokenizer
 
-                if x["type"] in BUNRUIJA_REGISTRY and isinstance(
-                    BUNRUIJA_REGISTRY[x["type"]], NeuralBaseClassifier
-                ):
-                    x.args["saver"] = self.saver
-
+                # If type of x starts with pipeline, args of x is assumed to be list,
+                # which is basically the list of weak learners in an ensemble model.
                 if x["type"].startswith("pipeline"):
                     estimator = self.build_estimator(
-                        [PipelineUnit(**_) for _ in x.get("args", {})],
+                        [PipelineUnit(**_) for _ in x.get("args", [])],
                         pipeline_idx=x["type"],
                     )
                 else:
-                    estimator = BUNRUIJA_REGISTRY[x["type"]](**x.get("args", {}))
+                    estimator = self.build_estimator(PipelineUnit(**x))[1]
                 return estimator
             else:
                 return x
 
         for key, value in pipeline_unit.args.items():
             pipeline_unit.args[key] = _update_arg_value(value)
+            cls = self._load_class(pipeline_unit.type)
 
-            # Because some argments such as ngra_range in TfidfVectorizer assumes tuple
-            # while YAML cannnot interpret tuple, convert list to tuple according to
+            # Because some argments such as ngram_range in TfidfVectorizer assume tuple
+            # while YAML cannot interpret as tuple, convert list to tuple according to
             # their constraints.
             if (
-                hasattr(BUNRUIJA_REGISTRY[pipeline_unit.type], "_parameter_constraints")
-                and key in BUNRUIJA_REGISTRY[pipeline_unit.type]._parameter_constraints
+                hasattr(cls, "_parameter_constraints")
+                and key in cls._parameter_constraints
             ):
-                constraints = BUNRUIJA_REGISTRY[
-                    pipeline_unit.type
-                ]._parameter_constraints[key]
+                constraints = cls._parameter_constraints[key]
                 if tuple in constraints and isinstance(value, list):
                     pipeline_unit.args[key] = tuple(pipeline_unit.args[key])
 
@@ -83,7 +81,8 @@ class PipelineBuilder:
         else:
             self._maybe_update_arg(pipeline_units)
             estimator_type = pipeline_units.type
-            estimator = BUNRUIJA_REGISTRY[pipeline_units.type](**pipeline_units.args)
+            cls = self._load_class(pipeline_units.type)
+            estimator = cls(**pipeline_units.args)
 
         # Because Pipeline of scikit-learn requires the tuple of name and estimator,
         # this functions returns them

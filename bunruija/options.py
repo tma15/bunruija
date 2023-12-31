@@ -36,6 +36,7 @@ def get_default_evaluation_parser():
 def get_default_gen_yaml_parser():
     parser = get_parser()
     parser.add_argument(
-        "--model", default="svm", choices=["svm", "rf", "lstm", "transformer"]
+        "--model",
+        default="sklearn.svm.SVC",
     )
     return parser

@@ -5,18 +5,18 @@ data:
 
 bin_dir: models/transformer-model
 
-classifier:
-  - type: sequence
+pipeline:
+  - type: bunruija.feature_extraction.sequence.SequenceVectorizer
     args:
       tokenizer:
         type: auto
         args:
           from_pretrained: cl-tohoku/bert-base-japanese
-  - type: transformer
+  - type: bunruija.classifiers.transformer.TransformerClassifier
     args:
-      device: cuda:0
+      device: cpu
       from_pretrained: cl-tohoku/bert-base-japanese
       optimizer: adamw
       lr: 3e-5
-      max_epochs: 10
+      max_epochs: 3
       weight_decay: 0.01
