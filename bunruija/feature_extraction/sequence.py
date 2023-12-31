@@ -1,12 +1,13 @@
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
+import transformers  # type: ignore
 from scipy.sparse import csr_matrix  # type: ignore
 from sklearn.base import TransformerMixin  # type: ignore
-import transformers  # type: ignore
 
-from bunruija import tokenizers
-from bunruija.data import Dictionary
+from ..data import Dictionary
+from ..tokenizers import DEFAULT_TOKENIZER_NAME
+from ..tokenizers.tokenizer_registry import BUNRUIJA_TOKENIZER_REGISTRY
 
 
 class SequenceVectorizer(TransformerMixin):
@@ -43,7 +44,7 @@ class SequenceVectorizer(TransformerMixin):
         if self.tokenizer is not None:
             return self.tokenizer
 
-        self.tokenizer = tokenizers.DEFAULT_TOKENIZER()
+        self.tokenizer = BUNRUIJA_TOKENIZER_REGISTRY[DEFAULT_TOKENIZER_NAME]()
         return self.tokenizer
 
     def set_params(self, **kwargs):

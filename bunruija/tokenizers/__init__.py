@@ -1,11 +1,10 @@
-from ..registry import BUNRUIJA_REGISTRY
-from .mecab_tokenizer import MeCabTokenizer
-from .space_tokenizer import SpaceTokenizer
-
 from transformers import AutoTokenizer  # type: ignore
 
+from .mecab_tokenizer import MeCabTokenizer
+from .space_tokenizer import SpaceTokenizer
+from .tokenizer_registry import register_tokenizer
 
-BUNRUIJA_REGISTRY["mecab"] = MeCabTokenizer
-BUNRUIJA_REGISTRY["space"] = SpaceTokenizer
-BUNRUIJA_REGISTRY["auto"] = AutoTokenizer
-DEFAULT_TOKENIZER = MeCabTokenizer
+register_tokenizer("auto")(AutoTokenizer)
+DEFAULT_TOKENIZER_NAME = "mecab"
+
+__all__ = ["MeCabTokenizer", "SpaceTokenizer", "register_tokenizer"]
