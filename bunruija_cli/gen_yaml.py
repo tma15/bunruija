@@ -24,7 +24,7 @@ def infer_vectorizer(model_type):
     if model_type in ["lstm", "transformer", "prado", "qrnn"]:
         vectorizer_dict["type"] = "sequence"
     else:
-        vectorizer_dict["type"] = "tfidf"
+        vectorizer_dict["type"] = "sklearn.feature_extraction.text.TfidfVectorizer"
         vectorizer_dict["args"]["ngram_range"] = (1, 3)
 
     if model_type == "transformer":
@@ -49,9 +49,9 @@ def main(args):
 
     setting = {
         "data": {
-            "train": None,
-            "dev": None,
-            "test": None,
+            "train": "train.csv",
+            "dev": "dev.csv",
+            "test": "test.csv",
         },
         "pipeline": [
             infer_vectorizer(args.model),
