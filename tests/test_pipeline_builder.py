@@ -1,6 +1,6 @@
 import tempfile
-from pathlib import Path
 import unittest
+from pathlib import Path
 
 from sklearn.feature_extraction.text import TfidfVectorizer  # type: ignore
 from sklearn.pipeline import Pipeline  # type: ignore
@@ -12,8 +12,8 @@ from bunruija_cli import gen_yaml
 
 class TestPipelineBuilder(unittest.TestCase):
     def test_build(self):
-        model = "svm"
-        with tempfile.TemporaryDirectory(f"test_pipeline") as data_dir:
+        model = "sklearn.svm.SVC"
+        with tempfile.TemporaryDirectory("test_pipeline") as data_dir:
             yaml_file = Path(data_dir) / "test-pipelinebuilder.yaml"
             gen_yaml.main(
                 [
@@ -29,7 +29,9 @@ class TestPipelineBuilder(unittest.TestCase):
             model = builder.build()
             self.assertTrue(isinstance(model, Pipeline))
 
-            self.assertEqual(model.steps[0][0], "tfidf")
+            self.assertEqual(
+                model.steps[0][0], "sklearn.feature_extraction.text.TfidfVectorizer"
+            )
             self.assertTrue(isinstance(model.steps[0][1], TfidfVectorizer))
-            self.assertEqual(model.steps[1][0], "svm")
+            self.assertEqual(model.steps[1][0], "sklearn.svm.SVC")
             self.assertTrue(isinstance(model.steps[1][1], SVC))

@@ -1,5 +1,5 @@
-from pathlib import Path
 import tempfile
+from pathlib import Path
 from unittest import TestCase
 
 from bunruija import BunruijaConfig
@@ -24,6 +24,9 @@ class TestBunruijaConfig(TestCase):
             self.assertTrue(hasattr(config, "pipeline"))
             self.assertTrue(hasattr(config, "bin_dir"))
 
-            self.assertEqual(config.pipeline[0].type, "tfidf")
+            self.assertEqual(
+                config.pipeline[0].type,
+                "sklearn.feature_extraction.text.TfidfVectorizer",
+            )
             self.assertEqual(config.pipeline[0].args["tokenizer"]["type"], "mecab")
             self.assertEqual(config.pipeline[1].type, "svm")
