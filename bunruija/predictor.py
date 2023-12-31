@@ -1,7 +1,8 @@
-from pathlib import Path
 import pickle
+from pathlib import Path
 
-import yaml  # type: ignore
+import numpy as np
+import ruamel.yaml  # type: ignore
 
 
 class Predictor:
@@ -9,7 +10,8 @@ class Predictor:
 
     def __init__(self, config_file):
         with open(config_file) as f:
-            config = yaml.load(f, Loader=yaml.SafeLoader)
+            yaml = ruamel.yaml.YAML()
+            config = yaml.load(f)
 
         model_path = Path(config.get("bin_dir", ".")) / "model.bunruija"
         with open(model_path, "rb") as f:
@@ -18,12 +20,17 @@ class Predictor:
 
             self.label_encoder = model_data["label_encoder"]
 
-    def __call__(self, text):
-        x = [text]
-        y = self.model.predict(x)
+    def __call__(
+        self,
+        text: list[str],
+        return_label_type: str = "id",
+    ) -> np.ndarray | list[str]:
+        y: np.ndarray = self.model.predict(text)
 
-        if isinstance(text, str):
+        if return_label_type == "str":
             label = self.label_encoder.inverse_transform(y)
-            return label[0]
+        elif return_label_type == "id":
+            label = y
         else:
-            return y
+            raise ValueError(return_label_type)
+        return label

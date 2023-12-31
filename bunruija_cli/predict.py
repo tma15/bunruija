@@ -1,7 +1,6 @@
 import sys
 
-from bunruija import options
-from bunruija import Predictor
+from bunruija import Predictor, options
 
 
 def main(args):
@@ -10,9 +9,9 @@ def main(args):
 
     predictor = Predictor(args.yaml)
     while True:
-        text = input()
-        label = predictor(text)
-        print(label)
+        text = input("Input:")
+        label: list[str] = predictor([text], return_label_type="str")
+        print(label[0])
 
 
 def cli_main():
