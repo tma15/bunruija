@@ -6,14 +6,14 @@ data:
 bin_dir: models/qrnn-model
 
 pipeline:
-  - type: sequence
+  - type: bunruija.feature_extraction.sequence.SequenceVectorizer
     args:
       tokenizer:
         type: mecab
         args:
           lemmatize: false
         max_features: 30000
-  - type: qrnn
+  - type: bunruija.classifiers.qrnn.QRNN
     args:
       device: cpu
       batch_size: 32
