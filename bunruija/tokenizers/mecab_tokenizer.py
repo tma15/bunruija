@@ -4,10 +4,8 @@ from fugashi import Tagger  # type: ignore
 
 from ..filters import PosFilter
 from .tokenizer import BaseTokenizer
-from .tokenizer_registry import register_tokenizer
 
 
-@register_tokenizer("mecab")
 class MeCabTokenizer(BaseTokenizer):
     def __init__(self, **kwargs):
         super().__init__(name="mecab")

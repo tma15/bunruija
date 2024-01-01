@@ -13,7 +13,7 @@ class TestBunruijaConfig(TestCase):
             gen_yaml.main(
                 [
                     "--model",
-                    "svm",
+                    "sklearn.svm.SVC",
                     "-y",
                     yaml_file,
                 ]
@@ -28,5 +28,8 @@ class TestBunruijaConfig(TestCase):
                 config.pipeline[0].type,
                 "sklearn.feature_extraction.text.TfidfVectorizer",
             )
-            self.assertEqual(config.pipeline[0].args["tokenizer"]["type"], "mecab")
-            self.assertEqual(config.pipeline[1].type, "svm")
+            self.assertEqual(
+                config.pipeline[0].args["tokenizer"]["type"],
+                "bunruija.tokenizers.mecab_tokenizer.MeCabTokenizer",
+            )
+            self.assertEqual(config.pipeline[1].type, "sklearn.svm.SVC")
