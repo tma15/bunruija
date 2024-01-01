@@ -10,11 +10,13 @@ class TransformerClassifier(NeuralBaseClassifier):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        from_pretrained = kwargs.pop("from_pretrained", None)
-        self.model = AutoModel.from_pretrained(from_pretrained)
+        pretrained_model_name_or_path = kwargs.pop(
+            "pretrained_model_name_or_path", None
+        )
+        self.model = AutoModel.from_pretrained(pretrained_model_name_or_path)
         self.dropout = torch.nn.Dropout(kwargs.get("dropout", 0.1))
 
-        tokenizer = AutoTokenizer.from_pretrained(from_pretrained)
+        tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path)
         self.pad = tokenizer.pad_token_id
 
     def init_layer(self, data):
@@ -29,7 +31,8 @@ class TransformerClassifier(NeuralBaseClassifier):
 
     def forward(self, batch):
         input_ids = batch["inputs"]
-        x = self.model(input_ids)
+        attention_mask = batch["attention_mask"]
+        x = self.model(input_ids=input_ids, attention_mask=attention_mask)
         pooled_output = x[1]
         pooled_output = self.dropout(pooled_output)
         logits = self.out(pooled_output)

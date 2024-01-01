@@ -43,7 +43,8 @@ class Collator:
             padding_value=self.padding_value,
         )
 
-        batch = {"inputs": inputs}
+        attention_mask = inputs != self.padding_value
+        batch = {"inputs": inputs, "attention_mask": attention_mask}
         if "label" in samples[0]:
             labels = torch.tensor([sample["label"] for sample in samples])
             batch["labels"] = labels
