@@ -9,7 +9,7 @@ pipeline:
   - type: bunruija.feature_extraction.sequence.SequenceVectorizer
     args:
       tokenizer:
-        type: mecab
+        type: bunruija.tokenizers.mecab_tokenizer.MeCabTokenizer
         args:
           lemmatize: false
         max_features: 30000

@@ -9,7 +9,7 @@ pipeline:
   - type: sklearn.feature_extraction.text.TfidfVectorizer
     args:
       tokenizer:
-        type: mecab
+        type: bunruija.tokenizers.mecab_tokenizer.MeCabTokenizer
         args:
           lemmatize: true
           exclude_pos:
