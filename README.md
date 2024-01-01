@@ -14,3 +14,62 @@ See `example` for understanding how bunruija is easy to use.
 ```
 poetry install
 ```
+
+## Examples
+Example of `sklearn.svm.SVC`
+
+```yaml
+data:
+  train: train.csv
+  dev: dev.csv
+  test: test.csv
+
+bin_dir: models/svm-model
+
+pipeline:
+  - type: sklearn.feature_extraction.text.TfidfVectorizer
+    args:
+      tokenizer:
+        type: bunruija.tokenizers.mecab_tokenizer.MeCabTokenizer
+        args:
+          lemmatize: true
+          exclude_pos:
+            - 助詞
+            - 助動詞
+      max_features: 10000
+      min_df: 3
+      ngram_range:
+        - 1
+        - 3
+  - type: sklearn.svm.SVC
+    args:
+      verbose: false
+      C: 10.
+```
+
+Example of BERT
+
+```yaml
+data:
+  train: train.csv
+  dev: dev.csv
+  test: test.csv
+
+bin_dir: models/transformer-model
+
+pipeline:
+  - type: bunruija.feature_extraction.sequence.SequenceVectorizer
+    args:
+      tokenizer:
+        type: transformers.AutoTokenizer
+        args:
+          pretrained_model_name_or_path: cl-tohoku/bert-base-japanese
+  - type: bunruija.classifiers.transformer.TransformerClassifier
+    args:
+      device: cpu
+      pretrained_model_name_or_path: cl-tohoku/bert-base-japanese
+      optimizer: adamw
+      lr: 3e-5
+      max_epochs: 3
+      weight_decay: 0.01
+```
