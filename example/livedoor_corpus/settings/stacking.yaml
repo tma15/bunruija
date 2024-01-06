@@ -14,7 +14,7 @@ pipeline:
             - type: sklearn.feature_extraction.text.TfidfVectorizer
               args:
                 tokenizer:
-                  type: mecab
+                  type: bunruija.tokenizers.mecab_tokenizer.MeCabTokenizer
                   args:
                     lemmatize: true
                     exclude_pos:
@@ -28,14 +28,14 @@ pipeline:
             - type: sklearn.feature_extraction.text.TfidfVectorizer
               args:
                 tokenizer:
-                  type: mecab
+                  type: bunruija.tokenizers.mecab_tokenizer.MeCabTokenizer
             - type: sklearn.ensemble.RandomForestClassifier
         - type: pipeline_2
           args:
             - type: bunruija.feature_extraction.sequence.SequenceVectorizer
               args:
                 tokenizer:
-                  type: mecab
+                  type: bunruija.tokenizers.mecab_tokenizer.MeCabTokenizer
             - type: bunruija.classifiers.lstm.LSTMClassifier
               args:
                 device: cpu

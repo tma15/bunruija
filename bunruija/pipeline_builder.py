@@ -3,10 +3,10 @@ from logging import getLogger
 from typing import List, Union
 
 from sklearn.pipeline import Pipeline  # type: ignore
+from transformers import AutoTokenizer, PreTrainedTokenizer
 
 from .dataclass import BunruijaConfig, PipelineUnit
 from .saver import Saver
-from .tokenizers.util import build_tokenizer
 
 logger = getLogger(__name__)
 
@@ -14,6 +14,21 @@ logger = getLogger(__name__)
 class PipelineBuilder:
     def __init__(self, config: BunruijaConfig):
         self.config = config
+
+    def _load_tokenizer(self, tokenizer_config: dict):
+        name = tokenizer_config["type"]
+        module_elems: list[str] = name.split(".")
+        module_name: str = ".".join(module_elems[:-1])
+        cls_name: str = module_elems[-1]
+        module = importlib.import_module(module_name)
+        cls = getattr(module, cls_name)
+        tokenizer_args = tokenizer_config.get("args", {})
+        if cls is AutoTokenizer or issubclass(cls, PreTrainedTokenizer):
+            tokenizer = cls.from_pretrained(**tokenizer_args)
+        else:
+            tokenizer = cls(**tokenizer_args)
+
+        return tokenizer
 
     def _load_class(self, name: str):
         module_elems: list[str] = name.split(".")
@@ -26,7 +41,7 @@ class PipelineBuilder:
     def _maybe_build_tokenizer(self, pipeline_unit: PipelineUnit):
         """If a pipeline_unit has a tokenizer as an argument, build the tokenizer"""
         if "tokenizer" in pipeline_unit.args:
-            tokenizer = build_tokenizer(pipeline_unit.args["tokenizer"])
+            tokenizer = self._load_tokenizer(pipeline_unit.args["tokenizer"])
             pipeline_unit.args["tokenizer"] = tokenizer
 
     def _maybe_update_arg(self, pipeline_unit: PipelineUnit):
@@ -37,7 +52,7 @@ class PipelineBuilder:
                 return [_update_arg_value(_) for _ in x]
             elif isinstance(x, dict):
                 if "tokenizer" in x.get("args", {}):
-                    tokenizer = build_tokenizer(x["args"]["tokenizer"])
+                    tokenizer = self._load_tokenizer(x["args"]["tokenizer"])
                     x["args"]["tokenizer"] = tokenizer
 
                 # If type of x starts with pipeline, args of x is assumed to be list,

@@ -9,13 +9,14 @@ pipeline:
   - type: bunruija.feature_extraction.sequence.SequenceVectorizer
     args:
       tokenizer:
-        type: auto
+        type: transformers.AutoTokenizer
+        # type: transformers.BertJapaneseTokenizer
         args:
-          from_pretrained: cl-tohoku/bert-base-japanese
+          pretrained_model_name_or_path: cl-tohoku/bert-base-japanese
   - type: bunruija.classifiers.transformer.TransformerClassifier
     args:
       device: cpu
-      from_pretrained: cl-tohoku/bert-base-japanese
+      pretrained_model_name_or_path: cl-tohoku/bert-base-japanese
       optimizer: adamw
       lr: 3e-5
       max_epochs: 3
