@@ -3,6 +3,7 @@ from pathlib import Path
 
 import numpy as np
 import ruamel.yaml  # type: ignore
+from sklearn.preprocessing import LabelEncoder  # type: ignore
 
 
 class Predictor:
@@ -15,10 +16,10 @@ class Predictor:
 
         model_path = Path(config.get("bin_dir", ".")) / "model.bunruija"
         with open(model_path, "rb") as f:
-            model_data = pickle.load(f)
-            self.model = model_data["pipeline"]
+            model_data: dict = pickle.load(f)
 
-            self.label_encoder = model_data["label_encoder"]
+            self.model = model_data["pipeline"]
+            self.label_encoder: LabelEncoder = model_data["label_encoder"]
 
     def __call__(
         self,

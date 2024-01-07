@@ -15,7 +15,7 @@ See `example` for understanding how bunruija is easy to use.
 poetry install
 ```
 
-## Examples
+## Example configs
 Example of `sklearn.svm.SVC`
 
 ```yaml
@@ -72,4 +72,25 @@ pipeline:
       lr: 3e-5
       max_epochs: 3
       weight_decay: 0.01
+```
+
+## CLI
+```sh
+# Training a classifier
+bunruija-train -y config.yaml
+
+# Evaluating the trained classifier
+bunruija-evaluate -y config.yaml
+```
+
+
+## Prediction using the trained classifier in Python code
+```python
+from bunruija import Predictor
+
+predictor = Predictor(args.yaml)
+while True:
+    text = input("Input:")
+    label: list[str] = predictor([text], return_label_type="str")
+    print(label[0])
 ```

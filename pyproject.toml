@@ -33,7 +33,6 @@ pytest = "^7.1.2"
 bunruija-gen-yaml = 'bunruija_cli.gen_yaml:cli_main'
 bunruija-evaluate = 'bunruija_cli.evaluate:cli_main'
 bunruija-predict = 'bunruija_cli.predict:cli_main'
-bunruija-preprocess = 'bunruija_cli.preprocess:cli_main'
 bunruija-train = 'bunruija_cli.train:cli_main'
 
 [tool.poetry.group.dev.dependencies]
