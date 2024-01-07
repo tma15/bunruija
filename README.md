@@ -82,3 +82,15 @@ bunruija-train -y config.yaml
 # Evaluating the trained classifier
 bunruija-evaluate -y config.yaml
 ```
+
+
+## Prediction using the trained classifier in Python code
+```python
+from bunruija import Predictor
+
+predictor = Predictor(args.yaml)
+while True:
+    text = input("Input:")
+    label: list[str] = predictor([text], return_label_type="str")
+    print(label[0])
+```
