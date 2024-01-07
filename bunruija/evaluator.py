@@ -1,9 +1,9 @@
-import pickle
 from argparse import Namespace
 
 import numpy as np
 from sklearn.metrics import classification_report, confusion_matrix
 
+from .data.dataset import load_data
 from .dataclass import BunruijaConfig
 from .predictor import Predictor
 
@@ -13,18 +13,12 @@ class Evaluator:
 
     def __init__(self, args: Namespace):
         self.config = BunruijaConfig.from_yaml(args.yaml)
-
         self.verbose = args.verbose
-
         self.predictor = Predictor(args.yaml)
 
-        data_path = self.config.bin_dir / "data.bunruija"
-        with open(data_path, "rb") as f:
-            self.data = pickle.load(f)
-
     def evaluate(self):
-        X_test: list[str] = self.data["data_test"]
-        y_test: np.ndarray = self.data["label_test"]
+        labels_test, X_test = load_data(self.config.data["test"])
+        y_test: np.ndarray = self.predictor.label_encoder.transform(labels_test)
         y_pred: np.ndarray = self.predictor(X_test)
 
         labels = list(self.predictor.label_encoder.classes_)

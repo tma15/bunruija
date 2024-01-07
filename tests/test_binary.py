@@ -6,7 +6,7 @@ from pathlib import Path
 import torch
 import yaml  # type: ignore
 
-from bunruija_cli import evaluate, gen_yaml, preprocess, train
+from bunruija_cli import evaluate, gen_yaml, train
 
 
 def create_dummy_data(data_dir, num_samples=5, num_labels=3, max_len=100):
@@ -75,7 +75,6 @@ class TestBinary(unittest.TestCase):
 
             self.rewrite_data_path(data_dir, yaml_file)
 
-            preprocess.main(["-y", yaml_file])
             train.main(["-y", yaml_file])
             evaluate.main(["-y", yaml_file])
 
