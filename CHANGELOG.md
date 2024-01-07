@@ -1,5 +1,16 @@
 # Changelog
 
+## [v0.0.2](https://github.com/tma15/bunruija/compare/v0.0.1...v0.0.2) - 2024-01-07
+- Refactor/cc by @tma15 in https://github.com/tma15/bunruija/pull/22
+- Feature/add hf datasets by @tma15 in https://github.com/tma15/bunruija/pull/24
+- Feature/add hf datasets by @tma15 in https://github.com/tma15/bunruija/pull/25
+- Fix/batch query by @tma15 in https://github.com/tma15/bunruija/pull/26
+- Add pyproject.toml to versionFile by @tma15 in https://github.com/tma15/bunruija/pull/27
+- Add tokenizer registry by @tma15 in https://github.com/tma15/bunruija/pull/28
+- Refactor/module loading by @tma15 in https://github.com/tma15/bunruija/pull/29
+- Refactor/vectorizer loading by @tma15 in https://github.com/tma15/bunruija/pull/30
+- Feature/delete bunruija preprocess by @tma15 in https://github.com/tma15/bunruija/pull/31
+
 ## [v0.0.1](https://github.com/tma15/bunruija/commits/v0.0.1) - 2023-12-29
 - Sqlite3 embedding lookup by @tma15 in https://github.com/tma15/bunruija/pull/1
 - Add stacking by @tma15 in https://github.com/tma15/bunruija/pull/2
