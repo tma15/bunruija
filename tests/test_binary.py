@@ -3,8 +3,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+import ruamel.yaml  # type: ignore
 import torch
-import yaml  # type: ignore
 
 from bunruija_cli import evaluate, gen_yaml, train
 
@@ -49,8 +49,10 @@ def create_dummy_data(data_dir, num_samples=5, num_labels=3, max_len=100):
 
 class TestBinary(unittest.TestCase):
     def rewrite_data_path(self, data_dir, yaml_file):
+        yaml = ruamel.yaml.YAML()
+
         with open(yaml_file, "r") as f:
-            setting = yaml.load(f, Loader=yaml.SafeLoader)
+            setting = yaml.load(f)
             setting["data"]["train"] = str(Path(data_dir) / "train.csv")
             setting["data"]["dev"] = str(Path(data_dir) / "dev.csv")
             setting["data"]["test"] = str(Path(data_dir) / "test.csv")
