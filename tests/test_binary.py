@@ -6,7 +6,7 @@ from pathlib import Path
 import ruamel.yaml  # type: ignore
 import torch
 
-from bunruija_cli import evaluate, gen_yaml, train
+from bunruija import evaluate, gen_yaml, train
 
 
 def create_dummy_data(data_dir, num_samples=5, num_labels=3, max_len=100):

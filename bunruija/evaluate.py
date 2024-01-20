@@ -1,9 +1,7 @@
 import logging
 import sys
 
-from bunruija import options
-from bunruija import Evaluator
-
+from . import Evaluator, options
 
 logging.basicConfig(
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
@@ -11,7 +9,7 @@ logging.basicConfig(
     level=logging.INFO,
     stream=sys.stdout,
 )
-logger = logging.getLogger("bunruija_cli.evaluate")
+logger = logging.getLogger("bunruija.evaluate")
 
 
 def main(args):

@@ -2,8 +2,7 @@ import tempfile
 from pathlib import Path
 from unittest import TestCase
 
-from bunruija import BunruijaConfig
-from bunruija_cli import gen_yaml
+from bunruija import BunruijaConfig, gen_yaml
 
 
 class TestBunruijaConfig(TestCase):

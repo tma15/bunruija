@@ -5,9 +5,11 @@ import sys
 
 import ruamel.yaml  # type: ignore
 
-from bunruija import options
-from bunruija.classifiers import TransformerClassifier
-from bunruija.classifiers.classifier import NeuralBaseClassifier
+from . import options
+from .classifiers import TransformerClassifier
+from .classifiers.classifier import NeuralBaseClassifier
+from .feature_extraction import SequenceVectorizer
+from .tokenizers import MeCabTokenizer
 
 logging.basicConfig(
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
@@ -15,7 +17,7 @@ logging.basicConfig(
     level=logging.INFO,
     stream=sys.stdout,
 )
-logger = logging.getLogger("bunruija_cli.gen_yaml")
+logger = logging.getLogger("bunruija.gen_yaml")
 
 
 def infer_vectorizer(model_cls):
@@ -23,27 +25,18 @@ def infer_vectorizer(model_cls):
         "type": None,
         "args": {
             "tokenizer": {
-                "type": "bunruija.tokenizers.mecab_tokenizer.MeCabTokenizer",
+                "type": MeCabTokenizer.module_name(),
                 "args": {"lemmatize": True},
             }
         },
     }
 
-    # if model_type in [
-    #     "bunruija.classifiers.lstm.LSTMClassifier",
-    #     "bunruija.classifiers.transformer.TransformerClassifier",
-    #     "bunruija.classifiers.prado.PRADO",
-    #     "bunruija.classifiers.qrnn.QRNN",
-    # ]:
     if issubclass(model_cls, NeuralBaseClassifier):
-        vectorizer_dict[
-            "type"
-        ] = "bunruija.feature_extraction.sequence.SequenceVectorizer"
+        vectorizer_dict["type"] = SequenceVectorizer.module_name()
     else:
         vectorizer_dict["type"] = "sklearn.feature_extraction.text.TfidfVectorizer"
         vectorizer_dict["args"]["ngram_range"] = (1, 3)
 
-    # if model_type == "bunruija.classifiers.transformer.TransformerClassifier":
     if model_cls == TransformerClassifier:
         vectorizer_dict["args"]["tokenizer"]["type"] = "transformers.AutoTokenizer"
         vectorizer_dict["args"]["tokenizer"]["args"] = {
@@ -60,7 +53,7 @@ def infer_model_args(model_cls):
     return args
 
 
-def validate_model(model_name):
+def validate_model(model_name: str):
     module_elems: list[str] = model_name.split(".")
     module_name: str = ".".join(module_elems[:-1])
     cls_name: str = module_elems[-1]

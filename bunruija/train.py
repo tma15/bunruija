@@ -1,9 +1,8 @@
-from logging import basicConfig, getLogger, INFO
 import sys
+from logging import INFO, basicConfig, getLogger
 
-from bunruija import options
-from bunruija import Trainer
-
+from . import options
+from .trainer import Trainer
 
 basicConfig(
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
@@ -11,7 +10,7 @@ basicConfig(
     level=INFO,
     stream=sys.stdout,
 )
-logger = getLogger("bunruija_cli.train")
+logger = getLogger("bunruija.train")
 
 
 def main(args):

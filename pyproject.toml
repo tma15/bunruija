@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bunruija"
-version = "0.0.3"
+version = "0.0.4"
 description = "A text classification toolkit"
 authors = ["Takuya Makino <takuyamakino15@gmail.com>"]
 homepage = "https://github.com/tma15"
@@ -32,10 +32,10 @@ ruamel-yaml = "^0.18.5"
 pytest = "^7.1.2"
 
 [tool.poetry.scripts]
-bunruija-gen-yaml = 'bunruija_cli.gen_yaml:cli_main'
-bunruija-evaluate = 'bunruija_cli.evaluate:cli_main'
-bunruija-predict = 'bunruija_cli.predict:cli_main'
-bunruija-train = 'bunruija_cli.train:cli_main'
+bunruija-gen-yaml = 'bunruija.gen_yaml:cli_main'
+bunruija-evaluate = 'bunruija.evaluate:cli_main'
+bunruija-predict = 'bunruija.predict:cli_main'
+bunruija-train = 'bunruija.train:cli_main'
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.6.0"
