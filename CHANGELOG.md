@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.0.4](https://github.com/tma15/bunruija/compare/v0.0.3...v0.0.4) - 2024-01-20
+- Fix CLI by @tma15 in https://github.com/tma15/bunruija/pull/35
+
 ## [v0.0.3](https://github.com/tma15/bunruija/compare/v0.0.2...v0.0.3) - 2024-01-20
 - Add homepage, respository and readme by @tma15 in https://github.com/tma15/bunruija/pull/32
 - Feature/preparing for pypi by @tma15 in https://github.com/tma15/bunruija/pull/34
