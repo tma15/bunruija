@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.0.3](https://github.com/tma15/bunruija/compare/v0.0.2...v0.0.3) - 2024-01-20
+- Add homepage, respository and readme by @tma15 in https://github.com/tma15/bunruija/pull/32
+- Feature/preparing for pypi by @tma15 in https://github.com/tma15/bunruija/pull/34
+
 ## [v0.0.2](https://github.com/tma15/bunruija/compare/v0.0.1...v0.0.2) - 2024-01-07
 - Refactor/cc by @tma15 in https://github.com/tma15/bunruija/pull/22
 - Feature/add hf datasets by @tma15 in https://github.com/tma15/bunruija/pull/24
