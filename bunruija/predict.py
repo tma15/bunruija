@@ -1,6 +1,6 @@
 import sys
 
-from bunruija import Predictor, options
+from . import Predictor, options
 
 
 def main(args):

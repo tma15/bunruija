@@ -28,6 +28,11 @@ class SequenceVectorizer(TransformerMixin):
         self.keep_raw_word = keep_raw_word
         self.only_raw_word = only_raw_word
 
+    @classmethod
+    def module_name(cls) -> str:
+        module_name = ".".join([cls.__module__, cls.__name__])
+        return module_name
+
     def __repr__(self) -> str:
         args = []
         if self.tokenizer:

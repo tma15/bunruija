@@ -6,8 +6,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer  # type: ignore
 from sklearn.pipeline import Pipeline  # type: ignore
 from sklearn.svm import SVC  # type: ignore
 
-from bunruija import BunruijaConfig, PipelineBuilder
-from bunruija_cli import gen_yaml
+from bunruija import BunruijaConfig, PipelineBuilder, gen_yaml
 
 
 class TestPipelineBuilder(unittest.TestCase):
