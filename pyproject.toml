@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bunruija"
-version = "0.0.2"
+version = "0.0.3"
 description = "A text classification toolkit"
 authors = ["Takuya Makino <takuyamakino15@gmail.com>"]
 homepage = "https://github.com/tma15"
@@ -13,9 +13,8 @@ generate-setup-file = true
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.11"
-Cython = "^0.29.26"
-lightgbm = "^3.3.1"
-PyYAML = "^6.0.1"
+Cython = "^3.0.8"
+lightgbm = "^4.2.0"
 torch = "^2.1.2"
 transformers = "^4.36.2"
 unidic-lite = "^1.0.8"

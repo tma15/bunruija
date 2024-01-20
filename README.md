@@ -12,7 +12,7 @@ See `example` for understanding how bunruija is easy to use.
 
 ## Install
 ```
-poetry install
+pip install bunruija
 ```
 
 ## Example configs
