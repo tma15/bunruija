@@ -1,6 +1,5 @@
 import importlib
 from logging import getLogger
-from typing import List, Union
 
 from sklearn.pipeline import Pipeline  # type: ignore
 from transformers import AutoTokenizer, PreTrainedTokenizer
@@ -85,7 +84,7 @@ class PipelineBuilder:
 
     def build_estimator(
         self,
-        pipeline_units: Union[PipelineUnit, List[PipelineUnit]],
+        pipeline_units: PipelineUnit | list[PipelineUnit],
         pipeline_idx="pipeline",
     ):
         if isinstance(pipeline_units, list):

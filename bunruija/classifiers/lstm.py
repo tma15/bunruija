@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 
 import numpy as np
 import torch
@@ -8,7 +7,6 @@ from torch.nn import Module
 from bunruija.classifiers.classifier import NeuralBaseClassifier
 from bunruija.modules import StaticEmbedding
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -16,7 +14,7 @@ class LSTMClassifier(NeuralBaseClassifier):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.embedding_path: Optional[str] = kwargs.get("static_embedding_path", None)
+        self.embedding_path: str | None = kwargs.get("static_embedding_path", None)
 
         self.dim_emb: int = kwargs.get("dim_emb", 256)
         self.dim_hid: int = kwargs.get("dim_hid", 512)

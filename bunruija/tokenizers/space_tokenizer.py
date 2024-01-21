@@ -1,5 +1,3 @@
-from typing import List
-
 from .tokenizer import BaseTokenizer
 
 
@@ -8,7 +6,7 @@ class SpaceTokenizer(BaseTokenizer):
         self.reduce_redundant_spaces = reduce_redundant_spaces
         super().__init__(name="space")
 
-    def __call__(self, text) -> List[str]:
+    def __call__(self, text) -> list[str]:
         if self.reduce_redundant_spaces:
             result = [token for token in text.split(" ") if token != ""]
             return result
