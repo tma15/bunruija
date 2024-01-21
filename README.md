@@ -24,7 +24,7 @@ data:
   dev: dev.csv
   test: test.csv
 
-bin_dir: models/svm-model
+output_dir: models/svm-model
 
 pipeline:
   - type: sklearn.feature_extraction.text.TfidfVectorizer
@@ -55,7 +55,7 @@ data:
   dev: dev.csv
   test: test.csv
 
-bin_dir: models/transformer-model
+output_dir: models/transformer-model
 
 pipeline:
   - type: bunruija.feature_extraction.sequence.SequenceVectorizer

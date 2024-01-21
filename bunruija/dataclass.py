@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 import ruamel.yaml  # type: ignore
 
@@ -8,14 +8,14 @@ import ruamel.yaml  # type: ignore
 @dataclass
 class PipelineUnit:
     type: str
-    args: Dict[str, Any] = field(default_factory=dict)
+    args: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
 class BunruijaConfig:
-    data: Dict[str, str]
-    pipeline: List[PipelineUnit]
-    bin_dir: Path
+    data: dict[str, str]
+    pipeline: list[PipelineUnit]
+    output_dir: Path
 
     @classmethod
     def from_yaml(cls, config_file):
@@ -26,5 +26,5 @@ class BunruijaConfig:
             return cls(
                 data=config["data"],
                 pipeline=[PipelineUnit(**unit) for unit in config["pipeline"]],
-                bin_dir=Path(config.get("bin_dir", ".")),
+                output_dir=Path(config.get("output_dir", "output")),
             )

@@ -56,7 +56,7 @@ class TestBinary(unittest.TestCase):
             setting["data"]["train"] = str(Path(data_dir) / "train.csv")
             setting["data"]["dev"] = str(Path(data_dir) / "dev.csv")
             setting["data"]["test"] = str(Path(data_dir) / "test.csv")
-            setting["bin_dir"] = str(Path(data_dir) / "bin_dir")
+            setting["output_dir"] = str(Path(data_dir) / "output_dir")
 
         with open(yaml_file, "w") as f:
             yaml.dump(setting, f)

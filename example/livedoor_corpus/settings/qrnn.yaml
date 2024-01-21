@@ -3,7 +3,7 @@ data:
   dev: dev.csv
   test: test.csv
 
-bin_dir: models/qrnn-model
+output_dir: models/qrnn-model
 
 pipeline:
   - type: bunruija.feature_extraction.sequence.SequenceVectorizer

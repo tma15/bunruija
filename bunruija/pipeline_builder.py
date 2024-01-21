@@ -91,7 +91,7 @@ class PipelineBuilder:
         if isinstance(pipeline_units, list):
             estimators = [self.build_estimator(u) for u in pipeline_units]
             estimator_type = pipeline_idx
-            memory = self.config.bin_dir / "cache"
+            memory = self.config.output_dir / "cache"
             estimator = Pipeline(estimators, memory=str(memory))
         else:
             self._maybe_update_arg(pipeline_units)
