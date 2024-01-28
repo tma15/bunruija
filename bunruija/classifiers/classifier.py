@@ -1,4 +1,5 @@
 import time
+from functools import partial
 from logging import getLogger
 
 import numpy as np
@@ -141,7 +142,6 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
         self.init_layer(data)
 
         optimizer = self.build_optimizer()
-        logger.info(f"{optimizer}")
         start_at = time.perf_counter()
 
         self.to(self.device)
@@ -211,24 +211,13 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
     def classifier_args(self):
         raise NotImplementedError
 
-    def build_optimizer(self):
-        lr = float(self.kwargs.get("lr", 0.001))
-        weight_decay = self.kwargs.get("weight_decay", 0.0)
-
-        if self.optimizer_type == "sgd":
-            optimizer = torch.optim.SGD(
-                self.parameters(), lr=lr, weight_decay=weight_decay
-            )
-        elif self.optimizer_type == "adam":
-            optimizer = torch.optim.Adam(
-                self.parameters(), lr=lr, weight_decay=weight_decay
-            )
-        elif self.optimizer_type == "adamw":
-            optimizer = torch.optim.AdamW(
-                self.parameters(), lr=lr, weight_decay=weight_decay
-            )
-        else:
-            raise ValueError(f"Unsupported optimizer: {self.optimizer_type}")
+    def build_optimizer(self) -> torch.optim.Optimizer:
+        unlinked_optimizer = self.kwargs.get(
+            "optimizer",
+            partial(torch.optim.AdamW),
+        )
+        optimizer: torch.optim.Optimizer = unlinked_optimizer(self.parameters())
+        logger.info(f"Optimizer: {optimizer}")
         return optimizer
 
     def zero_grad(self):
