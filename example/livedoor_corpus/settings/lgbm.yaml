@@ -3,7 +3,7 @@ data:
   dev: dev.csv
   test: test.csv
 
-bin_dir: models/lgb-model
+output_dir: models/lgb-model
 
 pipeline:
   - type: sklearn.feature_extraction.text.TfidfVectorizer

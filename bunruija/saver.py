@@ -10,7 +10,7 @@ class Saver:
         self.config = config
 
     def __call__(self, model, label_encoder: LabelEncoder):
-        with open(self.config.bin_dir / "model.bunruija", "wb") as f:
+        with open(self.config.output_dir / "model.bunruija", "wb") as f:
             model_data = {
                 "pipeline": model,
                 "label_encoder": label_encoder,

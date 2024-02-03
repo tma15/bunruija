@@ -2,19 +2,18 @@ import pickle
 from pathlib import Path
 
 import numpy as np
-import ruamel.yaml  # type: ignore
 from sklearn.preprocessing import LabelEncoder  # type: ignore
+
+from . import BunruijaConfig
 
 
 class Predictor:
     """Predicts labels"""
 
     def __init__(self, config_file):
-        with open(config_file) as f:
-            yaml = ruamel.yaml.YAML()
-            config = yaml.load(f)
+        config = BunruijaConfig.from_yaml(config_file)
+        model_path: Path = config.output_dir / "model.bunruija"
 
-        model_path = Path(config.get("bin_dir", ".")) / "model.bunruija"
         with open(model_path, "rb") as f:
             model_data: dict = pickle.load(f)
 

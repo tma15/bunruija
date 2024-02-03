@@ -24,7 +24,7 @@ data:
   dev: dev.csv
   test: test.csv
 
-bin_dir: models/svm-model
+output_dir: models/svm-model
 
 pipeline:
   - type: sklearn.feature_extraction.text.TfidfVectorizer
@@ -55,7 +55,7 @@ data:
   dev: dev.csv
   test: test.csv
 
-bin_dir: models/transformer-model
+output_dir: models/transformer-model
 
 pipeline:
   - type: bunruija.feature_extraction.sequence.SequenceVectorizer
@@ -68,10 +68,15 @@ pipeline:
     args:
       device: cpu
       pretrained_model_name_or_path: cl-tohoku/bert-base-japanese
-      optimizer: adamw
-      lr: 3e-5
+      optimizer:
+        type: torch.optim.AdamW
+        args:
+          lr: 3e-5
+          weight_decay: 0.01
+          betas:
+            - 0.9
+            - 0.999
       max_epochs: 3
-      weight_decay: 0.01
 ```
 
 ## CLI
@@ -82,6 +87,47 @@ bunruija-train -y config.yaml
 # Evaluating the trained classifier
 bunruija-evaluate -y config.yaml
 ```
+
+## Config
+### data
+You can set data-related settings in `data`.
+
+```sh
+data:
+  train: train.csv  # training data
+  dev: dev.csv # development data
+  test: test.csv # test data
+  label_column: label
+  text_column: text
+```
+
+You can set local files in `train`, `dev`, and `test`.
+Supported types are `csv`, `json` and `jsonl`.
+`label_column` and `text_column` are field names of label and text.
+When you set `label_column` to `label` and `text_column` to `text`, which are the default values, actual data must be as follows:
+
+Format of `csv`:
+
+```
+label,text
+label_name,sentence
+…
+```
+
+Format of `json`:
+
+```
+[{"label", "label_name", "text": "sentence"}]
+```
+
+Format of `jsonl`:
+
+```
+{"label", "label_name", "text": "sentence"}
+```
+
+### pipeline
+You can set pipeline of your model in `pipeline`
 
 
 ## Prediction using the trained classifier in Python code

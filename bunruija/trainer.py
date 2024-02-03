@@ -16,7 +16,11 @@ class Trainer:
         self.saver = Saver(self.config)
 
     def train(self):
-        labels_train, X_train = load_data(self.config.data["train"])
+        labels_train, X_train = load_data(
+            self.config.data.train,
+            label_column=self.config.data.label_column,
+            text_column=self.config.data.text_column,
+        )
 
         label_encoder = LabelEncoder()
         y_train: np.ndarray = label_encoder.fit_transform(labels_train)
@@ -25,8 +29,13 @@ class Trainer:
 
         self.saver(self.model, label_encoder)
 
-        if "dev" in self.config.data:
-            labels_dev, X_dev = load_data(self.config.data["dev"])
+        if self.config.data.dev.exists():
+            labels_dev, X_dev = load_data(
+                self.config.data.dev,
+                label_column=self.config.data.label_column,
+                text_column=self.config.data.text_column,
+            )
+
             y_dev: np.ndarray = label_encoder.transform(labels_dev)
 
             y_pred = self.model.predict(X_dev)

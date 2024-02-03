@@ -21,7 +21,7 @@ class TestBunruijaConfig(TestCase):
             config = BunruijaConfig.from_yaml(yaml_file)
             self.assertTrue(hasattr(config, "data"))
             self.assertTrue(hasattr(config, "pipeline"))
-            self.assertTrue(hasattr(config, "bin_dir"))
+            self.assertTrue(hasattr(config, "output_dir"))
 
             self.assertEqual(
                 config.pipeline[0].type,

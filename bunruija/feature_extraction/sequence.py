@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable
 
 import numpy as np
 import transformers  # type: ignore
@@ -12,8 +12,8 @@ from ..tokenizers import MeCabTokenizer
 class SequenceVectorizer(TransformerMixin):
     def __init__(
         self,
-        tokenizer: Optional[Callable[[str], List[str]]] = None,
-        max_features: Optional[int] = None,
+        tokenizer: Callable[[str], list[str]] | None = None,
+        max_features: int | None = None,
         keep_raw_word: bool = True,
         only_raw_word: bool = False,
         dictionary: Dictionary = Dictionary(),
@@ -44,7 +44,7 @@ class SequenceVectorizer(TransformerMixin):
         out = f'{self.__class__.__name__}({", ".join(args)})'
         return out
 
-    def build_tokenizer(self) -> Callable[[str], List[str]]:
+    def build_tokenizer(self) -> Callable[[str], list[str]]:
         if self.tokenizer is not None:
             return self.tokenizer
 
@@ -56,7 +56,7 @@ class SequenceVectorizer(TransformerMixin):
             if hasattr(self, k):
                 setattr(self, k, v)
 
-    def get_params(self, deep=True) -> Dict[str, Any]:
+    def get_params(self, deep=True) -> dict[str, Any]:
         return {
             "tokenizer": self.tokenizer,
             "max_features": self.max_features,
@@ -65,7 +65,7 @@ class SequenceVectorizer(TransformerMixin):
             "only_raw_word": self.only_raw_word,
         }
 
-    def fit(self, raw_documents: List[str], y=None) -> "SequenceVectorizer":
+    def fit(self, raw_documents: list[str], y=None) -> "SequenceVectorizer":
         if self.only_raw_word:
             return self
 
@@ -89,8 +89,9 @@ class SequenceVectorizer(TransformerMixin):
         return self
 
     def transform(
-        self, raw_documents: List[str]
-    ) -> Union[csr_matrix, Tuple[csr_matrix, List[str]]]:
+        self,
+        raw_documents: list[str],
+    ) -> csr_matrix | tuple[csr_matrix, list[str]]:
         data = []
         raw_words = []
         row = []

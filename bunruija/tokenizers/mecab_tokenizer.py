@@ -1,5 +1,3 @@
-from typing import List
-
 from fugashi import Tagger  # type: ignore
 
 from ..filters import PosFilter
@@ -55,7 +53,7 @@ class MeCabTokenizer(BaseTokenizer):
         out = f'{self.__class__.__name__}({", ".join(args)})'
         return out
 
-    def __call__(self, text: str) -> List[str]:
+    def __call__(self, text: str) -> list[str]:
         ret = []
         for word in self._mecab(text):
             if self.filters and any(

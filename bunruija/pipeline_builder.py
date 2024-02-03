@@ -1,7 +1,8 @@
 import importlib
+from functools import partial
 from logging import getLogger
-from typing import List, Union
 
+import torch
 from sklearn.pipeline import Pipeline  # type: ignore
 from transformers import AutoTokenizer, PreTrainedTokenizer
 
@@ -85,19 +86,25 @@ class PipelineBuilder:
 
     def build_estimator(
         self,
-        pipeline_units: Union[PipelineUnit, List[PipelineUnit]],
+        pipeline_units: PipelineUnit | list[PipelineUnit],
         pipeline_idx="pipeline",
     ):
         if isinstance(pipeline_units, list):
             estimators = [self.build_estimator(u) for u in pipeline_units]
             estimator_type = pipeline_idx
-            memory = self.config.bin_dir / "cache"
+            memory = self.config.output_dir / "cache"
             estimator = Pipeline(estimators, memory=str(memory))
         else:
             self._maybe_update_arg(pipeline_units)
             estimator_type = pipeline_units.type
             cls = self._load_class(pipeline_units.type)
-            estimator = cls(**pipeline_units.args)
+
+            # parameters of a neural network are not given at this moment.
+            # so, partially create an optimizer
+            if issubclass(cls, torch.optim.Optimizer):
+                estimator = partial(cls, **pipeline_units.args)
+            else:
+                estimator = cls(**pipeline_units.args)
 
         # Because Pipeline of scikit-learn requires the tuple of name and estimator,
         # this functions returns them

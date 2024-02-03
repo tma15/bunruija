@@ -3,7 +3,7 @@ data:
   dev: dev.csv
   test: test.csv
 
-bin_dir: models/stacking-model
+output_dir: models/stacking-model
 
 pipeline:
   - type: sklearn.ensemble.StackingClassifier

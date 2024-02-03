@@ -3,7 +3,7 @@ data:
   dev: dev.csv
   test: test.csv
 
-bin_dir: models/qrnn-model
+output_dir: models/qrnn-model
 
 pipeline:
   - type: bunruija.feature_extraction.sequence.SequenceVectorizer
@@ -20,10 +20,15 @@ pipeline:
       dim_emb: 128
       dim_hid: 256
       num_layers: 2
-      optimizer: adamw
-      lr: 0.001
       max_epochs: 10
-      weight_decay: 0.01
+      optimizer:
+        type: torch.optim.AdamW
+        args:
+          lr: 0.001
+          betas:
+            - 0.9
+            - 0.999
+          weight_decay: 0.01
       log_interval: 10
       static_embedding_path: jawiki.all_vectors.300d.txt
       num_workers: 2
