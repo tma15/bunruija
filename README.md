@@ -88,6 +88,47 @@ bunruija-train -y config.yaml
 bunruija-evaluate -y config.yaml
 ```
 
+## Config
+### data
+You can set data-related settings in `data`.
+
+```sh
+data:
+  train: train.csv  # training data
+  dev: dev.csv # development data
+  test: test.csv # test data
+  label_column: label
+  text_column: text
+```
+
+You can set local files in `train`, `dev`, and `test`.
+Supported types are `csv`, `json` and `jsonl`.
+`label_column` and `text_column` are field names of label and text.
+When you set `label_column` to `label` and `text_column` to `text`, which are the default values, actual data must be as follows:
+
+Format of `csv`:
+
+```
+label,text
+label_name,sentence
+…
+```
+
+Format of `json`:
+
+```
+[{"label", "label_name", "text": "sentence"}]
+```
+
+Format of `jsonl`:
+
+```
+{"label", "label_name", "text": "sentence"}
+```
+
+### pipeline
+You can set pipeline of your model in `pipeline`
+
 
 ## Prediction using the trained classifier in Python code
 ```python

@@ -1,3 +1,4 @@
+import csv
 import random
 import tempfile
 import unittest
@@ -28,19 +29,21 @@ def create_dummy_data(data_dir, num_samples=5, num_labels=3, max_len=100):
             data = torch.rand(num_samples * max_len)
             data = 97 + torch.floor(26 * data).int()
 
+            writer = csv.writer(f)
+            writer.writerow(["label", "text"])
             for i in range(num_labels):
                 label = labels[i]
                 sample_len = random.randint(30, max_len)
                 sample_str = "".join(map(chr, data[offset : offset + sample_len]))
                 offset += sample_len
-                print(f"{label},{sample_str}", file=f)
+                writer.writerow([label, sample_str])
 
             for i in range(num_samples - num_labels):
                 label = random.choice(labels)
                 sample_len = random.randint(30, max_len)
                 sample_str = "".join(map(chr, data[offset : offset + sample_len]))
                 offset += sample_len
-                print(f"{label},{sample_str}", file=f)
+                writer.writerow([label, sample_str])
 
     _create_dummy_data("train.csv")
     _create_dummy_data("dev.csv")

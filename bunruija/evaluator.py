@@ -17,7 +17,11 @@ class Evaluator:
         self.predictor = Predictor(args.yaml)
 
     def evaluate(self):
-        labels_test, X_test = load_data(self.config.data["test"])
+        labels_test, X_test = load_data(
+            self.config.data.test,
+            label_column=self.config.data.label_column,
+            text_column=self.config.data.text_column,
+        )
         y_test: np.ndarray = self.predictor.label_encoder.transform(labels_test)
         y_pred: np.ndarray = self.predictor(X_test)
 

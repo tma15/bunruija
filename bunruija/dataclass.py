@@ -12,8 +12,22 @@ class PipelineUnit:
 
 
 @dataclass
+class DataConfig:
+    train: Path = field(default_factory=Path)
+    dev: Path = field(default_factory=Path)
+    test: Path = field(default_factory=Path)
+    label_column: str = "label"
+    text_column: str = "text"
+
+    def __post_init__(self):
+        self.train = Path(self.train)
+        self.dev = Path(self.dev)
+        self.test = Path(self.test)
+
+
+@dataclass
 class BunruijaConfig:
-    data: dict[str, str]
+    data: DataConfig
     pipeline: list[PipelineUnit]
     output_dir: Path
 
@@ -24,7 +38,7 @@ class BunruijaConfig:
             config = yaml.load(f)
 
             return cls(
-                data=config["data"],
+                data=DataConfig(**config["data"]),
                 pipeline=[PipelineUnit(**unit) for unit in config["pipeline"]],
                 output_dir=Path(config.get("output_dir", "output")),
             )
