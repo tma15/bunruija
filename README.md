@@ -1,4 +1,6 @@
 # Bunruija
+[![PyPI version](https://badge.fury.io/py/bunruija.svg)](https://badge.fury.io/py/bunruija)
+
 Bunruija is a text classification toolkit.
 Bunruija aims at enabling pre-processing, training and evaluation of text classification models with **minimum coding effort**.
 Bunruija is mainly focusing on Japanese though it is also applicable to other languages.
