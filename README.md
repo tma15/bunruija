@@ -92,7 +92,7 @@ bunruija-evaluate -y config.yaml
 ### data
 You can set data-related settings in `data`.
 
-```sh
+```yaml
 data:
   train: train.csv  # training data
   dev: dev.csv # development data
@@ -108,7 +108,7 @@ When you set `label_column` to `label` and `text_column` to `text`, which are th
 
 Format of `csv`:
 
-```
+```csv
 label,text
 label_name,sentence
 …
@@ -116,13 +116,13 @@ label_name,sentence
 
 Format of `json`:
 
-```
+```json
 [{"label", "label_name", "text": "sentence"}]
 ```
 
 Format of `jsonl`:
 
-```
+```json
 {"label", "label_name", "text": "sentence"}
 ```
 
@@ -131,12 +131,15 @@ You can set pipeline of your model in `pipeline`
 
 
 ## Prediction using the trained classifier in Python code
+After you trained a classification model, you can use that model for prediction as follows:
 ```python
 from bunruija import Predictor
 
-predictor = Predictor(args.yaml)
+predictor = Predictor.from_pretrained("output_dir")
 while True:
     text = input("Input:")
     label: list[str] = predictor([text], return_label_type="str")
     print(label[0])
 ```
+
+`output_dir` is a directory that is specified in `output_dir` in config.

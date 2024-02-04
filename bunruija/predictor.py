@@ -4,21 +4,23 @@ from pathlib import Path
 import numpy as np
 from sklearn.preprocessing import LabelEncoder  # type: ignore
 
-from . import BunruijaConfig
-
 
 class Predictor:
     """Predicts labels"""
 
-    def __init__(self, config_file):
-        config = BunruijaConfig.from_yaml(config_file)
-        model_path: Path = config.output_dir / "model.bunruija"
+    def __init__(self, model_dir: str | Path):
+        if isinstance(model_dir, str):
+            model_dir = Path(model_dir)
 
+        model_path: Path = model_dir / "model.bunruija"
         with open(model_path, "rb") as f:
             model_data: dict = pickle.load(f)
+        self.model = model_data["pipeline"]
+        self.label_encoder: LabelEncoder = model_data["label_encoder"]
 
-            self.model = model_data["pipeline"]
-            self.label_encoder: LabelEncoder = model_data["label_encoder"]
+    @classmethod
+    def from_pretrained(cls, model_path: str | Path):
+        return cls(model_path)
 
     def __call__(
         self,

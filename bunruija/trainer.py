@@ -42,5 +42,8 @@ class Trainer:
 
             fscore = sklearn.metrics.f1_score(y_dev, y_pred, average="micro")
             print(f"F-score on dev: {fscore}")
-            report = sklearn.metrics.classification_report(y_pred, y_dev)
+            target_names: list[str] = list(label_encoder.classes_)
+            report = sklearn.metrics.classification_report(
+                y_pred, y_dev, target_names=target_names
+            )
             print(report)

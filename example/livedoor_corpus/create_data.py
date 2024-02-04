@@ -3,25 +3,27 @@ import json
 from argparse import ArgumentParser
 from pathlib import Path
 
-from datasets import load_dataset
+from datasets import Dataset, load_dataset
 from loguru import logger  # type: ignore
 
 
-def write_csv(samples: list[dict], name: Path):
+def write_csv(ds: Dataset, name: Path):
     with open(name, "w") as f:
         writer = csv.writer(f)
         writer.writerow(["label", "text"])
-        for sample in samples:
-            writer.writerow([f"{sample['category']}", sample["title"]])
+        for sample in ds:
+            category: str = ds.features["category"].names[sample["category"]]
+            writer.writerow([f"{category}", sample["title"]])
         logger.info(f"{name}")
 
 
-def write_json(samples: list[dict], name: Path):
+def write_json(ds: Dataset, name: Path):
     with open(name, "w") as f:
-        for sample in samples:
+        for sample in ds:
+            category: str = ds.features["category"].names[sample["category"]]
             sample_ = {
                 "text": sample["title"],
-                "label": sample["category"],
+                "label": category,
             }
             print(json.dumps(sample_), file=f)
         logger.info(f"{name}")
