@@ -1,4 +1,5 @@
 import argparse
+from pathlib import Path
 
 
 def get_parser():
@@ -18,7 +19,8 @@ def get_default_train_parser():
 
 
 def get_default_prediction_parser():
-    parser = get_parser()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--model", type=Path, required=True)
     return parser
 
 

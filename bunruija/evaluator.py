@@ -14,7 +14,7 @@ class Evaluator:
     def __init__(self, args: Namespace):
         self.config = BunruijaConfig.from_yaml(args.yaml)
         self.verbose = args.verbose
-        self.predictor = Predictor(args.yaml)
+        self.predictor = Predictor.from_pretrained(self.config.output_dir)
 
     def evaluate(self):
         labels_test, X_test = load_data(
