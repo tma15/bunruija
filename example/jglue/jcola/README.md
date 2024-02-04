@@ -2,7 +2,7 @@
 
 ## Linear SVM
 ### Config
-```json
+```yaml
 pipeline:
   - type: sklearn.feature_extraction.text.TfidfVectorizer
     args:
