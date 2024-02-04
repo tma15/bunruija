@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.1.0](https://github.com/tma15/bunruija/compare/v0.0.4...v0.1.0) - 2024-02-04
+- Fix/refactor by @tma15 in https://github.com/tma15/bunruija/pull/37
+- Fix/refactor by @tma15 in https://github.com/tma15/bunruija/pull/39
+
 ## [v0.0.4](https://github.com/tma15/bunruija/compare/v0.0.3...v0.0.4) - 2024-01-20
 - Fix CLI by @tma15 in https://github.com/tma15/bunruija/pull/35
 
