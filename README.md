@@ -22,9 +22,9 @@ Example of `sklearn.svm.SVC`
 
 ```yaml
 data:
-  train: train.csv
-  dev: dev.csv
-  test: test.csv
+  train: train.jsonl
+  dev: dev.jsonl
+  test: test.jsonl
 
 output_dir: models/svm-model
 
@@ -53,9 +53,9 @@ Example of BERT
 
 ```yaml
 data:
-  train: train.csv
-  dev: dev.csv
-  test: test.csv
+  train: train.jsonl
+  dev: dev.jsonl
+  test: test.jsonl
 
 output_dir: models/transformer-model
 
@@ -96,9 +96,9 @@ You can set data-related settings in `data`.
 
 ```yaml
 data:
-  train: train.csv  # training data
-  dev: dev.csv # development data
-  test: test.csv # test data
+  train: train.jsonl  # training data
+  dev: dev.jsonl # development data
+  test: test.jsonl # test data
   label_column: label
   text_column: text
 ```
@@ -129,8 +129,28 @@ Format of `jsonl`:
 ```
 
 ### pipeline
-You can set pipeline of your model in `pipeline`
+You can set pipeline of your model in `pipeline` section.
+It is a list of components that are used in your model.
 
+For each component, `type` is a module path and `args` is arguments for the module.
+For instance, when you set the first component as follows, [TfidfVectorizer](https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html) is instanciated with given arguments, and then applied to data at first in your model.
+
+```yaml
+  - type: sklearn.feature_extraction.text.TfidfVectorizer
+    args:
+      tokenizer:
+        type: bunruija.tokenizers.mecab_tokenizer.MeCabTokenizer
+        args:
+          lemmatize: true
+          exclude_pos:
+            - 助詞
+            - 助動詞
+      max_features: 10000
+      min_df: 3
+      ngram_range:
+        - 1
+        - 3
+```
 
 ## Prediction using the trained classifier in Python code
 After you trained a classification model, you can use that model for prediction as follows:
