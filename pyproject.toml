@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bunruija"
-version = "0.1.0"
+version = "0.2.0"
 description = "A text classification toolkit"
 authors = ["Takuya Makino <takuyamakino15@gmail.com>"]
 homepage = "https://github.com/tma15"
