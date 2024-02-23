@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.2.0](https://github.com/tma15/bunruija/compare/v0.1.0...v0.2.0) - 2024-02-23
+- Feature/jglue example by @tma15 in https://github.com/tma15/bunruija/pull/40
+- Add sentence pair classification (#42) by @tma15 in https://github.com/tma15/bunruija/pull/43
+- Feature/load data from hf by @tma15 in https://github.com/tma15/bunruija/pull/44
+
 ## [v0.1.0](https://github.com/tma15/bunruija/compare/v0.0.4...v0.1.0) - 2024-02-04
 - Fix/refactor by @tma15 in https://github.com/tma15/bunruija/pull/37
 - Fix/refactor by @tma15 in https://github.com/tma15/bunruija/pull/39
