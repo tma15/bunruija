@@ -72,9 +72,11 @@ def main(args):
 
     setting = {
         "data": {
-            "train": "train.csv",
-            "dev": "dev.csv",
-            "test": "test.csv",
+            "label_column": "label",
+            "text_coliumn": "text",
+            "args": {
+                "path": "",
+            },
         },
         "pipeline": [
             infer_vectorizer(model_cls),

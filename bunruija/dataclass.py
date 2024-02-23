@@ -1,3 +1,4 @@
+from collections import UserDict
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -13,23 +14,16 @@ class PipelineUnit:
 
 @dataclass
 class DataConfig:
-    train: Path = field(default_factory=Path)
-    dev: Path = field(default_factory=Path)
-    test: Path = field(default_factory=Path)
     label_column: str = "label"
-    text_column: str = "text"
-
-    def __post_init__(self):
-        self.train = Path(self.train)
-        self.dev = Path(self.dev)
-        self.test = Path(self.test)
+    text_column: str | list[str] = "text"
 
 
 @dataclass
 class BunruijaConfig:
-    data: DataConfig
     pipeline: list[PipelineUnit]
     output_dir: Path
+    data: DataConfig | None = None
+    dataset_args: UserDict | None = None
 
     @classmethod
     def from_yaml(cls, config_file):
@@ -37,8 +31,12 @@ class BunruijaConfig:
             yaml = ruamel.yaml.YAML()
             config = yaml.load(f)
 
+            label_column: str = config["data"].pop("label_column", "label")
+            text_column: str | list[str] = config["data"].pop("text_column", "text")
+
             return cls(
-                data=DataConfig(**config["data"]),
+                data=DataConfig(label_column=label_column, text_column=text_column),
                 pipeline=[PipelineUnit(**unit) for unit in config["pipeline"]],
                 output_dir=Path(config.get("output_dir", "output")),
+                dataset_args=UserDict(config["data"]["args"]),
             )

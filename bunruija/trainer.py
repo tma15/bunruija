@@ -1,3 +1,4 @@
+import datasets
 import numpy as np
 import sklearn  # type: ignore
 from sklearn.preprocessing import LabelEncoder  # type: ignore
@@ -17,7 +18,8 @@ class Trainer:
 
     def train(self):
         labels_train, X_train = load_data(
-            self.config.data.train,
+            self.config.dataset_args,
+            split=datasets.Split.TRAIN,
             label_column=self.config.data.label_column,
             text_column=self.config.data.text_column,
         )
@@ -29,21 +31,21 @@ class Trainer:
 
         self.saver(self.model, label_encoder)
 
-        if self.config.data.dev.exists():
-            labels_dev, X_dev = load_data(
-                self.config.data.dev,
-                label_column=self.config.data.label_column,
-                text_column=self.config.data.text_column,
-            )
+        labels_dev, X_dev = load_data(
+            self.config.dataset_args,
+            split=datasets.Split.VALIDATION,
+            label_column=self.config.data.label_column,
+            text_column=self.config.data.text_column,
+        )
 
-            y_dev: np.ndarray = label_encoder.transform(labels_dev)
+        y_dev: np.ndarray = label_encoder.transform(labels_dev)
 
-            y_pred = self.model.predict(X_dev)
+        y_pred = self.model.predict(X_dev)
 
-            fscore = sklearn.metrics.f1_score(y_dev, y_pred, average="micro")
-            print(f"F-score on dev: {fscore}")
-            target_names: list[str] = list(label_encoder.classes_)
-            report = sklearn.metrics.classification_report(
-                y_pred, y_dev, target_names=target_names
-            )
-            print(report)
+        fscore = sklearn.metrics.f1_score(y_dev, y_pred, average="micro")
+        print(f"F-score on dev: {fscore}")
+        target_names: list[str] = list(label_encoder.classes_)
+        report = sklearn.metrics.classification_report(
+            y_pred, y_dev, target_names=target_names
+        )
+        print(report)
