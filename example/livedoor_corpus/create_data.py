@@ -1,4 +1,3 @@
-import csv
 import json
 from argparse import ArgumentParser
 from pathlib import Path
@@ -7,23 +6,13 @@ from datasets import Dataset, load_dataset
 from loguru import logger  # type: ignore
 
 
-def write_csv(ds: Dataset, name: Path):
-    with open(name, "w") as f:
-        writer = csv.writer(f)
-        writer.writerow(["label", "text"])
-        for sample in ds:
-            category: str = ds.features["category"].names[sample["category"]]
-            writer.writerow([f"{category}", sample["title"]])
-        logger.info(f"{name}")
-
-
 def write_json(ds: Dataset, name: Path):
     with open(name, "w") as f:
         for sample in ds:
             category: str = ds.features["category"].names[sample["category"]]
             sample_ = {
-                "text": sample["title"],
-                "label": category,
+                "title": sample["title"],
+                "category": category,
             }
             print(json.dumps(sample_), file=f)
         logger.info(f"{name}")
@@ -31,7 +20,9 @@ def write_json(ds: Dataset, name: Path):
 
 def main():
     parser = ArgumentParser()
-    parser.add_argument("--output_dir", default="example/livedoor_corpus", type=Path)
+    parser.add_argument(
+        "--output_dir", default="example/livedoor_corpus/data/jsonl", type=Path
+    )
     args = parser.parse_args()
 
     dataset = load_dataset(
@@ -39,12 +30,12 @@ def main():
         random_state=0,
         shuffle=True,
     )
-    write_csv(dataset["train"], args.output_dir / "train.csv")
-    write_csv(dataset["validation"], args.output_dir / "dev.csv")
-    write_csv(dataset["test"], args.output_dir / "test.csv")
+
+    if not args.output_dir.exists():
+        args.output_dir.mkdir(parents=True)
 
     write_json(dataset["train"], args.output_dir / "train.jsonl")
-    write_json(dataset["validation"], args.output_dir / "dev.jsonl")
+    write_json(dataset["validation"], args.output_dir / "validation.jsonl")
     write_json(dataset["test"], args.output_dir / "test.jsonl")
 
 

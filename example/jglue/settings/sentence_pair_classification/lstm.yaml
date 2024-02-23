@@ -1,9 +1,10 @@
 data:
-  train: data/train.jsonl
-  dev: data/dev.jsonl
+  label_column: label
   text_column:
-    - text1
-    - text2
+    - sentence1
+    - sentence2
+  args:
+    path: data/jsonl
 
 output_dir: models/lstm-model
 

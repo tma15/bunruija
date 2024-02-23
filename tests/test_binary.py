@@ -46,7 +46,7 @@ def create_dummy_data(data_dir, num_samples=5, num_labels=3, max_len=100):
                 writer.writerow([label, sample_str])
 
     _create_dummy_data("train.csv")
-    _create_dummy_data("dev.csv")
+    _create_dummy_data("validation.csv")
     _create_dummy_data("test.csv")
 
 
@@ -56,9 +56,7 @@ class TestBinary(unittest.TestCase):
 
         with open(yaml_file, "r") as f:
             setting = yaml.load(f)
-            setting["data"]["train"] = str(Path(data_dir) / "train.csv")
-            setting["data"]["dev"] = str(Path(data_dir) / "dev.csv")
-            setting["data"]["test"] = str(Path(data_dir) / "test.csv")
+            setting["data"]["args"]["path"] = str(data_dir)
             setting["output_dir"] = str(Path(data_dir) / "output_dir")
 
         with open(yaml_file, "w") as f:
@@ -66,6 +64,10 @@ class TestBinary(unittest.TestCase):
 
     def execute(self, model):
         with tempfile.TemporaryDirectory(f"test_{model}") as data_dir:
+            data_dir = Path(data_dir) / "csv"
+            if not data_dir.exists():
+                data_dir.mkdir(parents=True)
+
             create_dummy_data(data_dir)
             yaml_file = str(Path(data_dir) / "test-binary.yaml")
 

@@ -1,5 +1,6 @@
 from argparse import Namespace
 
+import datasets
 import numpy as np
 from sklearn.metrics import classification_report, confusion_matrix
 
@@ -18,10 +19,12 @@ class Evaluator:
 
     def evaluate(self):
         labels_test, X_test = load_data(
-            self.config.data.test,
+            self.config.dataset_args,
+            split=datasets.Split.TEST,
             label_column=self.config.data.label_column,
             text_column=self.config.data.text_column,
         )
+
         y_test: np.ndarray = self.predictor.label_encoder.transform(labels_test)
         y_pred: np.ndarray = self.predictor(X_test)
 

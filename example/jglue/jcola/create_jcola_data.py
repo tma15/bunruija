@@ -11,7 +11,7 @@ def write_json(ds: Dataset, name: Path):
         for sample in ds:
             category: str = ds.features["label"].names[sample["label"]]
             sample_ = {
-                "text": sample["sentence"],
+                "sentence": sample["sentence"],
                 "label": category,
             }
             print(json.dumps(sample_), file=f)
@@ -20,7 +20,9 @@ def write_json(ds: Dataset, name: Path):
 
 def main():
     parser = ArgumentParser()
-    parser.add_argument("--output_dir", default="example/jglue/jcola/data", type=Path)
+    parser.add_argument(
+        "--output_dir", default="example/jglue/jcola/data/jsonl", type=Path
+    )
     args = parser.parse_args()
 
     if not args.output_dir.exists():
@@ -29,7 +31,7 @@ def main():
     dataset = load_dataset("shunk031/JGLUE", name="JCoLA")
 
     write_json(dataset["train"], args.output_dir / "train.jsonl")
-    write_json(dataset["validation"], args.output_dir / "dev.jsonl")
+    write_json(dataset["validation"], args.output_dir / "validation.jsonl")
 
 
 if __name__ == "__main__":

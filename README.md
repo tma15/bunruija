@@ -22,9 +22,10 @@ Example of `sklearn.svm.SVC`
 
 ```yaml
 data:
-  train: train.jsonl
-  dev: dev.jsonl
-  test: test.jsonl
+  label_column: category
+  text_column: title
+  args:
+    path: data/jsonl
 
 output_dir: models/svm-model
 
@@ -53,9 +54,10 @@ Example of BERT
 
 ```yaml
 data:
-  train: train.jsonl
-  dev: dev.jsonl
-  test: test.jsonl
+  label_column: category
+  text_column: title
+  args:
+    path: data/jsonl
 
 output_dir: models/transformer-model
 
@@ -96,36 +98,44 @@ You can set data-related settings in `data`.
 
 ```yaml
 data:
-  train: train.jsonl  # training data
-  dev: dev.jsonl # development data
-  test: test.jsonl # test data
-  label_column: label
-  text_column: text
+  label_column: category
+  text_column: title
+  args:
+    # Use local data in `data/jsonl`. In this path is assumed to contain data files such as train.jsonl, validation.jsonl and test.jsonl
+    path: data/jsonl
+
+    # If you want to use data on Hugging Face Hub, use the following args instead.
+    # Data is from https://huggingface.co/datasets/shunk031/livedoor-news-corpus
+    # path: shunk031/livedoor-news-corpus
+    # random_state: 0
+    # shuffle: true
+
 ```
 
-You can set local files in `train`, `dev`, and `test`.
-Supported types are `csv`, `json` and `jsonl`.
+data is loaded via [datasets.load_dataset](https://huggingface.co/docs/datasets/main/en/package_reference/loading_methods#datasets.load_dataset).
+So, you can load local data as well as data on [Hugging Face Hub](https://huggingface.co/datasets).
+When loading data, `args` are passed to `load_dataset`.
+
 `label_column` and `text_column` are field names of label and text.
-When you set `label_column` to `label` and `text_column` to `text`, which are the default values, actual data must be as follows:
 
 Format of `csv`:
 
 ```csv
-label,text
-label_name,sentence
+category,sentence
+sports,I like sports!
 …
 ```
 
 Format of `json`:
 
 ```json
-[{"label", "label_name", "text": "sentence"}]
+[{"category", "sports", "text": "I like sports!"}]
 ```
 
 Format of `jsonl`:
 
 ```json
-{"label", "label_name", "text": "sentence"}
+{"category", "sports", "text": "I like suports!"}
 ```
 
 ### pipeline

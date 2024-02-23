@@ -3,6 +3,7 @@ import json
 import tempfile
 from pathlib import Path
 
+import datasets
 import pytest
 
 from bunruija.data.dataset import load_data
@@ -55,38 +56,21 @@ def test_load_data(suffix):
         },
     ]
 
-    with tempfile.TemporaryDirectory("test_load_data}") as data_dir:
-        data_file = Path(data_dir) / ("sample." + suffix)
-        create_dummy_data(samples, data_file, "label", "text")
-        labels, texts = load_data(data_file)
+    with tempfile.TemporaryDirectory("test_load_data") as data_dir:
+        data_dir = Path(data_dir) / suffix
+        if not data_dir.exists():
+            data_dir.mkdir(parents=True)
+
+        for split in ["train", "validation", "test"]:
+            data_file = data_dir / (f"{split}." + suffix)
+            create_dummy_data(samples, data_file, "label", "text")
+
+        labels, texts = load_data(
+            dataset_args={"path": str(data_dir)},
+            label_column="label",
+            text_column="text",
+            split=datasets.Split.TRAIN,
+        )
 
         assert labels == [sample["label"] for sample in samples]
         assert texts == [sample["text"] for sample in samples]
-
-
-@pytest.mark.parametrize("suffix", ["csv", "jsonl", "json"])
-def test_load_data_2(suffix):
-    samples = [
-        {
-            "category": "A",
-            "sample": "text 1",
-        },
-        {
-            "category": "B",
-            "sample": "text 2",
-        },
-        {
-            "category": "C",
-            "sample": "text 3",
-        },
-    ]
-
-    with tempfile.TemporaryDirectory("test_load_data}") as data_dir:
-        data_file = Path(data_dir) / ("sample." + suffix)
-        create_dummy_data(samples, data_file, "category", "sample")
-        labels, texts = load_data(
-            data_file, label_column="category", text_column="sample"
-        )
-
-        assert labels == [sample["category"] for sample in samples]
-        assert texts == [sample["sample"] for sample in samples]

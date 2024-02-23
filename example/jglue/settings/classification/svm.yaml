@@ -1,6 +1,10 @@
 data:
-  train: data/train.jsonl
-  dev: data/dev.jsonl
+  label_column: label
+  text_column: sentence
+  args:
+    path: shunk031/JGLUE
+    name: JCoLA
+    # path: data/jsonl
 
 output_dir: models/svm-model
 

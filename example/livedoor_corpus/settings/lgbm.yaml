@@ -1,7 +1,11 @@
 data:
-  train: train.csv
-  dev: dev.csv
-  test: test.csv
+  label_column: category
+  text_column: title
+  args:
+    # path: shunk031/livedoor-news-corpus
+    # random_state: 0
+    # shuffle: true
+    path: data/jsonl
 
 output_dir: models/lgb-model
 
