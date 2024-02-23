@@ -10,6 +10,9 @@ class Saver:
         self.config = config
 
     def __call__(self, model, label_encoder: LabelEncoder):
+        if not self.config.output_dir.exists():
+            self.config.output_dir.mkdir(parents=True)
+
         with open(self.config.output_dir / "model.bunruija", "wb") as f:
             model_data = {
                 "pipeline": model,

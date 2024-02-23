@@ -111,7 +111,8 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
         if y is not None:
             logger.info("Loading data")
 
-        if len(X) == 2 and isinstance(X[1], list):
+        # if len(X) == 2 and isinstance(X[1], list):
+        if isinstance(X, tuple):
             indices = X[0]
             raw_words = X[1]
             has_raw_words = True
