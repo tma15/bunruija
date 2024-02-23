@@ -54,7 +54,7 @@ class MeCabTokenizer(BaseTokenizer):
         return out
 
     def __call__(self, text: str) -> list[str]:
-        ret = []
+        ret: list[str] = []
         for word in self._mecab(text):
             if self.filters and any(
                 [f(word.surface, word.feature) for f in self.filters]
