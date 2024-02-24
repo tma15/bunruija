@@ -2,10 +2,9 @@ data:
   label_column: category
   text_column: title
   args:
-    # path: shunk031/livedoor-news-corpus
-    # random_state: 0
-    # shuffle: true
-    path: data/jsonl
+    path: shunk031/livedoor-news-corpus
+    random_state: 0
+    shuffle: true
 
 output_dir: models/transformer-model
 

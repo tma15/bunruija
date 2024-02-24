@@ -41,7 +41,7 @@ class LSTMClassifier(NeuralBaseClassifier):
             dropout=self.dropout_prob if self.num_layers > 1 else 0.0,
         )
 
-    def init_layer(self, data):
+    def init_layer(self, data: list[dict]):
         max_input_idx = 0
         for data_i in data:
             max_input_idx = max(max_input_idx, np.max(data_i["inputs"]))

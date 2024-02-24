@@ -6,6 +6,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from sklearn.base import BaseEstimator, ClassifierMixin  # type: ignore
+from torch import FloatTensor
 
 logger = getLogger(__name__)
 
@@ -104,10 +105,10 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
         main_str += ")"
         return main_str
 
-    def init_layer(self, data):
+    def init_layer(self, data: list[dict]):
         raise NotImplementedError
 
-    def convert_data(self, X, y=None):
+    def convert_data(self, X, y=None) -> list[dict]:
         if y is not None:
             logger.info("Loading data")
 
@@ -121,11 +122,11 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
             indices = X
             raw_words = None
 
-        data = []
+        data: list[dict] = []
         for i in range(len(indices.indptr) - 1):
             start = indices.indptr[i]
             end = indices.indptr[i + 1]
-            data_i = {
+            data_i: dict = {
                 "inputs": indices.data[start:end],
             }
 
@@ -158,21 +159,24 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
 
         collator = Collator(self.pad)
         for epoch in range(self.max_epochs):
-            for batch in torch.utils.data.DataLoader(
+            data_loader = torch.utils.data.DataLoader(
                 data,
                 batch_size=self.batch_size,
                 shuffle=True,
                 collate_fn=collator,
                 num_workers=self.num_workers,
-            ):
+            )
+            num_epoch_steps: int = len(data_loader)
+
+            for batch in data_loader:
                 self.zero_grad()
 
                 if self.device.startswith("cuda"):
                     batch = move_to_cuda(batch)
 
-                logits = self(batch)
+                logits: FloatTensor = self(batch)
 
-                loss = F.nll_loss(
+                loss: FloatTensor = F.nll_loss(
                     torch.log_softmax(logits, dim=1),
                     batch["labels"],
                     reduction="sum",
@@ -191,7 +195,8 @@ class NeuralBaseClassifier(BaseClassifier, torch.nn.Module):
                         time.perf_counter() - start_at_accum
                     )
                     logger.info(
-                        f"epoch:{epoch+1} step:{step} "
+                        f"epoch:{epoch+1} step:{step}/"
+                        f"{num_epoch_steps * self.max_epochs} "
                         f"loss:{loss_accum:.2f} bps:{batch_per_sec:.2f} "
                         f"elapsed:{elapsed:.2f}"
                     )
