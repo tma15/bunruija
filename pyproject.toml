@@ -15,7 +15,7 @@ generate-setup-file = true
 python = ">=3.10,<3.11"
 Cython = "^3.0.8"
 lightgbm = "^4.2.0"
-torch = "^2.1.2"
+torch = "^2.2.1"
 transformers = "^4.38.1"
 unidic-lite = "^1.0.8"
 mmh3 = "^3.0.0"
